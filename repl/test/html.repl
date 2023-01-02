@@ -1,0 +1,19 @@
+(require '[cognitect.transcriptor :as xr])
+
+(require '[clojure.spec.alpha :as spec])
+(require '[clojure.test.check :refer [quick-check]])
+(require '[clojure.test.check.properties :refer [for-all]])
+
+(require '[tab.html :as html])
+
+(spec/def ::pass? true?)
+(spec/def ::ret (spec/keys :req-un [::pass?]))
+
+(import '(org.jsoup Jsoup))
+(import '(org.jsoup.nodes Document))
+
+(quick-check 50
+  (for-all [node (spec/gen ::html/node)]
+    (instance? Document (Jsoup/parse (html/html node)))))
+
+(xr/check! ::ret)

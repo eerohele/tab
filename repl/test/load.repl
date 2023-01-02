@@ -1,0 +1,42 @@
+(require '[clojure.spec.alpha :as spec])
+(require '[cognitect.transcriptor :as xr])
+(require '[clj-gatling.core :as gatling])
+(require '[org.httpkit.client :as http])
+(require '[tab.api :as tab])
+
+
+(def tab
+  (tab/run :browse? false :add-tap? false))
+
+#_(tab/halt tab)
+
+(xr/on-exit #(tab/halt tab))
+
+(tab/tab> tab BigInteger)
+
+(defn get-ok?
+  [_]
+  (= 200 (:status @(http/get (tab/address tab)))))
+
+(comment
+  (get-ok? nil)
+  ,,,)
+
+(spec/def ::ok pos?)
+
+(spec/def ::ret
+  (spec/and (spec/keys :req-un [::ok]) #(not (contains? % :ko))))
+
+(gatling/run
+  {:name "pre-tab"
+   :scenarios [{:name "localhost" :steps [{:name "root" :request get-ok?}]}]}
+  {:concurrency 50})
+
+(xr/check! ::ret)
+
+(tab/tab> tab BigDecimal)
+
+(gatling/run
+  {:name "post-tab"
+   :scenarios [{:name "localhost" :steps [{:name "root" :request get-ok?}]}]}
+  {:concurrency 50})

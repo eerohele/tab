@@ -1,0 +1,105 @@
+;; Tab is a zero-dependency Clojure data visualizer.
+;;
+;; For instructions on how to run this demo, see the README of this repo.
+;;
+;; Start Tab HTTP server in port 8080.
+(def tab
+  ((requiring-resolve 'tab.api/run)
+   :port 8080
+   :print-length 8))
+
+;; To send a thing to Tab, tap it.
+;;
+;; When given a scalar value, Tab just prints it.
+(tap> :hello-Tab)
+
+;; Same with seqs of scalars.
+;;
+;; I don't think there's a more compact or useful way to visualize a seq of
+;; scalars than to just show it as EDN.
+(tap> [1 2 3])
+
+;; If the seq has many values, Tab only shows the first :print-length
+;; (or *print-length* if set) values.
+;;
+;; You can click on the value to show the entire seq.
+(tap> {:range (range 32)})
+
+;; Pretty much everything else Tab tries to print as a table.
+;;
+;; Maps become tables with headers on the left.
+(tap> {:a 1 :b 2 :c 3})
+
+;; Seq of maps become tables with headers at the top.
+(tap> [{:a 1 :b 2 :c 3}
+       {:a 4 :b 5 :c 6}])
+
+;; What if the maps in the seq share no keys?
+(tap> [{:a 1} {:b 2}])
+
+;; Tab also tabulates seqs of seqs.
+(tap> [[{:a 1 :b 2}] [{:a 3 :b 4}]])
+
+;; Tab datafies (via clojure.datafy/datafy) the things it receives.
+;;
+;; This makes Tab useful for visualizing objects that are normally
+;; opaque. For example, classes. Clojure knows how to datafy classes out of the
+;; box.
+(tap> java.net.ServerSocket)
+
+;; You can collapse or expand nodes by clicking on the － and ＋ icons.
+;;
+;; To collapse or expand every node under a given node, hold down the Alt key
+;; while clicking on the － and ＋ icon.
+
+;; You can (extend-protocol clojure.core.protocols/Datafiable to teach Clojure
+;; how to datafy other things.
+;;
+;; There's a library called jedi-time that teaches Clojure to datafy java.time
+;; objects. Let's pull it in an try it out.
+(require '[clojure.tools.deps.alpha.repl :refer [add-libs]])
+(add-libs '{jedi-time/jedi-time {:mvn/version "0.2.1"}})
+(require 'jedi-time.core)
+(tap> (java.time.ZonedDateTime/now))
+
+;; Clojure also knows how to datafy namespaces.
+(tap> (find-ns 'clojure.set))
+
+;; Weirdly, Clojure doesn't know how to datafy vars. Let's teach it how to do that.
+(do
+  (require '[clojure.core.protocols :refer [Datafiable]])
+
+  (extend-protocol Datafiable
+    clojure.lang.Var
+    (datafy [this]
+      (assoc (meta this) :var this))))
+
+;; Now, we can visualize vars, too.
+(tap> #'clojure.core/mapcat)
+
+;; Tab has experimental support for navigating to namespaces, vars, and
+;; classes.
+(tap>
+  (->>
+    (ns-publics 'clojure.java.io)
+    (vals)
+    (map (comp #(dissoc % :doc) meta))
+    (sort-by :added compare)
+    (reverse)))
+
+;; Most of the data I work with are maps or seqs of maps. Tab can make
+;; fairly useful visualizations of both.
+(tap> (sort-by :name (:members ((requiring-resolve 'clojure.reflect/reflect) BigInteger))))
+
+;; Let's try tabulating a deeply nested map. tools.analyzer.jvm can make us one.
+(add-libs '{org.clojure/tools.analyzer.jvm {:mvn/version "1.2.3"}})
+(require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
+
+(tap>
+  (analyzer.jvm/analyze
+    '(sequence (comp (filter odd?) (map inc) (partition-by even?)) (range 10))))
+
+;; Tab keeps a history of (by default) the last 16 things you've given
+;; it. You can travel back and forth in time.
+
+((requiring-resolve 'tab.api/halt) tab)

@@ -1,0 +1,41 @@
+name: Clojure CI
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: DeLaGuardo/setup-clojure@10.1
+        with:
+          cli: '1.11.1.1208'
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.deps.clj
+          key: deps-${{ hashFiles('deps.edn') }}
+          restore-keys: deps-
+
+      - run: clojure -X:dev user/check! :path "test"
+        id: test
+
+      - run: clojure -X:dev user/check! :path "spec"
+
+      - run: clojure -A:dev -X cognitect.test-runner.api/test
+
+      - uses: actions/upload-artifact@v3
+        if: failure() && steps.test.outcome == 'failure'
+        with:
+          path: ./target/results/
+          retention-days: 2

@@ -1,0 +1,488 @@
+(require '[cognitect.transcriptor :as xr])
+(require '[tab.api :as tab])
+
+(import '(com.microsoft.playwright BrowserType$LaunchOptions Playwright))
+
+(def playwright (Playwright/create))
+(xr/on-exit #(.close playwright))
+
+(def browser (.webkit playwright))
+
+(defonce headless? true)
+
+(comment
+  (alter-var-root #'headless? not)
+  ,,,)
+
+(def ctx
+  (.launch browser
+    (doto (BrowserType$LaunchOptions.) (.setHeadless headless?))))
+
+(xr/on-exit #(.close ctx))
+
+(def page (.newPage ctx))
+(xr/on-exit #(.close page))
+
+(def tab (tab/run :browse? false :print-level 3 :print-length 4 :init-val {:a {:b {:c {:d 1}}}}))
+(xr/on-exit #(tab/halt tab))
+
+(def uri (tab/address tab))
+
+(.navigate page uri)
+(.title page)
+
+(xr/check! #{"Tab"})
+
+(defn tbody
+  ([level]
+   (tbody level 0))
+  ([level nth]
+   (.nth (.locator page (format "[data-level = '%d'] > tbody" level)) nth)))
+
+(defn type-header
+  ([level]
+   (type-header level 0))
+  ([level n]
+   (.nth (.locator page (format "[data-level = '%d'] > thead > tr > .type" level)) n)))
+
+(defn count-header
+  ([level]
+   (count-header level 0))
+  ([level n]
+   (.locator (.nth (.locator page (format "[data-level = '%d']" level)) n) ":scope > thead > tr > .count")))
+
+(defn toggle
+  ([level]
+   (toggle level 0))
+  ([level n]
+   (.locator (.nth (.locator page (format "[data-level = '%d']" level)) n) ":scope > thead > tr > [data-action = toggle-level]")))
+
+;; level 0
+
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+(.click (toggle 0))
+(xr/check! false? (.isVisible (type-header 0)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 0)))))
+(xr/check! false? (.isVisible (tbody 0)))
+
+(.click (toggle 0))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 1
+
+(.click (toggle 1))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (type-header 1)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 1)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! false? (.isVisible (tbody 1)))
+
+(.click (toggle 1))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 2
+
+(.click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! false? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 2)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! false? (.isVisible (tbody 2)))
+
+(.click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 3
+
+(.click (toggle 3))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! true? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! false? (.isVisible (count-header 3)))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! true? (.isVisible (tbody 3)))
+
+(.click (toggle 3))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; everything works the same after tabbing
+
+(tab/tab> tab {:a {:b {:c {:d 2}}}})
+
+;; level 0
+
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+(.click (toggle 0))
+(xr/check! false? (.isVisible (type-header 0)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 0)))))
+(xr/check! false? (.isVisible (tbody 0)))
+
+(.click (toggle 0))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 1
+
+(.click (toggle 1))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (type-header 1)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 1)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! false? (.isVisible (tbody 1)))
+
+(.click (toggle 1))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 2
+
+(.click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! false? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 2)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! false? (.isVisible (tbody 2)))
+
+(.click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+;; level 3
+
+(.click (toggle 3))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! true? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! false? (.isVisible (count-header 3)))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! true? (.isVisible (tbody 3)))
+
+(.click (toggle 3))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3)))
+
+(tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
+
+(defn alt-click
+  [locator]
+  (-> page .keyboard (.down "Alt"))
+  (.click locator)
+  (-> page .keyboard (.up "Alt")))
+
+(alt-click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! true? (.isVisible (type-header 3 0)))
+(xr/check! true? (.isVisible (type-header 3 1)))
+(xr/check! true? (.isVisible (type-header 3 2)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! false? (.isVisible (count-header 3 0)))
+(xr/check! false? (.isVisible (count-header 3 1)))
+(xr/check! false? (.isVisible (count-header 3 2)))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! true? (.isVisible (tbody 3 1)))
+(xr/check! true? (.isVisible (tbody 3 2)))
+
+(alt-click (toggle 2))
+(xr/check! true? (.isVisible (type-header 0)))
+(xr/check! true? (.isVisible (type-header 1)))
+(xr/check! true? (.isVisible (type-header 2)))
+(xr/check! false? (.isVisible (type-header 3 0)))
+(xr/check! false? (.isVisible (type-header 3 1)))
+(xr/check! false? (.isVisible (type-header 3 2)))
+(xr/check! false? (.isVisible (count-header 0)))
+(xr/check! false? (.isVisible (count-header 1)))
+(xr/check! false? (.isVisible (count-header 2)))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3 0)))))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3 1)))))
+(xr/check! true? (= 1 (parse-long (.textContent (count-header 3 2)))))
+(xr/check! true? (.isVisible (tbody 0)))
+(xr/check! true? (.isVisible (tbody 1)))
+(xr/check! true? (.isVisible (tbody 2)))
+(xr/check! false? (.isVisible (tbody 3 0)))
+(xr/check! false? (.isVisible (tbody 3 1)))
+(xr/check! false? (.isVisible (tbody 3 2)))
+
+(.click (toggle 3 0))
+(xr/check! true? (.isVisible (type-header 3 0)))
+(xr/check! false? (.isVisible (type-header 3 1)))
+(xr/check! false? (.isVisible (type-header 3 2)))
+(xr/check! false? (.isVisible (count-header 3 0)))
+(xr/check! true? (.isVisible (count-header 3 1)))
+(xr/check! true? (.isVisible (count-header 3 2)))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! false? (.isVisible (tbody 3 1)))
+(xr/check! false? (.isVisible (tbody 3 2)))
+
+(.click (toggle 3 0))
+(xr/check! false? (.isVisible (type-header 3 0)))
+(xr/check! true? (.isVisible (count-header 3 0)))
+(xr/check! false? (.isVisible (tbody 3 0)))
+
+(tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
+
+(.click (toggle 3 0))
+(alt-click (toggle 2))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! true? (.isVisible (tbody 3 1)))
+(xr/check! true? (.isVisible (tbody 3 2)))
+
+(alt-click (toggle 2))
+(xr/check! false? (.isVisible (tbody 3 0)))
+(xr/check! false? (.isVisible (tbody 3 1)))
+(xr/check! false? (.isVisible (tbody 3 2)))
+
+(tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
+
+(alt-click (toggle 2))
+(.click (toggle 3 1))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! false? (.isVisible (tbody 3 1)))
+(xr/check! true? (.isVisible (tbody 3 2)))
+
+(.click (toggle 3 1))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! true? (.isVisible (tbody 3 1)))
+(xr/check! true? (.isVisible (tbody 3 2)))
+
+(tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
+
+(.click (toggle 3 1))
+(alt-click (toggle 2))
+(xr/check! true? (.isVisible (tbody 3 0)))
+(xr/check! true? (.isVisible (tbody 3 1)))
+(xr/check! true? (.isVisible (tbody 3 2)))
+
+(alt-click (toggle 2))
+(xr/check! false? (.isVisible (tbody 3 0)))
+(xr/check! false? (.isVisible (tbody 3 1)))
+(xr/check! false? (.isVisible (tbody 3 2)))
+
+(tab/tab> tab {:a {:b {:c 1} :d {:e 2}}})
+
+(alt-click (toggle 1))
+(xr/check! false? (.isVisible (tbody 2 0)))
+(xr/check! false? (.isVisible (tbody 2 1)))
+
+(alt-click (toggle 1))
+(xr/check! true? (.isVisible (tbody 2 0)))
+(xr/check! true? (.isVisible (tbody 2 1)))
+
+(.click (toggle 2 1))
+(xr/check! true? (.isVisible (tbody 2 0)))
+(xr/check! false? (.isVisible (tbody 2 1)))
+
+(.click (toggle 2 0))
+(xr/check! false? (.isVisible (tbody 2 0)))
+(xr/check! false? (.isVisible (tbody 2 1)))
+
+(alt-click (toggle 1))
+(xr/check! true? (.isVisible (tbody 2 0)))
+(xr/check! true? (.isVisible (tbody 2 1)))
+
+(tap> {:a 1 :b {:c 2 :d {:e 3} :f {:g 4}}})
+
+(alt-click (toggle 0))
+(xr/check! false? (.isVisible (tbody 1 0)))
+
+(alt-click (toggle 0))
+(xr/check! true? (.isVisible (tbody 1 0)))
+
+;; ellipsis
+
+(tab/tab> tab (range 6))
+
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 ...)\n"})
+(.click (.locator page "[data-action = toggle-length]"))
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 4 5)\n"})
+(.click (.locator page "[data-action = toggle-length]"))
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 ...)\n"})
+
+(tab/tab> tab {:nums (range 6)})
+
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 ...)\n"})
+(.click (.locator page "[data-action = toggle-length]"))
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 4 5)\n"})
+(.click (.locator page "[data-action = toggle-length]"))
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 ...)\n"})
+
+(tab/tab> tab {:nums (range 4)})
+
+(zero? (.count (.locator page "[data-action = toggle-length]")))
+(.textContent(.locator page "pre"))
+(xr/check! #{"(0 1 2 3)\n"})
+
+(def a (atom [1]))
+
+(tab/tab> tab a)
+
+(.textContent (.locator page "pre"))
+(xr/check! #{"[1]\n"})
+(swap! a conj 2)
+(.textContent (.locator page "pre"))
+(xr/check! #{"[1 2]\n"})
+(swap! a conj 3)
+(.textContent (.locator page "pre"))
+(xr/check! #{"[1 2 3]\n"})
+
+(tab/tab> tab {:x 1 :a 2 :h 3})
+
+(.allTextContents (.locator page "table tbody th"))
+(xr/check! (partial = [":a" ":h" ":x"]))
+
+(tab/tab> tab [{:x 1 :a 2 :h 3}
+               {:x 4 :h 5 :a 6}])
+
+(.allTextContents (.locator page "table thead tr:nth-child(2) th"))
+(xr/check! (partial = ["#" ":a" ":h" ":x"]))
+
+(comment
+  (.close page)
+  (.close ctx)
+  (.close playwright)
+  (tab/halt tab)
+  ,,,)
+
+:done

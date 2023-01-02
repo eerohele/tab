@@ -1,0 +1,68 @@
+(require '[cognitect.transcriptor :as xr])
+
+(require '[clojure.spec.alpha :as spec])
+(require '[clojure.test.check :refer [quick-check]])
+(require '[clojure.test.check.properties :refer [for-all]])
+(require '[clojure.test.check.generators :as gen])
+
+(require '[tab.annotate :refer [annotate]])
+(require '[tab.html :as html])
+
+(spec/def ::pass? true?)
+(spec/def ::ret (spec/keys :req-un [::pass?]))
+
+(quick-check 10000
+  (for-all [x gen/any]
+    (spec/valid? ::html/node (annotate (pr-str x)))))
+
+(xr/check! ::ret)
+
+(require '[clojure.repl :as repl])
+
+(def gen-source
+  "A test.check generator that randomly chooses the source (as string) of a
+  random var in the runtime."
+  (gen/elements
+    (sequence
+      (comp
+        (mapcat ns-publics)
+        (map val)
+        (map symbol)
+        (keep (fn [sym]
+                (try
+                  (repl/source-fn sym)
+                  (catch Throwable _)))))
+      (all-ns))))
+
+(import '(org.jsoup Jsoup))
+(import '(org.jsoup.parser Parser))
+
+(defn parse-errors
+  [html]
+  (let [parser (doto (Parser/htmlParser) (.setTrackErrors 1))]
+    (Jsoup/parse html "" parser)
+    (map (fn [error] {:message (.getErrorMessage error)
+                      :position (.getCursorPos error)})
+      (.getErrors parser))))
+
+(quick-check 1000
+  (for-all [x gen-source]
+    (let [node (annotate x)]
+      (spec/valid? ::html/node node)
+      ;; Every annotation yields a data structure that Tab can print into HTML,
+      ;; which JSoup can then parse.
+      (empty? (parse-errors (html/html node))))))
+
+(xr/check! ::ret)
+
+;; keywords
+
+(require '[clojure.string :as string])
+
+(quick-check 100
+  (for-all [keywords (gen/vector gen/keyword 3)
+            separator (gen/elements [\space \newline \,])]
+    (let [{:keys [content]} (annotate (string/join separator keywords))]
+      (= 5 (count content)))))
+
+(xr/check! ::ret)

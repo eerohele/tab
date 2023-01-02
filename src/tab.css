@@ -1,0 +1,347 @@
+/* <VARIABLES> */
+
+:root {
+  --font-family-monospace: Iosevka, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --background-color: #fff;
+  --text-color-default: #333;
+
+  --header-link-color: var(--color-blue);
+  --header-background-color: #eee;
+  --table-border-color: #ccc;
+  --table-header-background-color: #f7f7f7;
+  --table-cell-padding: 0.5em;
+  --table-cell-hover-color: #f5f5f5;
+  --background-gradient-na: linear-gradient(
+    45deg,
+    var(--background-color) 25%,
+    #eee 25%,
+    #eee 50%,
+    var(--background-color) 50%,
+    var(--background-color) 75%,
+    #eee 75%,
+    #eee 100%
+  );
+
+  --color-red: #aa3731;
+  --color-blue: #325cc0;
+  --color-green: #448c27;
+  --color-violet: #7a3e9d;
+  --color-yellow: #fffabc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #342826;
+    --text-color-default: #fff;
+
+    --header-link-color: var(--color-yellow);
+    --header-background-color: #333;
+    --table-border-color: #444;
+    --table-header-background-color: #353535;
+    --table-cell-hover-color: #404040;
+    --background-gradient-na: linear-gradient(
+      45deg,
+      var(--background-color) 25%,
+      #353535 25%,
+      #353535 50%,
+      var(--background-color) 50%,
+      var(--background-color) 75%,
+      #353535 75%,
+      var(--table-header-background-color) 100%
+    );
+
+    --color-red: #ed4e5b;
+    --color-blue: #325cc0;
+    --color-green: #98c379;
+    --color-violet: #dd79fb;
+    --color-yellow: #fffabc;
+  }
+}
+
+/* </VARIABLES> */
+
+html {
+  margin: 2em 1em 0 1em;
+}
+
+body {
+  background: var(--background-color);
+  color: var(--text-color-default);
+  font-family: var(--font-family-monospace);
+  font-size: 18px;
+}
+
+a:any-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  font-family: var(--font-family-monospace);
+  line-height: 0;
+}
+
+/* <HEADER> */
+
+header {
+  backdrop-filter: grayscale(0.5) blur(3px);
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  text-align: right;
+  position: fixed;
+  padding: .5em 0 .5em 0;
+  left: 0;
+  top: 0;
+  font-size: 80%;
+  z-index: 1;
+}
+
+header .left {
+  display: flex;
+  padding: 0 2em;
+  width: 150px;
+  justify-content: space-between;
+}
+
+header .left span {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+header .right {
+  padding: 0 2em;
+  width: 200px;
+}
+
+header a:any-link {
+  color: var(--header-link-color);
+}
+
+header a:hover {
+  color: var(--color-red);
+}
+
+/* </HEADER> */
+
+/* <PARAGRAPH> */
+
+pre {
+  margin: 0;
+  padding: 0;
+}
+
+pre + pre {
+  margin-top: 1em;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+p + p {
+  margin-top: 1em;
+}
+
+/* </PARAGRAPH> */
+
+/* <TABLE> */
+
+table {
+  border-top: 1px solid var(--table-border-color);
+  border-left: 1px solid var(--table-border-color);
+  border-spacing: 0;
+}
+
+table a {
+  display: block;
+}
+
+table th {
+  font-weight: normal;
+  text-align: left;
+}
+
+table th,
+table td {
+  padding: calc(var(--table-cell-padding) / 2) var(--table-cell-padding);
+  white-space: pre;
+}
+
+table td > table {
+  margin-left: -.25em;
+  margin-right: -.25em;
+}
+
+table td:empty:not(.filler) {
+  cursor: not-allowed;
+  background-image: var(--background-gradient-na);
+  background-size: 9px 9px;
+}
+
+table tbody th {
+  background: var(--table-header-background-color);
+  border-right: 1px solid var(--table-border-color);
+  text-align: right;
+  vertical-align: top;
+}
+
+table tbody tr:last-of-type th,
+table tbody tr:last-of-type .filler {
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+table thead th {
+  background: var(--table-header-background-color);
+  border-bottom: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  text-align: left;
+}
+
+table tbody td {
+  background: var(--background-color);
+  border-bottom: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  transition: background 250ms ease-in-out;
+}
+
+table tbody td:not(:empty):hover {
+  background: var(--table-cell-hover-color);
+}
+
+td:hover {
+  background: var(--background-color);
+}
+
+td:hover td:hover {
+  background: transparent;
+}
+
+/* <EXPANDO/> */
+
+[data-state = collapsed] tbody,
+[data-state = collapsed] thead tr:nth-child(2),
+[data-state = collapsed] .type {
+  display: none;
+}
+
+[data-state = expanded] > thead > tr > .count {
+  display: none;
+}
+
+/* </TABLE> */
+
+th[data-action] {
+  min-width: 15px;
+}
+
+[data-action = toggle-length] {
+  cursor: pointer;
+}
+
+[data-action = toggle-level] {
+  cursor: pointer;
+  text-align: center;
+  transition: background 250ms ease-in-out;
+}
+
+[data-action = toggle-level]:hover {
+  background: var(--table-cell-hover-color);
+  color: var(--color-blue);
+}
+
+.index {
+  font-size: 80%;
+  opacity: 0.8;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 15px;
+}
+
+.type {
+  opacity: 0.8;
+  text-align: center;
+  vertical-align: middle;
+  font-variant: small-caps;
+}
+
+.count {
+  min-width: 15px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.filler {
+  background: var(--table-header-background-color);
+  border-right: none;
+  border-bottom: none;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.event-source-error {
+  animation: 250ms appear;
+  align-items: center;
+  backdrop-filter: grayscale(0.5) blur(3px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  justify-content: center;
+  pointer-events: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+.event-source-error a {
+  pointer-events: all;
+}
+
+.event-source-error a:hover {
+  text-decoration: underline;
+}
+
+/* <ANNOTATE> */
+
+/*
+Colors adapted from the Alabaster color scheme by Nikita Prokopov:
+
+https://github.com/tonsky/sublime-scheme-alabaster
+*/
+
+.ann .var { color: var(--color-blue); }
+.ann .keyword { color: var(--color-violet); }
+.ann .number { color: var(--color-violet); }
+.ann .string { color: var(--color-green); }
+
+.ann .dispatch,
+.ann .metadata,
+.ann .quote,
+.ann .syntax-quote,
+.ann .unquote {
+  color: var(--color-red);
+}
+
+.ann .punctuation,
+.ann .comma {
+  opacity: 0.5;
+}
+
+.ann .comment {
+  background: var(--color-yellow);
+  color: #494732;
+}
+
+/* </ANNOTATE> */

@@ -37,7 +37,7 @@
 ;; If the maps in the seq share no keys, Tab fills in the blanks.
 (tap> [{:a 1} {:b 2}])
 
-;; Tab can also tabulates seqs of seqs.
+;; Tab can also tabulate seqs of seqs.
 (tap> [[{:a 1 :b 2}] [{:a 3 :b 4}]])
 
 ;; Tab datafies (via clojure.datafy/datafy) the things it receives.

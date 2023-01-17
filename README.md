@@ -31,13 +31,13 @@ Tab aims to be that something else.
 On the command line, run:
 
 ```bash
-clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "b3dfff12f4cf42472bb3d99361cad55e61a0b1c8"}}}'
+clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "87ae9f3465ab2f4b4c972876c72c3b1be393cf30"}}}'
 ```
 
 Then, in the REPL:
 
 ```clojure
-user=> (load 'tab.auto)
+user=> (require 'tab.auto)
 nil
 user=> (tap> BigInteger)
 true
@@ -71,7 +71,7 @@ user=> (doc tab/halt)
 To see what Tab can do, on the command line, run:
 
 ```bash
-clj -Srepro -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "b3dfff12f4cf42472bb3d99361cad55e61a0b1c8"} org.clojure/tools.deps {:git/url "https://github.com/clojure/tools.deps.git" :git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}}}'
+clj -Srepro -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "87ae9f3465ab2f4b4c972876c72c3b1be393cf30"} org.clojure/tools.deps {:git/url "https://github.com/clojure/tools.deps.git" :git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}}}'
 ```
 
 Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl) into your favorite Clojure editor and start evaluating.

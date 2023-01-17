@@ -48,7 +48,7 @@ Then, bask in the glory of the table that appears in your browser. There's also 
 To stop Tab:
 
 ```clojure
-user=> (tab.auto/halt tab)
+user=> (tab.auto/halt)
 ```
 
 The `tab.auto` namespace is the easiest (in the near-at-hand sense) way to run Tab. The `tab.api` namespace exposes the [API](#api) proper.

@@ -88,6 +88,7 @@ Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eer
 
 - Can only make tables.
 - Likely to die if given a very large input.
+- Eager; will blow up if you give it an infinite seq.
 
 ## Inspiration
 

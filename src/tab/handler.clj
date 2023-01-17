@@ -22,7 +22,8 @@
       ($ :script "0")
       ($ :main main)
       ($ :div {:class "event-source-error"}
-        ($ :p ($ :a {:href "/"} "disconnected from server, click to reload"))))))
+        ($ :p ($ :a {:href "/"} "disconnected from server, click to reload")))
+      ($ :script {:src (format "/assets/js/tab.%s.js" server-id) :defer "true"}))))
 
 (comment
   (html/html (wrap-page {:server-id "foo"} "hello"))
@@ -42,9 +43,7 @@
 (defn ^:private index
   [{:keys [vals server-id] :as request}]
   (html-response request
-    ($ :div
-      (tabulator/tabulate (assoc (peek vals) :max-offset (count vals)))
-      ($ :script {:src (format "/assets/js/tab.%s.js" server-id) :defer "true"}))))
+    (tabulator/tabulate (assoc (peek vals) :max-offset (count vals)))))
 
 (defn ^:private js-asset
   [_]
@@ -68,10 +67,7 @@
        :headers {"Location" "/"}}
       (let [item (nth vals (- (dec (count vals)) offset))
             main (tabulator/tabulate (assoc item :offset offset :max-offset (count vals)))]
-        (html-response request
-          ($ :div main
-            ($ :script {:src (format "/assets/js/tab.%s.js" server-id)
-                        :defer "true"})))))))
+        (html-response request main)))))
 
 (defn ^:private event-source
   [_]

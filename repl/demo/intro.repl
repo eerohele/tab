@@ -2,7 +2,7 @@
 ;;
 ;; For instructions on how to run this demo, see the README of this repo.
 
-(in-ns 'tab.api)
+(require '[tab.api :refer [run halt]])
 
 ;; Run a Tab.
 (def tab

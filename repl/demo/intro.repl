@@ -1,17 +1,17 @@
 ;; Tab is a zero-dependency Clojure data visualizer.
 ;;
 ;; For instructions on how to run this demo, see the README of this repo.
-;;
-;; Start Tab HTTP server in port 8080.
+
+(in-ns 'tab.api)
+
+;; Run a Tab.
 (def tab
-  ((requiring-resolve 'tab.api/run)
-   :port 8080
-   :print-length 8))
+  (run :print-length 8 :print-level 2))
 
 ;; To send a thing to Tab, tap it.
 ;;
 ;; When given a scalar value, Tab just prints it.
-(tap> :hello-Tab)
+(tap> :hello-tab)
 
 ;; Same with seqs of scalars.
 ;;
@@ -34,10 +34,10 @@
 (tap> [{:a 1 :b 2 :c 3}
        {:a 4 :b 5 :c 6}])
 
-;; What if the maps in the seq share no keys?
+;; If the maps in the seq share no keys, Tab fills in the blanks.
 (tap> [{:a 1} {:b 2}])
 
-;; Tab also tabulates seqs of seqs.
+;; Tab can also tabulates seqs of seqs.
 (tap> [[{:a 1 :b 2}] [{:a 3 :b 4}]])
 
 ;; Tab datafies (via clojure.datafy/datafy) the things it receives.
@@ -78,7 +78,9 @@
 (tap> #'clojure.core/mapcat)
 
 ;; Tab has experimental support for navigating to namespaces, vars, and
-;; classes.
+;; classes. Try tapping the bad boy below. Then, try clicking on cells that
+;; contain namespaces (clojure.lang.Namespace objects), vars (cells whose
+;; contents begin with #'), or Java class names (e.g. java.io.File).
 (tap>
   (->>
     (ns-publics 'clojure.java.io)
@@ -87,11 +89,10 @@
     (sort-by :added compare)
     (reverse)))
 
-;; Most of the data I work with are maps or seqs of maps. Tab can make
-;; fairly useful visualizations of both.
+;; Tabular data is obviously what Tab excels at.
 (tap> (sort-by :name (:members ((requiring-resolve 'clojure.reflect/reflect) BigInteger))))
 
-;; Let's try tabulating a deeply nested map. tools.analyzer.jvm can make us one.
+;; Tab can handle deeply nested maps pretty well, too. tools.analyzer.jvm can make us one.
 (add-libs '{org.clojure/tools.analyzer.jvm {:mvn/version "1.2.3"}})
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
@@ -102,4 +103,11 @@
 ;; Tab keeps a history of (by default) the last 16 things you've given
 ;; it. You can travel back and forth in time.
 
-((requiring-resolve 'tab.api/halt) tab)
+;; Also try rubbing Tab on:
+;;
+;; - Ring request maps
+;; - Whatever your database query returns
+;; - Whatever big map/seq of date hidden in the depths of your function.
+
+;; Bye now!
+(halt tab)

@@ -118,7 +118,8 @@
               ($ :th {:class "count"} (count this))
               ($ :th {:colspan (pr-str (count ks)) :class "type"}
                 (seq-title this)))
-            ($ :tr ($ :th {:class "index"} "#")
+            ($ :tr {:class "sticky"}
+              ($ :th {:class "index"} "#")
               (map (fn [th]
                      ($ :th (*ann* (pr-str th)))) ks)))
           ($ :tbody

@@ -82,6 +82,7 @@ Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eer
 
 - Can make tables.
 - Zero dependencies, apart from Clojure itself.
+- [Prefers operating system theme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) (light or dark mode).
 
 ## Limitations
 

@@ -498,6 +498,22 @@
 (.allTextContents (.locator page "table tbody td"))
 (xr/check! (partial = ["0" "1" "2" "1" "2" "4"]))
 
+;; "Large" input
+
+(tap> BigDecimal)
+
+;; ugh
+(.waitFor (.locator page "text=:members")
+  (doto
+    (com.microsoft.playwright.Locator$WaitForOptions.)
+    (.setState com.microsoft.playwright.options.WaitForSelectorState/VISIBLE)))
+
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(xr/check! (partial = [":bases" ":flags" ":members" ":name"]))
+
+(count (.allTextContents (.locator page "main > table > tbody > tr > td > table > tbody > tr > th")))
+(xr/check! #(>= % 127))
+
 (comment
   (.close page)
   (.close ctx)

@@ -1,8 +1,10 @@
 (ns tab.auto
-  "Load this namespace to run a Tab using sensible defaults."
+  "Load this namespace to run a Tab using sensible defaults.
+
+  See tab.api for the API proper."
   (:require [tab.api :as tab]))
 
-(declare tab)
+(def tab "A Tab." nil)
 
 (alter-var-root #'tab
   (fn [_]

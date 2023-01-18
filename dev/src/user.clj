@@ -24,8 +24,8 @@
      ((requiring-resolve 'cognitect.transcriptor/repl-files) (format "repl/%s" path)))))
 
 (comment
-  (check! :path "test")
-  (check! :path "spec")
+  (check! {:path "test"})
+  (check! {:path "spec"})
   ,,,)
 
 #_{:clj-kondo/ignore [:unresolved-namespace]}

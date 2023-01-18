@@ -27,12 +27,12 @@ jobs:
           key: deps-${{ hashFiles('deps.edn') }}
           restore-keys: deps-
 
-      - run: clojure -X:dev user/check! :path "test"
+      - run: clojure -X:clj/v1.10:dev user/check! '{:path "test"}'
         id: test
 
-      - run: clojure -X:dev user/check! :path "spec"
+      - run: clojure -X:clj/v1.10:dev user/check! '{:path "spec"}'
 
-      - run: clojure -A:dev -X cognitect.test-runner.api/test
+      - run: clojure -A:clj/v1.10:dev -X cognitect.test-runner.api/test
 
       - uses: actions/upload-artifact@v3
         if: failure() && steps.test.outcome == 'failure'

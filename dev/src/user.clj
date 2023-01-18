@@ -19,7 +19,7 @@
 
 (defn check!
   ([] (check! nil))
-  ([& {:keys [path]}]
+  ([{:keys [path]}]
    (run! (requiring-resolve 'cognitect.transcriptor/run)
      ((requiring-resolve 'cognitect.transcriptor/repl-files) (format "repl/%s" path)))))
 

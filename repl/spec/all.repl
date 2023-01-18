@@ -1,6 +1,10 @@
 (require '[cognitect.transcriptor :as xr])
 (require '[tab.api :as tab])
 
+(defn parse-long
+  [^String s]
+  (Long/parseLong s))
+
 (import '(com.microsoft.playwright BrowserType$LaunchOptions Playwright))
 
 (def playwright (Playwright/create))

@@ -57,7 +57,7 @@ The `tab.auto` namespace is the easiest way to run Tab. The `tab.api` namespace 
 
 ## API
 
-Most importantly, there's `tab.api/run`:
+Most importantly, there's `tab.api/run` and `tab.api/halt`:
 
 ```clojure
 user=> (require '[tab.api :as tab])
@@ -65,6 +65,8 @@ nil
 ;; Run a Tab in port 1234; don't open a browser by default.
 user=> (def tab (tab/run :port 1234 :browse? false))
 #'user/tab
+user=> (tab/halt tab)
+nil
 ```
 
 See also:

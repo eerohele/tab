@@ -3,6 +3,7 @@
         :extra-deps {org.clojure/clojure {:mvn/version "1.10.2"}
                      org.clojure/tools.deps ^:antq/exclude {:git/url "https://github.com/clojure/tools.deps.git":git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}
                      org.clojure/test.check {:mvn/version "1.1.1"}
+                     org.clojure/tools.analyzer.jvm {:mvn/version "1.2.3"}
                      com.cognitect/transcriptor {:mvn/version "0.1.5"}
                      org.jsoup/jsoup {:mvn/version "1.15.3"}
                      clj-gatling/clj-gatling {:mvn/version "0.17.6"}

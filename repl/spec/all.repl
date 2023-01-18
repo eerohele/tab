@@ -482,6 +482,22 @@
 (.allTextContents (.locator page "table thead tr:nth-child(2) th"))
 (xr/check! (partial = ["#" ":a" ":h" ":x"]))
 
+(tab/tab> tab {:a 1 3 2})
+
+(.allTextContents (.locator page "table tbody th"))
+(xr/check! (partial = [":a" "3"]))
+
+(filter seq (.allTextContents (.locator page "table tbody td")))
+(xr/check! (partial = ["1" "2"]))
+
+(tab/tab> tab [{:a 1 3 2} {:a 2 3 4}])
+
+(.allTextContents (.locator page "table thead tr:nth-child(2) th"))
+(xr/check! (partial = ["#" ":a" "3"]))
+
+(.allTextContents (.locator page "table tbody td"))
+(xr/check! (partial = ["0" "1" "2" "1" "2" "4"]))
+
 (comment
   (.close page)
   (.close ctx)

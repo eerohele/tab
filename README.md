@@ -27,7 +27,7 @@ Tab aims to be that something else.
 Given that you have the [Clojure CLI](https://clojure.org/guides/install_clojure) installed, on the command line, run:
 
 ```bash
-clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "212f58af8eb10fcb788a72b6e8ff20c44863bfb6"}}}'
+clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "33a55351be8a155058df314c29505829aef1a755"}}}'
 ```
 
 Then, in the REPL:
@@ -69,7 +69,7 @@ user=> (doc tab/halt)
 To see what Tab can do, on the command line, run:
 
 ```bash
-clj -Srepro -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "212f58af8eb10fcb788a72b6e8ff20c44863bfb6"} org.clojure/tools.deps {:git/url "https://github.com/clojure/tools.deps.git" :git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}}}'
+clj -Srepro -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "33a55351be8a155058df314c29505829aef1a755"} org.clojure/tools.deps {:git/url "https://github.com/clojure/tools.deps.git" :git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}}}'
 ```
 
 Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl) into your favorite Clojure editor and start evaluating.

@@ -22,7 +22,7 @@
   ($ :a (cond-> {:href href} access-key (assoc :accesskey access-key))
     text))
 
-(defn ^:private seq-title
+(defn ^:private seq-label
   [this]
   (cond
     (vector? this) "vector"
@@ -31,6 +31,14 @@
     (lazy-seq this) "lazy seq"
     (instance? clojure.lang.Range this) "range"
     :else "seq"))
+
+(defn ^:private map-label
+  [this]
+  (condp = (class this)
+    clojure.lang.PersistentArrayMap "array map"
+    clojure.lang.PersistentHashMap "hash map"
+    clojure.lang.PersistentTreeMap "sorted map"
+    "map"))
 
 (defn ^:private state-for
   [level]
@@ -80,15 +88,9 @@
                    :data-level (pr-str level)}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"}
-                (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:colspan "2" :class "type"}
-                (condp = (class this)
-                  clojure.lang.PersistentArrayMap "array map"
-                  clojure.lang.PersistentHashMap "hash map"
-                  clojure.lang.PersistentTreeMap "sorted map"
-                  "map"))))
+              ($ :th {:colspan "2" :class "type"} (map-label this))))
           ($ :tbody
             (map
               (fn [[k v]]
@@ -111,11 +113,10 @@
                    :data-state (name state)}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"}
-                (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
               ($ :th {:colspan (pr-str (count ks)) :class "type"}
-                (seq-title this)))
+                (seq-label this)))
             ($ :tr {:class "sticky"}
               ($ :th {:class "index"} "#")
               (map (fn [th]
@@ -123,10 +124,13 @@
           ($ :tbody
             (map-indexed
               (fn [i m]
-                ($ :tr ($ :td {:class "index"} (pr-str i))
+                ($ :tr
+                  ($ :td {:class "index"} (pr-str i))
                   (map (fn [k]
                          (let [v (get m k)]
-                           ($ :td (when (some? v) (-tabulate v (inc level))))))
+                           ($ :td
+                             (when (some? v)
+                               (-tabulate v (inc level))))))
                     ks)))
               this))))
 
@@ -136,10 +140,9 @@
                    :data-state (name state)}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"}
-                (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:class "type"} (seq-title this))))
+              ($ :th {:class "type"} (seq-label this))))
           ($ :tbody
             (map-indexed
               (fn [i seq]

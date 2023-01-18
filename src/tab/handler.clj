@@ -41,7 +41,7 @@
    :body "Not found"})
 
 (defn ^:private index
-  [{:keys [vals server-id] :as request}]
+  [{:keys [vals] :as request}]
   (html-response request
     (tabulator/tabulate (assoc (peek vals) :max-offset (count vals)))))
 
@@ -60,7 +60,7 @@
    :body (slurp (io/resource "tab.css"))})
 
 (defn ^:private a-val
-  [{:keys [matches vals server-id] :as request}]
+  [{:keys [matches vals] :as request}]
   (let [offset (-> matches first Long/parseLong)]
     (if (>= offset (count vals))
       {:status 302

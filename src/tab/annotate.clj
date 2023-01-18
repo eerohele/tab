@@ -114,7 +114,6 @@
                        (number? form) "number"
                        (and (symbol? form) (= form '&)) "ampersand"
                        (symbol? form) "symbol"
-                       (nil? form) "nil"
                        :else "unknown")}
       (pr-str form))))
 
@@ -212,6 +211,9 @@
                             (cond
                               (nil? form)
                               (recur ctx (conj element ($ :span {:class "nil"} "nil")))
+
+                              (boolean? form)
+                              (recur ctx (conj element ($ :span {:class "boolean"} (pr-str form))))
 
                               (and (symbol? form) (contains? def-syms form))
                               (recur

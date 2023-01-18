@@ -330,6 +330,8 @@ https://github.com/tonsky/sublime-scheme-alabaster
 .ann .keyword { color: var(--color-violet); }
 .ann .number { color: var(--color-violet); }
 .ann .string { color: var(--color-green); }
+.ann .boolean { color: var(--color-violet); }
+.ann .nil { color: var(--color-violet); }
 
 .ann .dispatch,
 .ann .metadata,

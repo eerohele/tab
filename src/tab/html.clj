@@ -32,19 +32,24 @@
 (defn $
   "Given a tag (a keyword) and any number of nodes, return a clojure.xml-
   compatible representation of an XML or HTML element."
-  ([tag]
-   ($ tag {} []))
-  ([tag & nodes]
-   (let [node (first nodes)]
-     (map->Element
-       (if (and (map? node) (not (instance? Element node)))
-         (let [children (next nodes)]
-           (cond-> {:tag tag :attrs node}
-             (seq children) (assoc :content (->content children))))
-         (cond-> {:tag tag}
-           (seq nodes) (assoc :content (->content nodes))))))))
+  [tag & nodes]
+  (let [node (first nodes)]
+    (map->Element
+      (cond
+        (empty? nodes)
+        {:tag tag}
+        
+        (and (map? node) (not (instance? Element node)))
+        (let [children (next nodes)]
+          (cond-> {:tag tag :attrs node}
+            (seq children) (assoc :content (->content children))))
+
+        :else
+        (cond-> {:tag tag}
+          (seq nodes) (assoc :content (->content nodes)))))))
 
 (comment
+  ($ :html)
   ($ :a {:href "https://github.com/eerohele/tab"})
   ($ :ul ($ :li "1") ($ :li "2") ($ :li "3"))
   ($ :ul (map #($ :li (pr-str %)) [1 2 3]))

@@ -12,7 +12,7 @@
   --table-border-color: #ccc;
   --table-header-background-color: rgba(235, 235, 235, 0.5);
   --table-cell-padding: 0.5em;
-  --table-cell-hover-color: #f5f5f5;
+  --table-cell-hover-color: #e5e5e5;
   --background-gradient-na: linear-gradient(
     45deg,
     var(--background-color) 25%,
@@ -40,15 +40,15 @@
     --header-background-color: #333;
     --table-border-color: #444;
     --table-header-background-color: rgba(0, 0, 0, 0.2);
-    --table-cell-hover-color: #404040;
+    --table-cell-hover-color: #303030;
     --background-gradient-na: linear-gradient(
       45deg,
       var(--background-color) 25%,
-      #202020 25%,
-      #202020 50%,
+      #252525 25%,
+      #252525 50%,
       var(--background-color) 50%,
       var(--background-color) 75%,
-      #202020 75%,
+      #252525 75%,
       var(--table-header-background-color) 100%
     );
 
@@ -204,7 +204,11 @@ table tbody tr:last-of-type .filler {
 
 .sticky th {
   backdrop-filter: grayscale(0.5) blur(3px);
-  border: none;
+  border-right: none;
+}
+
+.sticky th:last-of-type {
+  border-right: 1px solid var(--table-border-color);
 }
 
 table thead th {
@@ -218,19 +222,7 @@ table tbody td {
   background-color: var(--background-color);
   border-bottom: 1px solid var(--table-border-color);
   border-right: 1px solid var(--table-border-color);
-  transition: background 250ms ease-in-out;
-}
-
-table tbody td:not(:empty):hover {
-  background-color: var(--table-cell-hover-color);
-}
-
-td:hover {
-  background-color: var(--background-color);
-}
-
-td:hover td:hover {
-  background-color: transparent;
+  transition: background-color 250ms ease-in-out;
 }
 
 /* <EXPANDO/> */
@@ -258,7 +250,7 @@ th[data-action] {
 [data-action = toggle-level] {
   cursor: pointer;
   text-align: center;
-  transition: background 250ms ease-in-out;
+  transition: background-color 250ms ease-in-out;
 }
 
 [data-action = toggle-level]:hover {

@@ -34,6 +34,7 @@ Then, in the REPL:
 
 ```clojure
 user=> (require 'tab.auto)
+Tab is listening on http://localhost:57426
 nil
 user=> (tap> BigInteger)
 true

@@ -8,7 +8,9 @@
 
 (alter-var-root #'tab
   (fn [_]
-    (tab/run :print-length 8 :print-level 2)))
+    (let [tab (tab/run :print-length 8 :print-level 2)]
+      (printf "Tab is listening on %s\n" (tab/address tab))
+      tab)))
 
 (defn halt
   []

@@ -98,7 +98,10 @@
                   ($ :td {:class "filler"})
                   ($ :th (-tabulate (datafy/datafy k) (inc level)))
                   ($ :td (-tabulate (datafy/datafy v) (inc level)))))
-              (sort-by key this)))))))
+              (try
+                (sort-by key this)
+                (catch ClassCastException _
+                  this))))))))
 
   Seqable
   (-tabulate [this level]
@@ -108,7 +111,11 @@
 
       (every? map? this)
       (let [state (state-for level)
-            ks (sort (eduction (mapcat keys) (distinct) this))]
+            ks (sequence (comp (mapcat keys) (distinct)) this)
+            ks (try
+                 (sort ks)
+                 (catch ClassCastException _
+                   ks))]
         ($ :table {:data-level (pr-str level)
                    :data-state (name state)}
           ($ :thead

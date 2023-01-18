@@ -18,7 +18,7 @@ Tab aims to be that something else.
 ## Differences to similar tools
 
 - Tab only shows you one value at a time.
-- Tab datafies (via `clojure.datafy/datafy`) everything you give it.
+- Tab datafies (via `clojure.datafy/datafy`) values you give it.
 - Tab aims to be useful without forcing you to choose between different viewers (table, tree, etc).
 - Tab has no dependencies.
 

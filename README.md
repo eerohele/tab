@@ -22,13 +22,9 @@ Tab aims to be that something else.
 - Tab aims to be useful without forcing you to choose between different viewers (table, tree, etc).
 - Tab has no dependencies.
 
-## Prerequisites
-
-- [Clojure CLI](https://clojure.org/guides/install_clojure)
-
 ## Try
 
-On the command line, run:
+Given that you have the [Clojure CLI](https://clojure.org/guides/install_clojure) installed, on the command line, run:
 
 ```bash
 clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "212f58af8eb10fcb788a72b6e8ff20c44863bfb6"}}}'

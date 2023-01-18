@@ -42,6 +42,9 @@ true
 
 Then, bask in the glory of the table that appears in your browser. If a tabulated `BigInteger` doesn't do it for you, there are [more examples available](#examples).
 
+> **Note**
+> The `tab.auto` namespace is the easiest way to run Tab. The `tab.api` namespace exposes the [API](#api) proper. In general, you'll probably want to use `tab.api`.
+
 See the [user manual](#user-manual) for instructions of use.
 
 To stop Tab:

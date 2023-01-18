@@ -315,6 +315,7 @@ th[data-action] {
   pointer-events: none;
   height: 100vh;
   width: 100vw;
+  z-index: 100;
 }
 
 .event-source-error a {

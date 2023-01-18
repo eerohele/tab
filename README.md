@@ -64,6 +64,12 @@ user=> (doc tab/halt)
 ...
 ```
 
+## User manual
+
+- Click `-` to collapse a node
+- Click `+` to expand a node
+- Press <kbd>Alt</kbd> and click `-` or `+` to expand or collapse all nodes underneath a node
+
 ## Examples
 
 For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl).

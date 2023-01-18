@@ -98,10 +98,7 @@
                   ($ :td {:class "filler"})
                   ($ :th (-tabulate k (inc level)))
                   ($ :td (-tabulate v (inc level)))))
-              (try
-                (sort-by key this)
-                (catch ClassCastException _
-                  this))))))))
+              this))))))
 
   Seqable
   (-tabulate [this level]
@@ -111,11 +108,7 @@
 
       (every? map? this)
       (let [state (state-for level)
-            ks (sequence (comp (mapcat keys) (distinct)) this)
-            ks (try
-                 (sort ks)
-                 (catch ClassCastException _
-                   ks))]
+            ks (sequence (comp (mapcat keys) (distinct)) this)]
         ($ :table {:data-level (pr-str level)
                    :data-state (name state)}
           ($ :thead

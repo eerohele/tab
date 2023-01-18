@@ -71,7 +71,12 @@
   (tap> (sort-by :added #(compare %2 %1) (map (comp #(dissoc % :doc) meta) (vals (ns-publics 'clojure.core)))))
 
   ;; This takes a while...
-  (tap> (reverse (sort-by :added compare (map meta (vals (ns-publics 'clojure.core))))))
+  (tap>
+    (->>
+      (ns-publics 'clojure.core)
+      (eduction (map val) (map meta) (map #(select-keys % [:name :added :arglists :doc])))
+      (sort-by :added compare)
+      (reverse)))
 
   (tap> (find-ns 'clojure.core))
   ,,,)

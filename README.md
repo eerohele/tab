@@ -89,6 +89,7 @@ Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eer
 - Can only make tables.
 - Likely to die if given a very large input.
 - Eager; will blow up if you give it an infinite seq.
+- Requires a modern browser. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
 
 ## Inspiration
 

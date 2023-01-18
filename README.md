@@ -49,7 +49,7 @@ To stop Tab:
 user=> (tab.auto/halt)
 ```
 
-The `tab.auto` namespace is the easiest (in the near-at-hand sense) way to run Tab. The `tab.api` namespace exposes the [API](#api) proper.
+The `tab.auto` namespace is the easiest way to run Tab. The `tab.api` namespace exposes the [API](#api) proper.
 
 ## API
 
@@ -106,5 +106,5 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 ## Acknowledgements
 
 - [My employer](https://www.solita.fi), for graciously sponsoring the development of this tool.
-- Nikita Prokopov, for the [Alabaster Color Scheme](https://github.com/tonsky/sublime-scheme-alabaster).
+- [Nikita Prokopov](https://github.com/tonsky), for the [Alabaster Color Scheme](https://github.com/tonsky/sublime-scheme-alabaster).
 - [Pedro Girardi](https://github.com/pedrorgirardi), for alpha testing and improvement ideas.

@@ -35,6 +35,7 @@
   (tap> *e)
   (tap> java.net.ServerSocket)
   (tap> (java.time.ZonedDateTime/now))
+  (tap> {:zoned-date-time (java.time.ZonedDateTime/now) :instant (java.time.Instant/now)})
   (tap> "foo")
   (tap> "bar")
   (tap> "baz")

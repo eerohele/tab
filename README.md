@@ -1,6 +1,6 @@
 # Tab
 
-Tab turns Clojure data structures into tables.
+Tab is a little program that turns Clojure data structures into tables.
 
 <img width="1552" alt="Screenshot 2023-01-17 at 21 05 06" src="https://user-images.githubusercontent.com/31859/212988791-5e3a060a-2072-47ba-ba16-2981823ccb2b.png">
 
@@ -62,8 +62,11 @@ Most importantly, there's `tab.api/run` and `tab.api/halt`:
 ```clojure
 user=> (require '[tab.api :as tab])
 nil
-;; Run a Tab in port 1234; don't open a browser by default.
-user=> (def tab (tab/run :port 1234 :browse? false))
+;; - Run a Tab in port 1234
+;; - Don't open a browser by default.
+;; - Set print length to 8
+;; - Set print level to 2
+user=> (def tab (tab/run :port 1234 :browse? false :print-length 8 :print-level 2))
 #'user/tab
 user=> (tab/halt tab)
 nil

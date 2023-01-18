@@ -66,13 +66,10 @@ user=> (doc tab/halt)
 
 ## Examples
 
-To see what Tab can do, on the command line, run:
+For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl).
 
-```bash
-clj -Srepro -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "33a55351be8a155058df314c29505829aef1a755"} org.clojure/tools.deps {:git/url "https://github.com/clojure/tools.deps.git" :git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}}}'
-```
-
-Then, copy-paste the contents of [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl) into your favorite Clojure editor and start evaluating.
+> **Note**
+> To run through all the examples, you must use the [`add-lib3` branch of tools.deps](https://github.com/clojure/tools.deps/tree/add-lib3).
 
 ## Features
 

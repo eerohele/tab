@@ -13,7 +13,8 @@
            (java.nio.charset StandardCharsets)
            (java.time LocalDateTime)
            (java.util.concurrent BlockingQueue Executors ArrayBlockingQueue ThreadFactory TimeUnit)
-           (java.util.concurrent.atomic AtomicInteger)))
+           (java.util.concurrent.atomic AtomicInteger)
+           (java.util UUID)))
 
 (set! *warn-on-reflection* true)
 
@@ -82,7 +83,7 @@
            browse? true}}]
   (let [print-length (or print-length *print-length*)
         print-level (or print-level *print-level*)
-        server-id (random-uuid)
+        server-id (UUID/randomUUID)
         ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
         request-thread-pool (Executors/newFixedThreadPool 4 (make-thread-factory :name-suffix :request))
         queue-thread-pool (Executors/newCachedThreadPool (make-thread-factory :name-suffix :queue))

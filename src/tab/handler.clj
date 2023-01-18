@@ -61,7 +61,7 @@
 
 (defn ^:private a-val
   [{:keys [matches vals server-id] :as request}]
-  (let [offset (-> matches first parse-long)]
+  (let [offset (-> matches first Long/parseLong)]
     (if (>= offset (count vals))
       {:status 302
        :headers {"Location" "/"}}

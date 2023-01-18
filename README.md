@@ -43,7 +43,7 @@ true
 Then, bask in the glory of the table that appears in your browser. If a tabulated `BigInteger` doesn't do it for you, there are [more examples available](#examples).
 
 > **Note**
-> The `tab.auto` namespace is the easiest way to run Tab. The `tab.api` namespace exposes the [API](#api) proper. In general, you'll probably want to use `tab.api`.
+> In general, you'll probably want to use [`tab.api`](#api) instead of `tab.auto`. The only purpose of the `tab.auto` namespace is to make it as easy as possible to run a Tab.
 
 See the [user manual](#user-manual) for instructions of use.
 
@@ -56,6 +56,18 @@ user=> (tab.auto/halt)
 The `tab.auto` namespace is the easiest way to run Tab. The `tab.api` namespace exposes the [API](#api) proper.
 
 ## API
+
+Most importantly, there's `tab.api/run`:
+
+```clojure
+user=> (require '[tab.api :as tab])
+nil
+;; Run a Tab in port 1234; don't open a browser by default.
+user=> (def tab (tab/run :port 1234 :browse? false))
+#'user/tab
+```
+
+See also:
 
 ```clojure
 user=> (require '[tab.api :as tab])

@@ -27,7 +27,7 @@ Tab aims to be that something else.
 Given that you have the [Clojure CLI](https://clojure.org/guides/install_clojure) installed, on the command line, run:
 
 ```bash
-clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "eb318e7d931a289b874feb37bf8280221a623315"}}}'
+clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "git@github.com:eerohele/tab.git" :git/sha "3bf3095a29d1bd9dce687c59c1a64577308e3cac"}}}'
 ```
 
 Then, in the REPL:
@@ -82,7 +82,7 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 - Can only make tables.
 - Likely to die if given a very large input.
 - Eager; will blow up if you give it an infinite seq.
-- Requires a modern browser. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
+- Requires a modern browser to look good. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
 
 ## Inspiration
 

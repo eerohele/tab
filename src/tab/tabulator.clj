@@ -22,8 +22,6 @@
   ($ :a (cond-> {:href href} access-key (assoc :accesskey access-key))
     text))
 
-(declare ^:private -tabulate)
-
 (defn ^:private seq-title
   [this]
   (cond

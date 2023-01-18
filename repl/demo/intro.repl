@@ -112,9 +112,8 @@
 ;; If you give Tab an atom, Tab starts watching it for changes.
 
 ;; Hukari is a personal REPL utility lib.
-((requiring-resolve 'clojure.tools.deps.alpha.repl/add-libs)
- '{me.flowthing/hukari {:git/url "https://github.com/eerohele/hukari.git"
-                        :git/sha "9e4103ac6013ab01b3667754441b7185f4e4f49b"}})
+(add-libs '{me.flowthing/hukari {:git/url "https://github.com/eerohele/hukari.git"
+                                 :git/sha "9e4103ac6013ab01b3667754441b7185f4e4f49b"}})
 
 ;; It has a function that datafies (via clojure.datafy/datafy) a bunch of
 ;; MXBeans that expose information about the JVM and the runtime.

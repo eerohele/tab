@@ -30,8 +30,8 @@
     nodes))
 
 (defn $
-  "Given a tag (a keyword) and any number of nodes, return a clojure.xml-
-  compatible representation of an XML or HTML element."
+  "Given a tag (a keyword), optionally an attribute map, and any number of child
+  nodes, return a clojure.xml-compatible representation of an HTML element."
   [tag & nodes]
   (let [node (first nodes)]
     (map->Element

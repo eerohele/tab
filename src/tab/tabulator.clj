@@ -96,8 +96,8 @@
               (fn [[k v]]
                 ($ :tr
                   ($ :td {:class "filler"})
-                  ($ :th (-tabulate (datafy/datafy k) (inc level)))
-                  ($ :td (-tabulate (datafy/datafy v) (inc level)))))
+                  ($ :th (-tabulate k (inc level)))
+                  ($ :td (-tabulate v (inc level)))))
               (try
                 (sort-by key this)
                 (catch ClassCastException _
@@ -137,7 +137,7 @@
                          (let [v (get m k)]
                            ($ :td
                              (when (some? v)
-                               (-tabulate (datafy/datafy v) (inc level))))))
+                               (-tabulate v (inc level))))))
                     ks)))
               this))))
 
@@ -155,7 +155,7 @@
               (fn [i seq]
                 ($ :tr
                   ($ :td {:class "index"} (pr-str i))
-                  ($ :td (-tabulate (datafy/datafy seq) level))))
+                  ($ :td (-tabulate seq level))))
               this))))
 
       :else

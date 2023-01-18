@@ -39,7 +39,9 @@ user=> (tap> BigInteger)
 true
 ```
 
-Then, bask in the glory of the table that appears in your browser. There's also more [examples](#examples) if a tabulated `BigInteger` doesn't do it for you.
+Then, bask in the glory of the table that appears in your browser. If a tabulated `BigInteger` doesn't do it for you, there are [more examples available](#examples).
+
+See the [user manual](#user-manual) for instructions of use.
 
 To stop Tab:
 

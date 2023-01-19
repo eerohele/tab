@@ -1,3 +1,4 @@
+(require '[clojure.string :as string])
 (require '[cognitect.transcriptor :as xr])
 (require '[tab.api :as tab])
 
@@ -37,29 +38,35 @@
 
 (xr/check! #{"Tab"})
 
+(defn table-selector
+  [level]
+  (string/join " " (repeat (inc level) "table")))
+
+(comment (table-selector 0) ,,,)
+
 (defn tbody
   ([level]
    (tbody level 0))
   ([level nth]
-   (.nth (.locator page (format "[data-level = '%d'] > tbody" level)) nth)))
+   (.nth (.locator page (str (table-selector level) " > tbody")) nth)))
 
 (defn type-header
   ([level]
    (type-header level 0))
   ([level n]
-   (.nth (.locator page (format "[data-level = '%d'] > thead > tr > .type" level)) n)))
+   (.nth (.locator page (str (table-selector level) "> thead > tr > .type")) n)))
 
 (defn count-header
   ([level]
    (count-header level 0))
   ([level n]
-   (.locator (.nth (.locator page (format "[data-level = '%d']" level)) n) ":scope > thead > tr > .count")))
+   (.locator (.nth (.locator page (table-selector level)) n) ":scope > thead > tr > .count")))
 
 (defn toggle
   ([level]
    (toggle level 0))
   ([level n]
-   (.locator (.nth (.locator page (format "[data-level = '%d']" level)) n) ":scope > thead > tr > [data-action = toggle-level]")))
+   (.locator (.nth (.locator page (table-selector level)) n) ":scope > thead > tr > [data-action = toggle-level]")))
 
 ;; level 0
 
@@ -491,6 +498,16 @@
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
 (tap> (analyzer.jvm/analyze (read-string (repl/source-fn 'clojure.core/inc))))
+
+(.waitFor (.first (.locator page "text=clojure.lang.Var"))
+  (doto
+    (com.microsoft.playwright.Locator$WaitForOptions.)
+    (.setState com.microsoft.playwright.options.WaitForSelectorState/VISIBLE)))
+
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+
+(binding [*ns* (find-ns 'clojure.core.server)]
+  (tap> (clojure.tools.analyzer.jvm/analyze (read-string (clojure.repl/source-fn 'clojure.core.server/prepl)))))
 
 (.waitFor (.first (.locator page "text=clojure.lang.Var"))
   (doto

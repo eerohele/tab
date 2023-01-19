@@ -47,6 +47,7 @@
   (tap> {:a 1 :b {:c 2 :d {:e 3} :f {:g 4}}})
   (tap> {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
   (tap> {:a 1 :b {:c 2 :d {:e 3 :f 4} :g {:h 5 :f 6}}})
+  (tap> {:a 1 :b {:c {:d 3 :e 4} :f {:g 5 :h 6} :i {:j 7 :l {:m 8}}}})
   (tap> [{:a 1} {:b 2}])
   (tap> [{:a 1 :b 2} {:a 3 :c 4}])
   (tap> [{:a 1} 3])
@@ -68,6 +69,10 @@
   (tap> java.util.concurrent.BlockingQueue)
   (tap> (clojure.tools.analyzer.jvm/analyze '(map inc (range 10))))
   (tap> (clojure.tools.analyzer.jvm/analyze '(sequence (comp (filter odd?) (map inc) (partition-by even?)) (range 10))))
+
+  (binding [*ns* (find-ns 'clojure.core.server)]
+    (tap> (clojure.tools.analyzer.jvm/analyze (read-string (clojure.repl/source-fn 'clojure.core.server/prepl)))))
+
   (tap> (sort-by :added #(compare %2 %1) (map (comp #(dissoc % :doc) meta) (vals (ns-publics 'clojure.core)))))
 
   ;; This takes a while...

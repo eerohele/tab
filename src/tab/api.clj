@@ -3,6 +3,7 @@
   (:require [clojure.java.browse :as browse]
             [tab.annotate :as annotate]
             [tab.base64 :as base64]
+            [tab.db :as db]
             [tab.tabulator :as tabulator]
             [tab.ring :as ring]
             [tab.handler :as handler]
@@ -88,6 +89,7 @@
         request-thread-pool (Executors/newFixedThreadPool 4 (make-thread-factory :name-suffix :request))
         queue-thread-pool (Executors/newCachedThreadPool (make-thread-factory :name-suffix :queue))
 
+        db (db/pristine)
         !queues (atom #{})
         !vals (atom [{:inst (LocalDateTime/now) :data init-val}])
         !watches (atom [])
@@ -110,7 +112,7 @@
                 (let [val {:inst (LocalDateTime/now) :data x}
                       data (->
                              val
-                             (assoc :max-offset (count (push-val val)))
+                             (assoc :db db :max-offset (count (push-val val)))
                              tabulator/tabulate
                              html/html
                              base64/encode)]
@@ -161,7 +163,7 @@
                                     *print-level* print-level
                                     tabulator/*ann* (memoize annotate/annotate)]
                             (handler/handle
-                              (assoc request :server-id server-id :vals @!vals)))
+                              (assoc request :db db :server-id server-id :vals @!vals)))
                           (catch Throwable ex
                             (log/log :severe {:event :write-response-failed :ex ex})
                             {:status 500

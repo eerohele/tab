@@ -1,9 +1,11 @@
 (ns tab.handler
   "HTTP request handler functions."
   (:require [clojure.java.io :as io]
+            [tab.db :as db]
             [tab.tabulator :as tabulator]
             [tab.html :refer [$] :as html])
-  (:import (java.time LocalDateTime)))
+  (:import (java.time LocalDateTime)
+           (java.util UUID)))
 
 (set! *warn-on-reflection* true)
 
@@ -41,9 +43,9 @@
    :body "Not found"})
 
 (defn ^:private index
-  [{:keys [vals] :as request}]
+  [{:keys [vals db] :as request}]
   (html-response request
-    (tabulator/tabulate (assoc (peek vals) :max-offset (count vals)))))
+    (tabulator/tabulate (assoc (peek vals) :db (db/evacuate! db) :max-offset (count vals)))))
 
 (defn ^:private js-asset
   [_]
@@ -60,13 +62,13 @@
    :body (slurp (io/resource "tab.css"))})
 
 (defn ^:private a-val
-  [{:keys [matches vals] :as request}]
+  [{:keys [db matches vals] :as request}]
   (let [offset (-> matches first Long/parseLong)]
     (if (>= offset (count vals))
       {:status 302
        :headers {"Location" "/"}}
       (let [item (nth vals (- (dec (count vals)) offset))
-            main (tabulator/tabulate (assoc item :offset offset :max-offset (count vals)))]
+            main (tabulator/tabulate (assoc item :db (db/evacuate! db) :offset offset :max-offset (count vals)))]
         (html-response request main)))))
 
 (defn ^:private event-source
@@ -97,6 +99,23 @@
                          :inst (LocalDateTime/now)
                          :data (-> class-str read-string resolve)})))
 
+(defn ^:private item
+  [{db :db [uuid] :matches}]
+  (let [uuid (UUID/fromString uuid)
+        data (db/extract! db uuid)]
+    (if data
+      {:status 200
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body (html/html (tabulator/-tabulate data db 0))}
+      {:status 302
+       :headers {"Location" "/"}})))
+
+(defn ^:private db
+  [{db :db}]
+  {:status 200
+   :headers {"Content-Type" "text/plain"}
+   :body (pr-str (count @db))})
+
 (defn handle
   "Given an ersatz Ring request map, pass it off to its designated handler, and
   return the result."
@@ -112,6 +131,7 @@
       request
 
       [:get #"^/$"] :>> index
+      [:get #"^/id/(.+)$"] :>> item
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset
       [:get #"^/event-source$"] :>> event-source
@@ -119,6 +139,7 @@
       [:get #"^/ns/(.+)$"] :>> a-namespace
       [:get #"^/var/(.+?)/(.+)$"] :>> a-var
       [:get #"^/class/(.+?)$"] :>> a-class
+      [:get #"^/db$"] :>> db
       [:get #".*"] :>> not-found
       not-found)))
 

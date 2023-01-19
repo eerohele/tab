@@ -36,37 +36,6 @@ if (window.location.pathname === "/") {
   }
 }
 
-const toggleLevel = (el, newState) => {
-  const headerCells = el.querySelectorAll(":scope > thead > tr > th:not([data-action]):not(.count)");
-  const tbody = el.querySelectorAll(":scope > tbody");
-
-  headerCells.forEach(el => {
-    if (newState == "expanded") {
-      el.style.display = "table-cell"
-    } else {
-      el.style.display = "none";
-    }
-  });
-
-  tbody.forEach(el => {
-    if (newState == "expanded") {
-      el.style.display = "table-row-group"
-    } else {
-      el.style.display = "none";
-    }
-  });
-
-  const toggle = el.querySelector(":scope > thead > tr > [data-action = toggle-level]");
-
-  if (newState == "expanded") {
-    toggle.textContent = "－";
-  } else {
-    toggle.textContent = "＋";
-  }
-
-  el.dataset.state = newState;
-}
-
 const getTarget = (el) => {
   if (el.dataset.target) {
     return el.closest(el.dataset.target);
@@ -92,7 +61,7 @@ const toggleLength = (el, newState) => {
   target.querySelectorAll("[data-action = toggle-length]").forEach(initToggleLength);
 }
 
-const otherState = state => {
+const flipState = state => {
   if (state === "expanded") {
     return "collapsed";
   } else {
@@ -100,8 +69,8 @@ const otherState = state => {
   }
 }
 
-const determineNewState = (collapsers) => {
-  const states = Array.from(collapsers).map(el => el.dataset.state || "expanded");
+const determineNewState = (elements) => {
+  const states = Array.from(elements).map(el => el.dataset.state || "expanded");
   const hiddenStates = states.filter(state => state === "collapsed");
   const visibleStates = states.filter(state => state === "expanded");
 
@@ -112,27 +81,61 @@ const determineNewState = (collapsers) => {
   }
 }
 
+const flipIcon = (el, newState) => {
+  if (newState == "collapsed") {
+    el.textContent = "＋";
+  } else {
+    el.textContent = "－";
+  }
+}
+
+const toggle = (el, newState) => {
+  if (el.getAttribute("bx-dispatch")) {
+    const target = el.closest(el.getAttribute('bx-target'));
+    const href = el.getAttribute('href');
+    const method = el.getAttribute('bx-request');
+    const uri = el.getAttribute('bx-uri');
+
+    fetch(uri, {method: method}).then((response) => response.text()).then((html) => {
+      const parent = target.closest('td');
+      target.outerHTML = html;
+
+      initToggleLevel(parent);
+    });
+  } else {
+    flipIcon(el, newState);
+    el.closest("table").dataset.state = newState;
+  }
+}
+
+const toggleHandler = (event) => {
+  event.stopPropagation();
+  event.preventDefault();
+
+  const el = event.currentTarget;
+  const table = el.closest("table");
+
+  if (event.altKey) {
+    const table = el.closest("table");
+    const toggles = table.querySelectorAll(":scope > tbody > tr > td > table > thead > tr > [data-action = toggle-level]");
+    const newState = determineNewState(table.querySelectorAll(":scope > tbody > tr > td > table"));
+
+    toggles.forEach(el => { toggle(el, newState) });
+  } else {
+    const table = el.closest("table");
+    toggle(el, flipState(table.dataset.state));
+  }
+}
+
 const initToggleLevel = (el) => {
   el.querySelectorAll("[data-action = toggle-level]").forEach((toggle) => {
-    toggle.addEventListener("click", (event) => {
-      const table = event.currentTarget.closest("table");
-
-      if (event.altKey) {
-        const tbody = table.querySelector(":scope > tbody");
-        const tables = tbody.querySelectorAll(":scope > tr > td > table");
-        const state = determineNewState(tables);
-
-        tables.forEach(el => toggleLevel(el, state));
-      } else {
-        toggleLevel(table, otherState(table.dataset.state));
-      }
-    });
+    toggle.addEventListener("click", toggleHandler);
   });
 }
 
 const initToggleLength = (el) => {
   el.addEventListener("click", (event) => {
-    toggleLength(event.currentTarget, otherState(el.dataset.state));
+    toggleLength(event.currentTarget, flipState(el.dataset.state));
   });
 }
 

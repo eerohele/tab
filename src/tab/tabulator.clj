@@ -4,6 +4,7 @@
             [clojure.pprint :as pprint]
             [tab.annotate :as annotate]
             [tab.base64 :as base64]
+            [tab.db :as db]
             [tab.html :refer [$] :as html])
   (:import (clojure.lang IPersistentMap Namespace Seqable Var)
            (java.net URLEncoder)
@@ -40,9 +41,13 @@
     clojure.lang.PersistentTreeMap "sorted map"
     "map"))
 
+(defn ^:private exceeds-print-level?
+  [level]
+  (and (int? *print-level*) (>= level *print-level*)))
+
 (defn ^:private state-for
   [level]
-  (if (and (int? *print-level*) (>= level *print-level*))
+  (if (exceeds-print-level? level)
     :collapsed
     :expanded))
 
@@ -51,41 +56,58 @@
   (case state :collapsed "＋" :expanded "－"))
 
 (defprotocol Tabulable
-  (-tabulate [this level]))
+  (-tabulate [this db level]))
 
 (extend-protocol Tabulable
   nil
-  (-tabulate [_ _]
+  (-tabulate [_ _ _]
     (*ann* "nil"))
 
   Object
-  (-tabulate [this _]
+  (-tabulate [this _ _]
     (*ann* (pr-str this)))
 
   Class
-  (-tabulate [this _]
+  (-tabulate [this _ _]
     (link (str "/class/" (.getName this)) (*ann* (pr-str this))))
 
   String
-  (-tabulate [this _]
+  (-tabulate [this _ _]
     ($ :pre (*ann* (pr-str this))))
 
   Namespace
-  (-tabulate [this _]
+  (-tabulate [this _ _]
     (link (str "/ns/" (encode-uri (ns-name this))) (*ann* (pr-str this))))
 
   Var
-  (-tabulate [this _]
+  (-tabulate [this _ _]
     (link (str "/var/" (encode-uri (ns-name (.ns this))) "/" (encode-uri (.sym this))) (*ann* (pr-str this))))
 
   IPersistentMap
-  (-tabulate [this level]
-    (if (empty? this)
+  (-tabulate [this db level]
+    (cond
+      (empty? this)
       (*ann* (pr-str this))
 
+      (exceeds-print-level? level)
+      (let [uuid (db/put! db this)]
+        ($ :table {:data-state "collapsed"}
+          ($ :thead
+            ($ :tr
+              ($ :th
+                (let [href (format "/id/%s" uuid)]
+                  {:data-action "toggle-level"
+                   :bx-dispatch "click"
+                   :bx-request "get"
+                   :bx-uri href
+                   :bx-target "table"
+                   :href href})
+                "＋")
+              ($ :th {:class "count"} (count this))))))
+
+      :else
       (let [state (state-for level)]
-        ($ :table {:data-state (name state)
-                   :data-level (pr-str level)}
+        ($ :table {:data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
@@ -96,21 +118,35 @@
               (fn [[k v]]
                 ($ :tr
                   ($ :td {:class "filler"})
-                  ($ :th (-tabulate k (inc level)))
-                  ($ :td (-tabulate v (inc level)))))
+                  ($ :th (-tabulate (datafy/datafy k) db (inc level)))
+                  ($ :td (-tabulate (datafy/datafy v) db (inc level)))))
               this))))))
 
   Seqable
-  (-tabulate [this level]
+  (-tabulate [this db level]
     (cond
       (empty? this)
       (*ann* (pr-str this))
 
+      (and (or (every? map? this) (every? sequential? this)) (exceeds-print-level? level))
+      (let [uuid (db/put! db this)]
+        ($ :table {:data-state "collapsed"}
+          ($ :thead
+            ($ :tr
+              ($ :th
+                (let [href (format "/id/%s" uuid)]
+                  {:data-action "toggle-level"
+                   :bx-dispatch "click"
+                   :bx-request "get"
+                   :bx-uri href
+                   :bx-target "table"
+                   :href href}) "＋")
+              ($ :th {:class "count"} (count this))))))
+
       (every? map? this)
       (let [state (state-for level)
             ks (sequence (comp (mapcat keys) (distinct)) this)]
-        ($ :table {:data-level (pr-str level)
-                   :data-state (name state)}
+        ($ :table {:data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
@@ -130,14 +166,13 @@
                          (let [v (get m k)]
                            ($ :td
                              (when (some? v)
-                               (-tabulate v (inc level))))))
+                               (-tabulate (datafy/datafy v) db (inc level))))))
                     ks)))
               this))))
 
       (every? sequential? this)
       (let [state (state-for level)]
-        ($ :table {:data-level (pr-str level)
-                   :data-state (name state)}
+        ($ :table {:data-state (name state)}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
@@ -148,7 +183,7 @@
               (fn [i seq]
                 ($ :tr
                   ($ :td {:class "index"} (pr-str i))
-                  ($ :td (-tabulate seq level))))
+                  ($ :td (-tabulate (datafy/datafy seq) db level))))
               this))))
 
       :else
@@ -171,7 +206,7 @@
   (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss"))
 
 (defn tabulate
-  [{:keys [data offset max-offset inst] :or {offset 0 max-offset 0}}]
+  [{:keys [db data offset max-offset inst] :or {offset 0 max-offset 0}}]
   (let [data (datafy/datafy data)]
     ($ :main
       ($ :header
@@ -190,4 +225,4 @@
           (when inst
             ($ :time {:datetime (str inst) :title (str inst)}
               (.format date-time-formatter inst)))))
-      (-tabulate data 0))))
+      (-tabulate data db 0))))

@@ -9,7 +9,7 @@
       ((requiring-resolve 'tab.api/run)
        :port 8080
        :browse? false
-       :print-level 3
+       :print-level 2
        :print-length 8)))
 
   ((requiring-resolve 'tab.api/halt) tab)

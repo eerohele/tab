@@ -20,6 +20,8 @@
   [level]
   (timbre/set-level! (levels level)))
 
+(set-level! :info)
+
 (comment
   (log {:hello :world})
   (log :info {:hello :world})

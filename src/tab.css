@@ -170,7 +170,6 @@ table th {
 table th,
 table td {
   padding: calc(var(--table-cell-padding) / 2) var(--table-cell-padding);
-  white-space: pre;
 }
 
 table td > table {
@@ -216,6 +215,7 @@ table thead th {
   border-bottom: 1px solid var(--table-border-color);
   border-right: 1px solid var(--table-border-color);
   text-align: left;
+  white-space: pre;
 }
 
 table tbody td {

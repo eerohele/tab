@@ -66,11 +66,11 @@
     :browse? (default: true)
       Whether to automatically open your default browser to show Tab.
 
-    :print-length (default: *print-length*)
+    :print-length (default: *print-length* or 8)
       Maximum number of items of a seq to show. To show all items, click on the
       ellipsis in the UI.
 
-    :print-level (default: *print-level*)
+    :print-level (default: *print-level* or 2)
       Tab shows every nested object whose nesting level exceeds this
       value as collapsed.
 
@@ -81,8 +81,8 @@
            max-vals 16
            add-tap? true
            browse? true}}]
-  (let [print-length (or print-length *print-length*)
-        print-level (or print-level *print-level*)
+  (let [print-length (or print-length *print-length* 8)
+        print-level (or print-level *print-level* 2)
         server-id (UUID/randomUUID)
         ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
         request-thread-pool (Executors/newFixedThreadPool 4 (make-thread-factory :name-suffix :request))

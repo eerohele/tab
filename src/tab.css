@@ -188,6 +188,7 @@ table tbody th {
   border-right: 1px solid var(--table-border-color);
   text-align: right;
   vertical-align: top;
+  white-space: pre;
 }
 
 table tbody tr:last-of-type th,

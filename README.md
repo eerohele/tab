@@ -110,6 +110,7 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 
 - Can only make tables.
 - Will blow up expand an infinite seq of scalars a table cell with an ellipsis.
+- You might be able to have Tab do a denial-of-service attack on itself if you <kbd>Alt</kbd>-click a node with _many_ children.
 - Requires a modern browser to look good. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
 - Might not work with Clojure versions older than 1.10.2.
 

@@ -105,7 +105,9 @@
         data (db/extract! db uuid)]
     (if data
       {:status 200
-       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :headers {"Content-Type" "text/html; charset=utf-8"
+                 "Cache-Control" "no-cache"
+                 "Expires" "0"}
        :body (html/html (tabulator/-tabulate data db 0))}
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}

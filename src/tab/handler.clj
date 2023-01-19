@@ -107,8 +107,9 @@
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body (html/html (tabulator/-tabulate data db 0))}
-      {:status 302
-       :headers {"Location" "/"}})))
+      {:status 200
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body "<span></span>"})))
 
 (defn ^:private db
   [{db :db}]

@@ -109,10 +109,9 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 ## Limitations
 
 - Can only make tables.
-- Likely to die if given a very large input.
-- Eager; will blow up if you give it an infinite seq.
+- Will blow up expand an infinite seq of scalars a table cell with an ellipsis.
 - Requires a modern browser to look good. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
-- Might not work with Clojure versions older than 1.10.2
+- Might not work with Clojure versions older than 1.10.2.
 
 ## Inspiration
 

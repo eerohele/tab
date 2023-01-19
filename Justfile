@@ -4,3 +4,6 @@ test:
 
 spec:
 	clojure -X:dev user/check! '{:path "spec"}'
+
+bump-sha:
+  clojure -A:dev -X user/bump-sha

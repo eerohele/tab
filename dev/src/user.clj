@@ -28,6 +28,23 @@
   (check! {:path "spec"})
   ,,,)
 
+(defn bump-sha
+  "Bump the Git commit hash in the README."
+  [& _]
+  (let [re #"(?im)\"([0-9a-f]{5,40})\""
+        ret ((requiring-resolve 'clojure.java.shell/sh) "git" "rev-parse" "HEAD")
+        commit-hash (-> ret :out .trim)]
+    (println commit-hash)
+    (spit "README.md"
+      ((requiring-resolve 'clojure.string/replace)
+       (slurp "README.md") re (str \" commit-hash \")))
+
+    ((requiring-resolve 'clojure.java.shell/sh) "git" "commit" "README.md" "-m" "Update README")))
+
+(comment
+  (bump-sha)
+  ,,,)
+
 #_{:clj-kondo/ignore [:unresolved-namespace]}
 (comment
   (tap> (sort-by :added #(compare %2 %1) (map meta (vals (ns-publics 'clojure.pprint)))))

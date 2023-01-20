@@ -1,7 +1,6 @@
 (ns tab.tabulator
   "Make tables."
-  (:require [clojure.datafy :as datafy]
-            [clojure.pprint :as pprint]
+  (:require [clojure.pprint :as pprint]
             [tab.annotate :as annotate]
             [tab.base64 :as base64]
             [tab.db :as db]

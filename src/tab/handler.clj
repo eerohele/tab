@@ -100,15 +100,18 @@
                          :data (-> class-str read-string resolve)})))
 
 (defn ^:private item
-  [{db :db [uuid] :matches}]
+  [{db :db [uuid] :matches headers :headers :as request}]
   (let [uuid (UUID/fromString uuid)
-        data (db/extract! db uuid)]
+        data (db/pull db uuid)]
     (if data
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"
                  "Cache-Control" "no-cache"
                  "Expires" "0"}
-       :body (html/html (tabulator/-tabulate data db 0))}
+       :body (let [main (tabulator/-tabulate data db 0)]
+               (if (contains? headers "bx-request")
+                 (html/html main)
+                 (html/page (wrap-page request main))))}
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body "<span></span>"})))

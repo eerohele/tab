@@ -105,13 +105,15 @@
               ($ :th {:class "count"} (count this))))))
 
       :else
-      (let [state (state-for level)]
+      (let [uuid (db/put! db this)
+            state (state-for level)]
         ($ :table {:data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:colspan "2" :class "type"} (map-label this))))
+              ($ :th {:colspan "2" :class "type"}
+                ($ :a {:href (format "/id/%s" uuid)} (map-label this)))))
           ($ :tbody
             (map
               (fn [[k v]]
@@ -143,7 +145,8 @@
               ($ :th {:class "count"} (count this))))))
 
       (every? map? this)
-      (let [state (state-for level)
+      (let [uuid (db/put! db this)
+            state (state-for level)
             ks (sequence (comp (mapcat keys) (distinct)) this)
             num-items (count this)]
         ($ :table {:data-state "expanded"}
@@ -152,7 +155,7 @@
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} num-items)
               ($ :th {:colspan (pr-str (count ks)) :class "type"}
-                (seq-label this)))
+                ($ :a {:href (format "/id/%s" uuid)} (seq-label this))))
             ($ :tr {:class "sticky"}
               ($ :th {:title "Total number of items in this collection."
                       :class "count"} num-items)
@@ -172,13 +175,15 @@
               this))))
 
       (every? sequential? this)
-      (let [state (state-for level)]
+      (let [uuid (db/put! db this)
+            state (state-for level)]
         ($ :table {:data-state (name state)}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:class "type"} (seq-label this))))
+              ($ :th {:class "type"}
+                ($ :a {:href (format "/id/%s" uuid)} (seq-label this)))))
           ($ :tbody
             (map-indexed
               (fn [i seq]

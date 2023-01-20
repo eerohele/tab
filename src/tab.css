@@ -276,6 +276,10 @@ th[data-action] {
   font-variant: small-caps;
 }
 
+.type a:any-link:hover {
+  text-decoration: underline;
+}
+
 .count {
   min-width: 15px;
   vertical-align: middle;

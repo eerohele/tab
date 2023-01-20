@@ -96,7 +96,7 @@ const toggle = (el, newState) => {
     const method = el.getAttribute('bx-request');
     const uri = el.getAttribute('bx-uri');
 
-    fetch(uri, {method: method}).then((response) => response.text()).then((html) => {
+    fetch(uri, {method: method, headers: {'bx-request': 'true'}}).then((response) => response.text()).then((html) => {
       const parent = target.closest('td');
       target.outerHTML = html;
 

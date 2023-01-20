@@ -89,9 +89,11 @@ user=> (doc tab/halt)
 
 ## User manual
 
-- Click `-` to collapse a node
-- Click `+` to expand a node
-- Press <kbd>Alt</kbd> and click `-` or `+` to expand or collapse all nodes underneath a node
+- Click `-` to collapse a node.
+- Click `+` to expand a node.
+- Press <kbd>Alt</kbd> and click `-` or `+` to expand or collapse all nodes underneath a node.
+- Click a table header (e.g. `ARRAY MAP`) to zoom in on that table.
+- Press <kbd>Alt</kbd> and click a table header (e.g. `ARRAY MAP`) to copy the value backing that table to your clipboard.
 
 ## Examples
 

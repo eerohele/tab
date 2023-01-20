@@ -7,8 +7,8 @@
   --background-color: #fff;
   --text-color-default: #333;
 
-  --header-link-color: var(--color-blue);
-  --header-background-color: #eee;
+  --nav-link-color: var(--color-blue);
+  --nav-background-color: #eee;
   --table-border-color: #ccc;
   --table-header-background-color: rgba(235, 235, 235, 0.5);
   --table-cell-padding: 0.5em;
@@ -36,8 +36,8 @@
     --background-color: #342826;
     --text-color-default: #fff;
 
-    --header-link-color: var(--color-yellow);
-    --header-background-color: #333;
+    --nav-link-color: var(--color-yellow);
+    --nav-background-color: #333;
     --table-border-color: #444;
     --table-header-background-color: rgba(0, 0, 0, 0.2);
     --table-cell-hover-color: #303030;
@@ -63,7 +63,7 @@
 /* </VARIABLES> */
 
 html {
-  margin: 2em 1em 0 1em;
+  margin: 1em 1em 0 1em;
 }
 
 body {
@@ -83,46 +83,48 @@ code {
   line-height: 0;
 }
 
-/* <HEADER> */
+/* <NAV> */
 
-header {
+nav {
   background-color: var(--table-header-background-color);
   backdrop-filter: grayscale(0.5) blur(3px);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   text-align: right;
   position: fixed;
-  padding: .5em 0 .5em 0;
+  padding: .25em 0 .25em 0;
   left: 0;
-  top: 0;
-  font-size: 80%;
+  bottom: 0;
   z-index: 1;
 }
 
-header .left {
+nav .left {
   display: flex;
   padding: 0 2em;
   width: 150px;
   justify-content: space-between;
+  font-size: 80%;
 }
 
-header .left span {
+nav .left span {
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.5;
 }
 
-header .right {
+nav .right {
   padding: 0 2em;
+  font-size: 70%;
   width: 200px;
 }
 
-header a:any-link {
-  color: var(--header-link-color);
+nav a:any-link {
+  color: var(--nav-link-color);
 }
 
-header a:hover {
+nav a:hover {
   color: var(--color-red);
 }
 
@@ -198,17 +200,12 @@ table tbody tr:last-of-type .filler {
 
 .sticky {
   position: sticky;
-  top: 33px;
+  top: 0;
   z-index: 1;
 }
 
 .sticky th {
   backdrop-filter: grayscale(0.5) blur(3px);
-  border-right: none;
-}
-
-.sticky th:last-of-type {
-  border-right: 1px solid var(--table-border-color);
 }
 
 table thead th {

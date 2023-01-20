@@ -209,7 +209,8 @@
 (defn tabulate
   [{:keys [db data offset max-offset inst] :or {offset 0 max-offset 0}}]
   ($ :main
-    ($ :header
+    (-tabulate data db 0)
+    ($ :nav
       ($ :div {:class "left"}
         (if (< offset (dec max-offset))
           (link (format "/val/-%d" (inc offset)) "❮" :access-key "h")
@@ -224,5 +225,4 @@
       ($ :div {:class "right"}
         (when inst
           ($ :time {:datetime (str inst) :title (str inst)}
-            (.format date-time-formatter inst)))))
-    (-tabulate data db 0)))
+            (.format date-time-formatter inst)))))))

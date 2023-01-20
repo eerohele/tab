@@ -118,8 +118,8 @@
               (fn [[k v]]
                 ($ :tr
                   ($ :td {:class "filler"})
-                  ($ :th (-tabulate (datafy/datafy k) db (inc level)))
-                  ($ :td (-tabulate (datafy/datafy v) db (inc level)))))
+                  ($ :th (-tabulate k db (inc level)))
+                  ($ :td (-tabulate v db (inc level)))))
               this))))))
 
   Seqable
@@ -166,7 +166,7 @@
                          (let [v (get m k)]
                            ($ :td
                              (when (some? v)
-                               (-tabulate (datafy/datafy v) db (inc level))))))
+                               (-tabulate v db (inc level))))))
                     ks)))
               this))))
 
@@ -183,7 +183,7 @@
               (fn [i seq]
                 ($ :tr
                   ($ :td {:class "index"} (pr-str i))
-                  ($ :td (-tabulate (datafy/datafy seq) db level))))
+                  ($ :td (-tabulate seq db level))))
               this))))
 
       :else

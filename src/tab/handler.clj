@@ -1,6 +1,7 @@
 (ns tab.handler
   "HTTP request handler functions."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.datafy :as datafy]
+            [clojure.java.io :as io]
             [clojure.pprint :as pprint]
             [clojure.string :as string]
             [tab.db :as db]
@@ -100,25 +101,28 @@
              "Connection" "keep-alive"}})
 
 (defn ^:private a-namespace
-  [{[ns-str] :matches vals :vals :as request}]
+  [{[ns-str] :matches db :db vals :vals :as request}]
   (html-response request
-    (tabulator/tabulate {:max-offset (count vals)
+    (tabulator/tabulate {:db db
+                         :max-offset (count vals)
                          :inst (LocalDateTime/now)
-                         :data (-> ns-str read-string find-ns)})))
+                         :data (-> ns-str read-string find-ns datafy/datafy)})))
 
 (defn ^:private a-var
-  [{[ns-str var-str] :matches vals :vals :as request}]
+  [{[ns-str var-str]:matches db :db vals :vals :as request}]
   (html-response request
-    (tabulator/tabulate {:max-offset (count vals)
+    (tabulator/tabulate {:db db
+                         :max-offset (count vals)
                          :inst (LocalDateTime/now)
-                         :data (ns-resolve (read-string ns-str) (read-string var-str))})))
+                         :data (datafy/datafy (ns-resolve (read-string ns-str) (read-string var-str)))})))
 
 (defn ^:private a-class
-  [{[class-str] :matches vals :vals :as request}]
+  [{[class-str]:matches db :db vals :vals :as request}]
   (html-response request
-    (tabulator/tabulate {:max-offset (count vals)
+    (tabulator/tabulate {:db db
+                         :max-offset (count vals)
                          :inst (LocalDateTime/now)
-                         :data (-> class-str read-string resolve)})))
+                         :data (-> class-str read-string resolve datafy/datafy)})))
 
 (defn ^:private item
   [{db :db [uuid] :matches headers :headers :as request}]

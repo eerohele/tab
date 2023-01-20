@@ -117,7 +117,7 @@
                              tabulator/tabulate
                              html/html
                              base64/encode)]
-                  (.put queue (format "data: %s\n\n" data))))
+                  (.put queue (format "event: tab\ndata: %s\n\n" data))))
               @!queues))
 
           (when (instance? clojure.lang.IRef x)

@@ -24,11 +24,11 @@ if (window.location.pathname === "/") {
     setErrorDisplay("none");
   };
 
-  eventSource.onmessage = (event) => {
+  eventSource.addEventListener("tab", (event) => {
     console.debug(event);
     document.querySelector("main").outerHTML = Base64.decode(event.data);
     document.dispatchEvent(new Event("DOMContentLoaded"));
-  };
+  });
 
   eventSource.onerror = (event) => {
     console.error(event);

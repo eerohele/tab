@@ -151,7 +151,16 @@ const init = (el) => {
       if (event.altKey) {
         event.preventDefault();
 
-        fetch(`/clip/${table.id}`, {method: "post"});
+        fetch(`/clip/${table.id}`, {method: "post"}).then(response => {
+          if (response.ok) {
+            const ok = document.querySelector(".ok");
+            ok.classList.toggle("show");
+
+            window.setTimeout(() => {
+              ok.classList.toggle("show");
+            }, 3000);
+          }
+        });
       }
     });
   });

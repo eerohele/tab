@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2023-01-20
+
+- Don't datafy nested values
+
 ## 2023-01-19
 
 - Add default values for `:print-length` (`8`) and `:print-level` (`2`) options
@@ -10,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
   This allows for sending Tab arbitrarily deeply nested data structures.
 
-- Datafy values recursively
+- Datafy nested values
 
 ## 2023-01-18
 

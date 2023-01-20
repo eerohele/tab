@@ -40,13 +40,13 @@
     clojure.lang.PersistentTreeMap "sorted map"
     "map"))
 
-(defn ^:private exceeds-print-level?
+(defn ^:private meets-print-level?
   [level]
   (and (int? *print-level*) (>= level *print-level*)))
 
 (defn ^:private state-for
   [level]
-  (if (exceeds-print-level? level)
+  (if (meets-print-level? level)
     :collapsed
     :expanded))
 
@@ -88,7 +88,7 @@
       (empty? this)
       (*ann* (pr-str this))
 
-      (exceeds-print-level? level)
+      (meets-print-level? level)
       (let [uuid (db/put! db this)]
         ($ :table {:data-state "collapsed"}
           ($ :thead
@@ -127,7 +127,7 @@
       (empty? this)
       (*ann* (pr-str this))
 
-      (and (or (every? map? this) (every? sequential? this)) (exceeds-print-level? level))
+      (and (or (every? map? this) (every? sequential? this)) (meets-print-level? level))
       (let [uuid (db/put! db this)]
         ($ :table {:data-state "collapsed"}
           ($ :thead

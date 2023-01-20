@@ -144,16 +144,18 @@
 
       (every? map? this)
       (let [state (state-for level)
-            ks (sequence (comp (mapcat keys) (distinct)) this)]
+            ks (sequence (comp (mapcat keys) (distinct)) this)
+            num-items (count this)]
         ($ :table {:data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
-              ($ :th {:class "count"} (count this))
+              ($ :th {:class "count"} num-items)
               ($ :th {:colspan (pr-str (count ks)) :class "type"}
                 (seq-label this)))
             ($ :tr {:class "sticky"}
-              ($ :th {:class "index"} "#")
+              ($ :th {:title "Total number of items in this collection."
+                      :class "count"} num-items)
               (map (fn [th]
                      ($ :th (*ann* (pr-str th)))) ks)))
           ($ :tbody

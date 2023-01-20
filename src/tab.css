@@ -234,11 +234,17 @@ table tbody td {
   display: none;
 }
 
-[data-state = expanded] > thead > tr > .count {
+[data-state = expanded] > thead > tr:first-child > .count {
   display: none;
 }
 
 /* </TABLE> */
+
+.sticky .count {
+  color: var(--color-violet);
+  cursor: help;
+  font-size: 80%;
+}
 
 th[data-action] {
   min-width: 15px;

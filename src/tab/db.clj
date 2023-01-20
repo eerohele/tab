@@ -24,9 +24,13 @@
   [db id]
   (swap! db dissoc id))
 
+(defn pull
+  [db id]
+  (get @db id))
+
 (defn extract!
   [db id]
-  (let [data (get @db id)]
+  (let [data (pull db id)]
     (evict! db id)
     data))
 

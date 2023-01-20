@@ -465,6 +465,20 @@
 (.textContent(.locator page "pre"))
 (xr/check! #{"(0 1 2 3)\n"})
 
+;; ellipsis exceeding :print-level
+
+(tap> {:a {:b {:c {:d (range 6)}}}})
+(.click (toggle 3))
+
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 ...)\n"})
+
+(.click (.locator page "[data-action = toggle-length]"))
+(.textContent (.locator page "[data-action = toggle-length]"))
+(xr/check! #{"(0 1 2 3 4 5)\n"})
+
+;; atom
+
 (def a (atom [1]))
 
 (tab/tab> tab a)

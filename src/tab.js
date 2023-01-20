@@ -100,7 +100,7 @@ const toggle = (el, newState) => {
       const parent = target.closest('td');
       target.outerHTML = html;
 
-      initToggleLevel(parent);
+      init(parent);
     });
   } else {
     flipIcon(el, newState);
@@ -139,10 +139,11 @@ const initToggleLength = (el) => {
   });
 }
 
-document.addEventListener("DOMContentLoaded", (_) => {
-  document.querySelectorAll("[data-action = toggle-length]").forEach(el => {
-    initToggleLength(el);
-  });
+const init = (el) => {
+  el.querySelectorAll("[data-action = toggle-length]").forEach(initToggleLength);
+  initToggleLevel(el);
+}
 
-  initToggleLevel(document);
+document.addEventListener("DOMContentLoaded", (_) => {
+  init(document);
 });

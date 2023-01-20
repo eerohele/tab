@@ -511,7 +511,8 @@
 (require '[clojure.repl :as repl])
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
-(tap> (analyzer.jvm/analyze (read-string (repl/source-fn 'clojure.core/inc))))
+(binding [*ns* (find-ns 'clojure.core)]
+  (tap> (analyzer.jvm/analyze (read-string (repl/source-fn 'clojure.core/inc)))))
 
 (.waitFor (.first (.locator page "text=clojure.lang.Var"))
   (doto

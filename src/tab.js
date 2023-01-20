@@ -142,6 +142,19 @@ const initToggleLength = (el) => {
 const init = (el) => {
   el.querySelectorAll("[data-action = toggle-length]").forEach(initToggleLength);
   initToggleLevel(el);
+
+  document.querySelectorAll(".value-type").forEach(el => {
+    el.addEventListener("click", (event) => {
+      const el = event.currentTarget;
+      const table = el.closest("table");
+
+      if (event.altKey) {
+        event.preventDefault();
+
+        fetch(`/clip/${table.id}`, {method: "post"});
+      }
+    });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", (_) => {

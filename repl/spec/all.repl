@@ -54,7 +54,7 @@
   ([level]
    (type-header level 0))
   ([level n]
-   (.nth (.locator page (str (table-selector level) "> thead > tr > .type")) n)))
+   (.nth (.locator page (str (table-selector level) "> thead > tr > .value-type")) n)))
 
 (defn count-header
   ([level]

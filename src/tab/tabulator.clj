@@ -90,7 +90,7 @@
 
       (meets-print-level? level)
       (let [uuid (db/put! db this)]
-        ($ :table {:data-state "collapsed"}
+        ($ :table {:id (str uuid) :data-state "collapsed"}
           ($ :thead
             ($ :tr
               ($ :th
@@ -107,12 +107,12 @@
       :else
       (let [uuid (db/put! db this)
             state (state-for level)]
-        ($ :table {:data-state "expanded"}
+        ($ :table {:id (str uuid) :data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:colspan "2" :class "type"}
+              ($ :th {:colspan "2" :class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (map-label this)))))
           ($ :tbody
             (map
@@ -131,7 +131,7 @@
 
       (and (or (every? map? this) (every? sequential? this)) (meets-print-level? level))
       (let [uuid (db/put! db this)]
-        ($ :table {:data-state "collapsed"}
+        ($ :table {:id (str uuid) :data-state "collapsed"}
           ($ :thead
             ($ :tr
               ($ :th
@@ -149,12 +149,12 @@
             state (state-for level)
             ks (sequence (comp (mapcat keys) (distinct)) this)
             num-items (count this)]
-        ($ :table {:data-state "expanded"}
+        ($ :table {:id (str uuid) :data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} num-items)
-              ($ :th {:colspan (pr-str (count ks)) :class "type"}
+              ($ :th {:colspan (pr-str (count ks)) :class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (seq-label this))))
             ($ :tr {:class "sticky"}
               ($ :th {:title "Total number of items in this collection."
@@ -177,12 +177,12 @@
       (every? sequential? this)
       (let [uuid (db/put! db this)
             state (state-for level)]
-        ($ :table {:data-state (name state)}
+        ($ :table {:id (str uuid) :data-state (name state)}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle state))
               ($ :th {:class "count"} (count this))
-              ($ :th {:class "type"}
+              ($ :th {:class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (seq-label this)))))
           ($ :tbody
             (map-indexed

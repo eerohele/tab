@@ -226,7 +226,7 @@ table tbody td {
 
 [data-state = collapsed] tbody,
 [data-state = collapsed] thead tr:nth-child(2),
-[data-state = collapsed] .type {
+[data-state = collapsed] .value-type {
   display: none;
 }
 
@@ -269,14 +269,14 @@ th[data-action] {
   min-width: 15px;
 }
 
-.type {
+.value-type {
   opacity: 0.8;
   text-align: center;
   vertical-align: middle;
   font-variant: small-caps;
 }
 
-.type a:any-link:hover {
+.value-type a:any-link:hover {
   text-decoration: underline;
 }
 

@@ -81,6 +81,7 @@ a:any-link {
 code {
   font-family: var(--font-family-monospace);
   line-height: 0;
+  white-space: pre;
 }
 
 /* <NAV> */
@@ -172,7 +173,6 @@ table th {
 table th,
 table td {
   padding: calc(var(--table-cell-padding) / 2) var(--table-cell-padding);
-  white-space: pre;
 }
 
 table td > table {

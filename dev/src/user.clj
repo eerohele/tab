@@ -53,6 +53,10 @@
   (tap> java.net.ServerSocket)
   (tap> (java.time.ZonedDateTime/now))
   (tap> {:zoned-date-time (java.time.ZonedDateTime/now) :instant (java.time.Instant/now)})
+
+  (tap> {:os (java.lang.management.ManagementFactory/getOperatingSystemMXBean)
+         :runtime (java.lang.management.ManagementFactory/getRuntimeMXBean)})
+  
   (tap> "foo")
   (tap> "bar")
   (tap> "baz")

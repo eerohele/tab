@@ -1,6 +1,7 @@
 (ns tab.tabulator
   "Make tables."
-  (:require [clojure.pprint :as pprint]
+  (:require [clojure.datafy :as datafy]
+            [clojure.pprint :as pprint]
             [tab.annotate :as annotate]
             [tab.base64 :as base64]
             [tab.db :as db]
@@ -63,8 +64,9 @@
     (*ann* "nil"))
 
   Object
-  (-tabulate [this _ _]
-    (*ann* (pr-str this)))
+  (-tabulate [this db _]
+    (let [uuid (db/put! db (datafy/datafy this))]
+      ($ :a {:href (format "/id/%s" uuid)} (*ann* (pr-str this)))))
 
   Class
   (-tabulate [this _ _]

@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 - Don't datafy nested values
 
+- Datafy values earlier to support ephemeral objects
+
+  Prior to this change, Tab datafied values upon rendering rather than when receiving the value. If the datafied object was ephemeral (such as a HTTP response object), Tab errored out when refreshing a page that showed the value.
+
 ## 2023-01-19
 
 - Add default values for `:print-length` (`8`) and `:print-level` (`2`) options

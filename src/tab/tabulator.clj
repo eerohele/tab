@@ -207,22 +207,21 @@
 
 (defn tabulate
   [{:keys [db data offset max-offset inst] :or {offset 0 max-offset 0}}]
-  (let [data (datafy/datafy data)]
-    ($ :main
-      ($ :header
-        ($ :div {:class "left"}
-          (if (< offset (dec max-offset))
-            (link (format "/val/-%d" (inc offset)) "❮" :access-key "h")
-            ($ :span "❮"))
-          (cond
-            (= 1 offset)
-            (link "/" "❯" :access-key "l")
-            (pos? offset)
-            (link (format "/val/-%d" (dec offset)) "❯" :access-key "l")
-            :else
-            ($ :span "❯")))
-        ($ :div {:class "right"}
-          (when inst
-            ($ :time {:datetime (str inst) :title (str inst)}
-              (.format date-time-formatter inst)))))
-      (-tabulate data db 0))))
+  ($ :main
+    ($ :header
+      ($ :div {:class "left"}
+        (if (< offset (dec max-offset))
+          (link (format "/val/-%d" (inc offset)) "❮" :access-key "h")
+          ($ :span "❮"))
+        (cond
+          (= 1 offset)
+          (link "/" "❯" :access-key "l")
+          (pos? offset)
+          (link (format "/val/-%d" (dec offset)) "❯" :access-key "l")
+          :else
+          ($ :span "❯")))
+      ($ :div {:class "right"}
+        (when inst
+          ($ :time {:datetime (str inst) :title (str inst)}
+            (.format date-time-formatter inst)))))
+    (-tabulate data db 0)))

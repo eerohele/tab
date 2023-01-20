@@ -1,6 +1,7 @@
 (ns tab.api
   "Tab is a tool for visualizing Clojure data structures."
-  (:require [clojure.java.browse :as browse]
+  (:require [clojure.datafy :as datafy]
+            [clojure.java.browse :as browse]
             [tab.annotate :as annotate]
             [tab.base64 :as base64]
             [tab.db :as db]
@@ -91,7 +92,7 @@
 
         db (db/pristine)
         !queues (atom #{})
-        !vals (atom [{:inst (LocalDateTime/now) :data init-val}])
+        !vals (atom [{:inst (LocalDateTime/now) :data (datafy/datafy init-val)}])
         !watches (atom [])
 
         push-val
@@ -109,7 +110,7 @@
                     *print-level* print-level]
             (run!
               (fn [^BlockingQueue queue]
-                (let [val {:inst (LocalDateTime/now) :data x}
+                (let [val {:inst (LocalDateTime/now) :data (datafy/datafy x)}
                       data (->
                              val
                              (assoc :db db :max-offset (count (push-val val)))

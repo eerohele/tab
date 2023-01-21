@@ -4,7 +4,7 @@
   See https://github.com/ring-clojure/ring for the original."
   (:require [clojure.string :as string]
             [tab.log :as log])
-  (:import (java.io Writer)
+  (:import (java.io InputStream OutputStream)
            (java.net SocketException)
            (java.nio.charset StandardCharsets)
            (java.time Instant ZoneId)
@@ -59,57 +59,73 @@
   [^String s]
   (pr-str (+ (alength (.getBytes s StandardCharsets/UTF_8)) 2)))
 
+(defprotocol Writable
+  (writes [this stream]))
+
+(extend-protocol Writable
+  nil (writes [_ _])
+
+  String
+  (writes [this ^OutputStream stream]
+    (.write stream (.getBytes this StandardCharsets/UTF_8)))
+
+  InputStream
+  (writes [this ^OutputStream stream]
+    (.transferTo this stream)))
+
 (defn write-response
-  "Given a java.io.Writer and a HTTP response map (á là Ring), write the
+  "Given a java.io.OutputStream and a HTTP response map (á là Ring), write the
   response map into the writer and flush the writer."
-  [^Writer writer {:keys [status headers ^String body]
-                   :or {status 500 headers {} body ""}}]
-  (try
-    ;; Status line
-    (.write writer "HTTP/1.1")
-    (.write writer " ")
-    (.write writer (str status))
-    (.write writer " ")
-    (.write writer ^String (status-text status ""))
-    (.write writer "\r\n")
+  [^OutputStream out
+   {:keys [status headers ^String body]
+    :or {status 500 headers {}}}]
+  (let [write (fn [x] (writes x out))]
+    (try
+      ;; Status line
+      (write "HTTP/1.1")
+      (write " ")
+      (write (str status))
+      (write " ")
+      (write ^String (status-text status ""))
+      (write "\r\n")
 
-    ;; Headers
-    (let [headers (cond-> (assoc headers "Date" (.format date-time-formatter (Instant/now)))
-                    (and (string? body) (seq body) (= 200 status))
-                    ;; Body length + \r\n
-                    (assoc "Content-Length" (content-length body)))]
-      (when (seq headers)
-        (doseq [[^String name ^String value] headers]
-          (.write writer name)
-          (.write writer ": ")
-          (.write writer value)
-          (.write writer "\r\n"))
+      ;; Headers
+      (let [headers (cond-> (assoc headers "Date" (.format date-time-formatter (Instant/now)))
+                      (and (string? body) (seq body) (= 200 status))
+                      ;; Body length + \r\n
+                      (assoc "Content-Length" (content-length body)))]
+        (when (seq headers)
+          (doseq [[^String name ^String value] headers]
+            (write name)
+            (write ": ")
+            (write value)
+            (write "\r\n"))
 
-        (.write writer "\r\n")))
+          (write "\r\n")))
 
-    ;; Body
-    (when (and (string? body) (seq body))
-      (.write writer body)
-      (.write writer "\r\n"))
+      ;; Body
+      (when body
+        (write body)
+        (write "\r\n"))
 
-    (.flush writer)
+      (.flush out)
 
-    (catch SocketException ex
-      (log/log :fine ex))))
+      (catch SocketException ex
+        (log/log :fine ex)))))
 
 (comment
-  (with-open [writer (java.io.StringWriter.)]
+  (with-open [writer (java.io.ByteArrayOutputStream.)]
     (write-response writer {})
     (.toString writer))
 
-  (with-open [writer (java.io.StringWriter.)]
+  (with-open [writer (java.io.ByteArrayOutputStream.)]
     (write-response writer {:status 200
                             :headers {"Content-Type" "text/html"}
                             :body "<p>Hello, world!</p>"})
     (.toString writer))
 
   (println
-    (with-open [writer (java.io.StringWriter.)]
+    (with-open [writer (java.io.ByteArrayOutputStream.)]
       (write-response writer {:status 200
                               :headers {"Content-Type" "text/event-source; charset=utf-8"
                                         "Cache-Control" "no-store"

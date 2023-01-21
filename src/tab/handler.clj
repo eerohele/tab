@@ -55,14 +55,14 @@
   {:status 200
    :headers {"Content-Type" "text/javascript; charset=utf-8"
              "Cache-Control" "private, max-age=31536000"}
-   :body (slurp (io/resource "tab.js"))})
+   :body (io/input-stream (io/resource "tab.js"))})
 
 (defn ^:private css-asset
   [_]
   {:status 200
    :headers {"Content-Type" "text/css; charset=utf-8"
              "Cache-Control" "private, max-age=31536000"}
-   :body (slurp (io/resource "tab.css"))})
+   :body (io/input-stream (io/resource "tab.css"))})
 
 (defn ^:private a-val
   [{:keys [db matches vals] :as request}]

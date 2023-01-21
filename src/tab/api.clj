@@ -10,7 +10,7 @@
             [tab.handler :as handler]
             [tab.html :refer [$] :as html]
             [tab.log :as log])
-  (:import (java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter)
+  (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)
            (java.time LocalDateTime)
@@ -148,11 +148,11 @@
 
                         request (ring/parse-request lines)
 
-                        writer (-> client .getOutputStream (OutputStreamWriter. StandardCharsets/UTF_8) BufferedWriter.)
+                        output-stream (-> client .getOutputStream BufferedOutputStream.)
 
                         finish (fn []
                                  (try
-                                   (.close writer)
+                                   (.close output-stream)
                                    (.close reader)
                                    (.close client)
                                    (catch SocketException _
@@ -173,7 +173,7 @@
                                      ($ :p "I messed up. Sorry. "
                                        ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?")))}))]
 
-                    (ring/write-response writer response)
+                    (ring/write-response output-stream response)
 
                     (if (= "text/event-stream" (get-in response [:headers "Content-Type"]))
                       (let [event-queue (ArrayBlockingQueue. 1024)]
@@ -185,8 +185,8 @@
                             (fn []
                               (try
                                 (log/log :fine {:event :send-heartbeat :remote-addr remote-addr})
-                                (.write writer ":\n\n")
-                                (.flush writer)
+                                (.write output-stream (.getBytes ":\n\n" StandardCharsets/UTF_8))
+                                (.flush output-stream)
                                 (catch SocketException _
                                   (log/log :fine {:event :heartbeat-failed :remote-addr remote-addr})
                                   (eject-queue!)
@@ -198,8 +198,8 @@
                               (loop []
                                 (let [^String item (.take ^BlockingQueue event-queue)]
                                   (when-not (identical? item ::quit)
-                                    (.write writer item)
-                                    (.flush writer)
+                                    (.write output-stream (.getBytes item StandardCharsets/UTF_8))
+                                    (.flush output-stream)
                                     (recur))))
                               (catch SocketException _
                                 (log/log :fine {:event :eject-queue :remote-addr remote-addr}))

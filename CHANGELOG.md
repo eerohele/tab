@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2023-01-21
+
+- Add support for [zooming in on values](https://github.com/eerohele/tab#user-manual)
+- Add support for [copying values to clipboard](https://github.com/eerohele/tab#user-manual)
+- Add support for [navigating to undatafied objects](https://github.com/eerohele/tab#user-manual)
+- UI improvements
+
 ## 2023-01-20
 
 - Don't datafy nested values

@@ -97,7 +97,7 @@ user=> (doc tab/halt)
 - Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
 
 > **Note**
-> UI is subject to change while Tab is in alpha.
+> UI controls are subject to change while Tab is in alpha.
 
 ## Examples
 

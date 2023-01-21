@@ -2,10 +2,8 @@
   "A very bad Ring implementation.
 
   See https://github.com/ring-clojure/ring for the original."
-  (:require [clojure.string :as string]
-            [tab.log :as log])
+  (:require [clojure.string :as string])
   (:import (java.io InputStream OutputStream)
-           (java.net SocketException)
            (java.nio.charset StandardCharsets)
            (java.time Instant ZoneId)
            (java.time.format DateTimeFormatter)
@@ -71,7 +69,10 @@
 
   InputStream
   (writes [this ^OutputStream stream]
-    (.transferTo this stream)))
+    (.transferTo this stream))
+
+  Object
+  (writes [_ _]))
 
 (defn write-response
   "Given a java.io.OutputStream and a HTTP response map (á là Ring), write the
@@ -80,38 +81,34 @@
    {:keys [status headers ^String body]
     :or {status 500 headers {}}}]
   (let [write (fn [x] (writes x out))]
-    (try
-      ;; Status line
-      (write "HTTP/1.1")
-      (write " ")
-      (write (str status))
-      (write " ")
-      (write ^String (status-text status ""))
-      (write "\r\n")
+    ;; Status line
+    (write "HTTP/1.1")
+    (write " ")
+    (write (str status))
+    (write " ")
+    (write ^String (status-text status ""))
+    (write "\r\n")
 
-      ;; Headers
-      (let [headers (cond-> (assoc headers "Date" (.format date-time-formatter (Instant/now)))
-                      (and (string? body) (seq body) (= 200 status))
-                      ;; Body length + \r\n
-                      (assoc "Content-Length" (content-length body)))]
-        (when (seq headers)
-          (doseq [[^String name ^String value] headers]
-            (write name)
-            (write ": ")
-            (write value)
-            (write "\r\n"))
+    ;; Headers
+    (let [headers (cond-> (assoc headers "Date" (.format date-time-formatter (Instant/now)))
+                    (and (string? body) (seq body) (= 200 status))
+                    ;; Body length + \r\n
+                    (assoc "Content-Length" (content-length body)))]
+      (when (seq headers)
+        (doseq [[^String name ^String value] headers]
+          (write name)
+          (write ": ")
+          (write value)
+          (write "\r\n"))
 
-          (write "\r\n")))
+        (write "\r\n")))
 
-      ;; Body
-      (when body
-        (write body)
-        (write "\r\n"))
+    ;; Body
+    (when body
+      (write body)
+      (write "\r\n"))
 
-      (.flush out)
-
-      (catch SocketException ex
-        (log/log :fine ex)))))
+    (.flush out)))
 
 (comment
   (with-open [writer (java.io.ByteArrayOutputStream.)]

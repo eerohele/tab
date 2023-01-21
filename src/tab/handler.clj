@@ -4,10 +4,11 @@
             [clojure.java.io :as io]
             [tab.clip :as clip]
             [tab.db :as db]
-            [tab.tabulator :as tabulator]
-            [tab.html :refer [$] :as html])
+            [tab.html :refer [$] :as html]
+            [tab.tabulator :as tabulator])
   (:import (java.time LocalDateTime)
-           (java.util UUID)))
+           (java.util UUID)
+           (java.util.concurrent ArrayBlockingQueue)))
 
 (set! *warn-on-reflection* true)
 
@@ -79,7 +80,8 @@
   {:status 200
    :headers {"Content-Type" "text/event-stream"
              "Cache-Control" "no-cache, must-revalidate, max-age=0"
-             "Connection" "keep-alive"}})
+             "Connection" "keep-alive"}
+   :body (ArrayBlockingQueue. 1024)})
 
 (defn ^:private a-namespace
   [{[ns-str] :matches db :db vals :vals :as request}]

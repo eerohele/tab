@@ -6,47 +6,17 @@
             [tab.base64 :as base64]
             [tab.db :as db]
             [tab.tabulator :as tabulator]
-            [tab.ring :as ring]
             [tab.handler :as handler]
-            [tab.html :refer [$] :as html]
-            [tab.log :as log])
-  (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
-           (java.net InetAddress ServerSocket SocketException)
-           (java.nio.charset StandardCharsets)
-           (java.time LocalDateTime)
-           (java.util.concurrent BlockingQueue Executors ArrayBlockingQueue ThreadFactory TimeUnit)
-           (java.util.concurrent.atomic AtomicInteger)
-           (java.util UUID)))
+            [tab.html :as html]
+            [tab.http :as http])
+  (:import (java.time LocalDateTime)))
 
 (set! *warn-on-reflection* true)
 
-(defn ^:private make-thread-factory
-  [& {:keys [name-suffix daemon?] :or {daemon? true}}]
-  (let [no (AtomicInteger. 0)]
-    (reify ThreadFactory
-      (newThread [_ runnable]
-        (doto (Thread. runnable (format "tab-pool-%s-%d" (name name-suffix) (.incrementAndGet no)))
-          (.setUncaughtExceptionHandler
-            (reify Thread$UncaughtExceptionHandler
-              (uncaughtException [_ thread ex]
-                (log/log :severe {:thread (.getName thread) :ex ex}))))
-          (.setDaemon daemon?))))))
-
-(def ^:private convey-bindings @#'clojure.core/binding-conveyor-fn)
-
-(defmacro ^:private exec
-  "Given a ExecutorService thread pool and a body of forms, .execute the body
-  (with binding conveyance) in the thread pool."
-  [thread-pool & body]
-  `(.execute ~thread-pool (convey-bindings (fn [] ~@body))))
-
-(defprotocol HttpServer
-  (tab> [this event] "Given a Tab and a value, send the value to the Tab.")
-  (address [this] "Given a Tab, return the address it listens on.")
-  (halt [this] "Halt a Tab."))
-
-(def ^:private heartbeat-initial-delay-secs 10)
-(def ^:private heartbeat-frequency-secs 10)
+(defprotocol Tab
+  (tab> [this event])
+  (address [this])
+  (halt [this]))
 
 (defn run
   "Run a Tab.
@@ -77,23 +47,28 @@
       value as collapsed.
 
       To expand a collapsed object, click on the plus sign."
-  [& {:keys [port init-val max-vals add-tap? browse? print-length print-level]
-      :or {port 0
-           init-val '(tap> :hello-world)
+  [& {:keys [init-val max-vals add-tap? browse? print-length print-level]
+      :as opts
+      :or {init-val '(tap> :hello-world)
            max-vals 16
            add-tap? true
            browse? true}}]
   (let [print-length (or print-length *print-length* 8)
         print-level (or print-level *print-level* 2)
-        server-id (UUID/randomUUID)
-        ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
-        request-thread-pool (Executors/newFixedThreadPool 4 (make-thread-factory :name-suffix :request))
-        queue-thread-pool (Executors/newCachedThreadPool (make-thread-factory :name-suffix :queue))
 
         db (db/pristine)
-        !queues (atom #{})
+
         !vals (atom [{:inst (LocalDateTime/now) :data (datafy/datafy init-val)}])
         !watches (atom [])
+
+        http-server
+        (http/serve
+          (fn [request]
+            (binding [*print-length* print-length
+                      *print-level* print-level
+                      tabulator/*ann* (memoize annotate/annotate)]
+              (handler/handle (assoc request :db db :vals @!vals))))
+          opts)
 
         push-val
         (fn [v]
@@ -108,127 +83,29 @@
         (fn send [x]
           (binding [*print-length* print-length
                     *print-level* print-level]
-            (run!
-              (fn [^BlockingQueue queue]
-                (let [val {:inst (LocalDateTime/now) :data (datafy/datafy x)}
-                      data (->
-                             val
-                             (assoc :db db :max-offset (count (push-val val)))
-                             tabulator/tabulate
-                             html/html
-                             base64/encode)]
-                  (.put queue (format "event: tab\ndata: %s\n\n" data))))
-              @!queues))
+            (let [val {:inst (LocalDateTime/now) :data (datafy/datafy x)}
+                  data (->
+                         val
+                         (assoc :db db :max-offset (count (push-val val)))
+                         tabulator/tabulate
+                         html/html
+                         base64/encode)]
+              (http/broadcast http-server (format "event: tab\ndata: %s\n\n" data))))
 
           (when (instance? clojure.lang.IRef x)
             (add-watch x :tab (fn [_ _ _ n] (send n)))
-            (swap! !watches conj x)))
+            (swap! !watches conj x)))]
 
-        _ (when add-tap? (doto send-event add-tap))
-
-        address
-        (let [^java.net.InetSocketAddress address (.getLocalSocketAddress socket)]
-          (format "http://%s:%s" (.getHostString address) (.getLocalPort socket)))
-
-        accept-loop
-        (future
-          (try
-            (loop []
-              (let [client (.accept socket)
-                    remote-addr (str (.getRemoteSocketAddress client))]
-                (log/log :fine {:event :accept-client :remote-addr remote-addr :no-event-queues (count @!queues)})
-
-                (exec request-thread-pool
-                  (let [reader (-> client .getInputStream (InputStreamReader. StandardCharsets/UTF_8) BufferedReader.)
-
-                        lines (not-empty
-                                (doall
-                                  (take-while (fn [^String line] (and line (not (.isBlank line))))
-                                    (repeatedly #(.readLine reader)))))
-
-                        request (ring/parse-request lines)
-
-                        output-stream (-> client .getOutputStream BufferedOutputStream.)
-
-                        finish (fn []
-                                 (try
-                                   (.close output-stream)
-                                   (.close reader)
-                                   (.close client)
-                                   (catch SocketException _
-                                     (log/log :fine {:event :socket-close-failed :remote-addr remote-addr}))))
-
-                        response
-                        (try
-                          (binding [*print-length* print-length
-                                    *print-level* print-level
-                                    tabulator/*ann* (memoize annotate/annotate)]
-                            (handler/handle
-                              (assoc request :db db :server-id server-id :vals @!vals)))
-                          (catch Throwable ex
-                            (log/log :severe {:event :write-response-failed :ex ex})
-                            {:status 500
-                             :headers {"Content-Type" "text/html"}
-                             :body (html/page
-                                     ($ :p "I messed up. Sorry. "
-                                       ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?")))}))]
-
-                    (ring/write-response output-stream response)
-
-                    (if (= "text/event-stream" (get-in response [:headers "Content-Type"]))
-                      (let [event-queue (ArrayBlockingQueue. 1024)]
-                        (swap! !queues conj event-queue)
-
-                        (let [eject-queue! (fn [] (swap! !queues disj event-queue))
-                              heartbeat (Executors/newScheduledThreadPool 1 (make-thread-factory :name-suffix :heartbeat))]
-                          (.scheduleAtFixedRate heartbeat
-                            (fn []
-                              (try
-                                (log/log :fine {:event :send-heartbeat :remote-addr remote-addr})
-                                (.write output-stream (.getBytes ":\n\n" StandardCharsets/UTF_8))
-                                (.flush output-stream)
-                                (catch SocketException _
-                                  (log/log :fine {:event :heartbeat-failed :remote-addr remote-addr})
-                                  (eject-queue!)
-                                  (.shutdown heartbeat))))
-                            heartbeat-initial-delay-secs heartbeat-frequency-secs TimeUnit/SECONDS)
-
-                          (exec queue-thread-pool
-                            (try
-                              (loop []
-                                (let [^String item (.take ^BlockingQueue event-queue)]
-                                  (when-not (identical? item ::quit)
-                                    (.write output-stream (.getBytes item StandardCharsets/UTF_8))
-                                    (.flush output-stream)
-                                    (recur))))
-                              (catch SocketException _
-                                (log/log :fine {:event :eject-queue :remote-addr remote-addr}))
-                              (finally
-                                (eject-queue!)
-                                (finish))))))
-                      (finish)))))
-              (recur))
-            (catch SocketException ex
-              (log/log :fine {:event :client-disappeared? :ex ex})
-              :halted)))]
-
+    (when add-tap? (doto send-event add-tap))
     (when browse? (browse/browse-url address))
 
-    (reify HttpServer
-      (tab> [_ event] (send-event event))
-      (address [_] address)
+    (reify Tab
+      (tab> [_ x] (send-event x))
+      (address [_] (http/address http-server))
       (halt [_]
         ;; Remove any assigned watches
         (run! (fn [x] (remove-watch x :tab)) @!watches)
-
-        ;; Put poison pill into event queue loop
-        (doseq [^BlockingQueue queue @!queues] (.put queue ::quit))
-
-        (.shutdown request-thread-pool)
-        (.shutdown queue-thread-pool)
-        (future-cancel accept-loop)
-        (remove-tap send-event)
-        (.close socket)))))
+        (http/halt http-server)))))
 
 (comment
   (def tab (run :port 8080))

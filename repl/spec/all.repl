@@ -578,19 +578,21 @@
               ":arglists"
               ":raw-forms"]))
 
-;; clipboard
+(comment
+  ;; clipboard
 
-(tap> {:a 1})
+  (tap> {:a 1})
 
-(wait-for-text ":a")
+  (wait-for-text ":a")
 
-(.waitForResponse page "**/clip/**" #(alt-click (type-header 0)))
+  (.waitForResponse page "**/clip/**" #(alt-click (type-header 0)))
 
-(import '(java.awt Toolkit))
-(import '(java.awt.datatransfer DataFlavor))
+  (import '(java.awt Toolkit))
+  (import '(java.awt.datatransfer DataFlavor))
 
-(.getData (-> (Toolkit/getDefaultToolkit) .getSystemClipboard) (DataFlavor/stringFlavor))
-(xr/check! (partial = "{:a 1}"))
+  (.getData (-> (Toolkit/getDefaultToolkit) .getSystemClipboard) (DataFlavor/stringFlavor))
+  (xr/check! (partial = "{:a 1}"))
+  ,,,)
 
 (comment
   (.close page)

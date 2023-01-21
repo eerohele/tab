@@ -8,20 +8,12 @@ const Base64 = {
   }
 };
 
-const setErrorDisplay = display => {
-  const el = document.querySelector(".event-source-error");
-
-  if (typeof el !== "undefined") {
-    el.style.display = display;
-  }
-}
-
 if (window.location.pathname === "/") {
   const eventSource = new EventSource("/event-source");
 
   eventSource.onopen = (event) => {
     console.debug(event);
-    setErrorDisplay("none");
+    document.querySelector(".event-source-error").classList.remove("show");
   };
 
   eventSource.addEventListener("tab", (event) => {
@@ -32,7 +24,7 @@ if (window.location.pathname === "/") {
 
   eventSource.onerror = (event) => {
     console.error(event);
-    window.setTimeout(() => setErrorDisplay("flex"), 3000);
+    window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
   }
 }
 
@@ -153,10 +145,10 @@ const initZoom = (root) => {
         fetch(`/clip/${table.id}`, {method: "post"}).then(response => {
           if (response.ok) {
             const ok = root.querySelector(".ok");
-            ok.classList.toggle("show");
+            ok.classList.add("show");
 
             window.setTimeout(() => {
-              ok.classList.toggle("show");
+              ok.classList.remove("show");
             }, 3000);
           }
         });

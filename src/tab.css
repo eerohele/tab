@@ -293,40 +293,6 @@ th[data-action] {
   border-bottom: none;
 }
 
-@keyframes appear {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-.event-source-error {
-  animation: 250ms appear;
-  align-items: center;
-  backdrop-filter: grayscale(0.5) blur(3px);
-  -webkit-backdrop-filter: grayscale(0.5) blur(3px);
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: none;
-  justify-content: center;
-  pointer-events: none;
-  height: 100vh;
-  width: 100vw;
-  z-index: 100;
-}
-
-.event-source-error a {
-  pointer-events: all;
-}
-
-.event-source-error a:hover {
-  text-decoration: underline;
-}
-
 /* <ANNOTATE> */
 
 /*
@@ -364,8 +330,8 @@ https://github.com/tonsky/sublime-scheme-alabaster
 
 /* <NOTIFICATIONS> */
 
-.ok.show {
-  opacity: 1;
+.show {
+  opacity: 1 !important;
 }
 
 .ok {
@@ -375,6 +341,31 @@ https://github.com/tonsky/sublime-scheme-alabaster
   opacity: 0;
   transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 10;
+}
+
+.event-source-error {
+  display: flex;
+  align-items: center;
+  backdrop-filter: grayscale(0.5) blur(3px);
+  -webkit-backdrop-filter: grayscale(0.5) blur(3px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  justify-content: center;
+  pointer-events: none;
+  height: 100vh;
+  width: 100vw;
+  transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 100;
+  opacity: 0;
+}
+
+.event-source-error a {
+  pointer-events: all;
+}
+
+.event-source-error a:hover {
+  text-decoration: underline;
 }
 
 /* </NOTIFICATIONS> */

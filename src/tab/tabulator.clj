@@ -52,7 +52,7 @@
     :collapsed
     :expanded))
 
-(defn ^:private toggle
+(defn ^:private toggle-icon
   [state]
   (case state :collapsed "＋" :expanded "－"))
 
@@ -113,7 +113,7 @@
         ($ :table {:id (str uuid) :data-state "expanded"}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"} (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:colspan "2" :class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (map-label this)))))
@@ -155,7 +155,7 @@
         ($ :table {:id (str uuid) :data-state "expanded"}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"} (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} num-items)
               ($ :th {:colspan (pr-str (count ks)) :class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (seq-label this))))
@@ -183,7 +183,7 @@
         ($ :table {:id (str uuid) :data-state (name state)}
           ($ :thead
             ($ :tr
-              ($ :th {:data-action "toggle-level"} (toggle state))
+              ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:class "value-type"}
                 ($ :a {:href (format "/id/%s" uuid)} (seq-label this)))))

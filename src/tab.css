@@ -89,6 +89,7 @@ code {
 nav {
   background-color: var(--table-header-background-color);
   backdrop-filter: grayscale(0.5) blur(3px);
+  -webkit-backdrop-filter: grayscale(0.5) blur(3px);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -206,6 +207,7 @@ table tbody tr:last-of-type .filler {
 
 .sticky th {
   backdrop-filter: grayscale(0.5) blur(3px);
+  -webkit-backdrop-filter: grayscale(0.5) blur(3px);
 }
 
 table thead th {
@@ -305,6 +307,7 @@ th[data-action] {
   animation: 250ms appear;
   align-items: center;
   backdrop-filter: grayscale(0.5) blur(3px);
+  -webkit-backdrop-filter: grayscale(0.5) blur(3px);
   position: absolute;
   top: 0;
   left: 0;

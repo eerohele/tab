@@ -584,9 +584,7 @@
 
 (wait-for-text ":a")
 
-(alt-click (type-header 0))
-
-(.waitForSelector page ".ok.show")
+(.waitForResponse page "**/clip/**" #(alt-click (type-header 0)))
 
 (import '(java.awt Toolkit))
 (import '(java.awt.datatransfer DataFlavor))

@@ -39,7 +39,7 @@
       ((requiring-resolve 'clojure.string/replace)
        (slurp "README.md") re (str \" commit-hash \")))
 
-    ((requiring-resolve 'clojure.java.shell/sh) "git" "commit" "README.md" "-m" "Update README")))
+    ((requiring-resolve 'clojure.java.shell/sh) "git" "commit" "README.md" "-m" "Update README\n\n[skip ci]")))
 
 (comment
   (bump-sha)

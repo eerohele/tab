@@ -5,6 +5,7 @@
            (java.awt.datatransfer StringSelection)))
 
 (defn copy
+  "Given a Clojure form, copy it into the system clipboard."
   [form]
   (try
     (let [toolkit (Toolkit/getDefaultToolkit)

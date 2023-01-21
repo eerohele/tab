@@ -48,15 +48,20 @@
    500 "Internal Server Error"})
 
 (def ^:private ^DateTimeFormatter date-time-formatter
+  "A date-time formatter that yields date-times for the Date HTTP header."
   (.withZone
     (DateTimeFormatter/ofPattern "EEE, dd MMM yyyy HH:mm:ss z" Locale/ENGLISH)
     (ZoneId/of "GMT")))
 
 (defn ^:private content-length
-  [^String body]
-  (pr-str (+ (alength (.getBytes body StandardCharsets/UTF_8)) 2)))
+  "Given a string, return the length of the string as a string, for the Content-
+  Type HTTP header."
+  [^String s]
+  (pr-str (+ (alength (.getBytes s StandardCharsets/UTF_8)) 2)))
 
 (defn write-response
+  "Given a java.io.Writer and a HTTP response map (á là Ring), write the
+  response map into the writer and flush the writer."
   [^Writer writer {:keys [status headers ^String body]
                    :or {status 500 headers {} body ""}}]
   (try

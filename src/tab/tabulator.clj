@@ -15,6 +15,7 @@
 (def ^:dynamic *ann* annotate/annotate)
 
 (defn ^:private encode-uri
+  "Given a value, return the value as a URI-encoded string."
   [v]
   (-> v pr-str URLEncoder/encode))
 

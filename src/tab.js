@@ -141,12 +141,8 @@ const initToggleLength = (root) => {
   })
 }
 
-const init = (el) => {
-  initToggleLength(el);
-
-  initToggleLevel(el);
-
-  document.querySelectorAll(".value-type").forEach(el => {
+const initZoom = (root) => {
+  root.querySelectorAll(".value-type").forEach(el => {
     el.addEventListener("click", (event) => {
       const el = event.currentTarget;
       const table = el.closest("table");
@@ -156,7 +152,7 @@ const init = (el) => {
 
         fetch(`/clip/${table.id}`, {method: "post"}).then(response => {
           if (response.ok) {
-            const ok = document.querySelector(".ok");
+            const ok = root.querySelector(".ok");
             ok.classList.toggle("show");
 
             window.setTimeout(() => {
@@ -167,6 +163,12 @@ const init = (el) => {
       }
     });
   });
+}
+
+const init = (el) => {
+  initToggleLength(el);
+  initToggleLevel(el);
+  initZoom(el);
 }
 
 document.addEventListener("DOMContentLoaded", (_) => {

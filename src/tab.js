@@ -32,7 +32,7 @@ if (window.location.pathname === "/") {
 
   eventSource.onerror = (event) => {
     console.error(event);
-    window.setTimeout(() => setErrorDisplay("flex"), 1000);
+    window.setTimeout(() => setErrorDisplay("flex"), 3000);
   }
 }
 

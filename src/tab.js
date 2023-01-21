@@ -57,8 +57,7 @@ const toggleLength = (el, newState) => {
   el.setAttribute("data-value", Base64.encode(html));
 
   initToggleLevel(target);
-
-  target.querySelectorAll("[data-action = toggle-length]").forEach(initToggleLength);
+  initToggleLength(target);
 }
 
 const flipState = state => {
@@ -127,20 +126,24 @@ const toggleHandler = (event) => {
   }
 }
 
-const initToggleLevel = (el) => {
-  el.querySelectorAll("[data-action = toggle-level]").forEach((toggle) => {
+const initToggleLevel = (root) => {
+  root.querySelectorAll("[data-action = toggle-level]").forEach((toggle) => {
     toggle.addEventListener("click", toggleHandler);
   });
 }
 
-const initToggleLength = (el) => {
-  el.addEventListener("click", (event) => {
-    toggleLength(event.currentTarget, flipState(el.dataset.state));
-  });
+const initToggleLength = (root) => {
+  root.querySelectorAll("[data-action = toggle-length]").forEach((toggle) => {
+    toggle.addEventListener("click", (event) => {
+      const el = event.currentTarget;
+      toggleLength(el, flipState(el.dataset.state));
+    });
+  })
 }
 
 const init = (el) => {
-  el.querySelectorAll("[data-action = toggle-length]").forEach(initToggleLength);
+  initToggleLength(el);
+
   initToggleLevel(el);
 
   document.querySelectorAll(".value-type").forEach(el => {

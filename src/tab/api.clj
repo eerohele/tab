@@ -45,8 +45,8 @@
   (address [this] "Given a Tab, return the address it listens on.")
   (halt [this] "Halt a Tab."))
 
-(def ^:private heartbeat-initial-delay 10)
-(def ^:private heartbeat-frequency 10)
+(def ^:private heartbeat-initial-delay-secs 10)
+(def ^:private heartbeat-frequency-secs 10)
 
 (defn run
   "Run a Tab.
@@ -191,7 +191,7 @@
                                   (log/log :fine {:event :heartbeat-failed :remote-addr remote-addr})
                                   (eject-queue!)
                                   (.shutdown heartbeat))))
-                            heartbeat-initial-delay heartbeat-frequency TimeUnit/SECONDS)
+                            heartbeat-initial-delay-secs heartbeat-frequency-secs TimeUnit/SECONDS)
 
                           (exec queue-thread-pool
                             (try

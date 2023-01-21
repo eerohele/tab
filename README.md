@@ -94,6 +94,7 @@ user=> (doc tab/halt)
 - Press <kbd>Alt</kbd> and click `-` or `+` to expand or collapse all nodes underneath a node.
 - Click a table header (e.g. `ARRAY MAP`) to zoom in on that table.
 - Press <kbd>Alt</kbd> and click a table header (e.g. `ARRAY MAP`) to copy the value backing that table to your clipboard.
+- Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
 
 ## Examples
 

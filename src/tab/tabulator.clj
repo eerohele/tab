@@ -214,6 +214,9 @@
 (def ^:private ^DateTimeFormatter date-time-formatter
   (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss"))
 
+(def ^:private left-icon "❮")
+(def ^:private right-icon "❯")
+
 (defn tabulate
   [{:keys [db data offset max-offset inst] :or {offset 0 max-offset 0}}]
   ($ :main
@@ -221,15 +224,15 @@
     ($ :nav
       ($ :div {:class "left"}
         (if (< offset (dec max-offset))
-          (link (format "/val/-%d" (inc offset)) "❮" :access-key "h")
-          ($ :span "❮"))
+          (link (format "/val/-%d" (inc offset)) left-icon :access-key "h")
+          ($ :span left-icon))
         (cond
           (= 1 offset)
-          (link "/" "❯" :access-key "l")
+          (link "/" right-icon :access-key "l")
           (pos? offset)
-          (link (format "/val/-%d" (dec offset)) "❯" :access-key "l")
+          (link (format "/val/-%d" (dec offset)) right-icon :access-key "l")
           :else
-          ($ :span "❯")))
+          ($ :span right-icon)))
       ($ :div {:class "right"}
         (when inst
           ($ :time {:datetime (str inst) :title (str inst)}

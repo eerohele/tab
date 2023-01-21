@@ -96,6 +96,9 @@ user=> (doc tab/halt)
 - Press <kbd>Alt</kbd> and click a table header (e.g. `ARRAY MAP`) to copy the value backing that table to your clipboard.
 - Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
 
+> **Note**
+> UI is subject to change while Tab is in alpha.
+
 ## Examples
 
 For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl).

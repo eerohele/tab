@@ -1,12 +1,17 @@
-;; Tab is a zero-dependency Clojure data visualizer.
+;; Tab is little program that turns Clojure data structures into tables.
 ;;
-;; For instructions on how to run this demo, see the README of this repo.
+;; It focuses on two types of data structures: maps and seqs of maps.
 
-(require '[tab.api :refer [run halt]])
+(require '[tab.api :as tab])
 
 ;; Run a Tab.
 (def tab
-  (run :print-length 8 :print-level 2))
+  (tab/run
+    ;; Tell Tab to initially show only the first two levels of a nested map.
+    :print-level 2
+    ;; Tell Tab to initially show only the first eight items of a sequence of
+    ;; scalar values.
+    :print-length 8))
 
 ;; To send a thing to Tab, tap it.
 ;;
@@ -14,15 +19,15 @@
 (tap> :hello-tab)
 
 ;; Same with seqs of scalars.
-;;
-;; I don't think there's a more compact or useful way to visualize a seq of
-;; scalars than to just show it as EDN.
 (tap> [1 2 3])
 
-;; If the seq has many values, Tab only shows the first :print-length
-;; (or *print-length* if set) values.
+;; If the seq has many values, Tab only shows the first :print-length (or
+;; *print-length* if set) values.
 ;;
-;; You can click on the value to show the entire seq.
+;; You can click the value to show the entire seq.
+;;
+;; You can click the value again to again show the first :print-length (here 8)
+;; values.
 (tap> {:range (range 32)})
 
 ;; Pretty much everything else Tab tries to print as a table.
@@ -31,13 +36,12 @@
 (tap> {:a 1 :b 2 :c 3})
 
 ;; Seq of maps become tables with headers at the top.
-(tap> [{:a 1 :b 2 :c 3}
-       {:a 4 :b 5 :c 6}])
+(tap> [{:a 1 :b 2 :c 3} {:a 4 :b 5 :c 6}])
 
 ;; If the maps in the seq share no keys, Tab fills in the blanks.
 (tap> [{:a 1} {:b 2}])
 
-;; Tab can also tabulate seqs of seqs.
+;; Tab can also tabulate seqs of seqs of maps.
 (tap> [[{:a 1 :b 2}] [{:a 3 :b 4}]])
 
 ;; Tab datafies (via clojure.datafy/datafy) the things it receives.
@@ -51,21 +55,21 @@
 ;;
 ;; To collapse or expand every node under a given node, hold down the Alt key
 ;; while clicking on the － and ＋ icon.
+;;
+;; To zoom in on a nested table, click the table label typeset in small caps
+;; (e.g. ARRAY MAP).
+;;
+;; To copy the value a table is generated from to your clipboard, hold Alt and
+;; click the table label.
 
-;; You can (extend-protocol clojure.core.protocols/Datafiable to teach Clojure
+;; You can (extend-protocol clojure.core.protocols/Datafiable) to teach Clojure
 ;; how to datafy other things.
 ;;
-;; There's a library called jedi-time that teaches Clojure to datafy java.time
-;; objects. Let's pull it in an try it out.
-(require '[clojure.tools.deps.alpha.repl :refer [add-libs]])
-(add-libs '{jedi-time/jedi-time {:mvn/version "0.2.1"}})
-(require 'jedi-time.core)
-(tap> (java.time.ZonedDateTime/now))
-
-;; Clojure also knows how to datafy namespaces.
+;; For example, Clojure already knows how to datafy namespaces.
 (tap> (find-ns 'clojure.set))
 
-;; Weirdly, Clojure doesn't know how to datafy vars. Let's teach it how to do that.
+;; Weirdly, though, Clojure *doesn't* know how to datafy vars. Let's teach it
+;; how to do that.
 (do
   (require '[clojure.core.protocols :refer [Datafiable]])
 
@@ -74,11 +78,11 @@
     (datafy [this]
       (assoc (meta this) :var this))))
 
-;; Now, we can visualize vars, too.
+;; Now, we can tabulate vars, too.
 (tap> #'clojure.core/mapcat)
 
 ;; Tab has experimental support for navigating to namespaces, vars, and
-;; classes. Try tapping the bad boy below. Then, try clicking on cells that
+;; classes. Try tapping the form below. Then, try clicking on cells that
 ;; contain namespaces (clojure.lang.Namespace objects), vars (cells whose
 ;; contents begin with #'), or Java class names (e.g. java.io.File).
 (tap>
@@ -89,11 +93,13 @@
     (sort-by :added compare)
     (reverse)))
 
+;; Now that you've navigated away from Tab's main page, you have to navigate
+;; back to it to see new tapped values.
+
 ;; Tabular data is obviously what Tab excels at.
 (tap> (sort-by :name (:members ((requiring-resolve 'clojure.reflect/reflect) BigInteger))))
 
 ;; Tab can handle deeply nested maps pretty well, too. tools.analyzer.jvm can make us one.
-(add-libs '{org.clojure/tools.analyzer.jvm {:mvn/version "1.2.3"}})
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
 (tap>
@@ -103,33 +109,23 @@
 ;; Tab keeps a history of (by default) the last 16 things you've given
 ;; it. You can travel back and forth in time.
 
-;; Also try rubbing Tab on:
-;;
-;; - Ring request maps
-;; - Whatever your database query returns
-;; - Whatever big map/seq of date hidden in the depths of your function.
-
 ;; If you give Tab an atom, Tab starts watching it for changes.
 
-;; Hukari is a personal REPL utility lib.
-(add-libs '{me.flowthing/hukari {:git/url "https://github.com/eerohele/hukari.git"
-                                 :git/sha "9e4103ac6013ab01b3667754441b7185f4e4f49b"}})
-
-;; It has a function that datafies (via clojure.datafy/datafy) a bunch of
-;; MXBeans that expose information about the JVM and the runtime.
-(require '[hukari.repl :refer [runtime-stats]])
-(tap> (runtime-stats))
-
-(def a (atom (runtime-stats)))
+(def a (atom [1]))
 
 ;; If you tap an atom, Tab updates every time you update the atom.
 ;;
-;; The first tap of an atom looks a bit weird, since an atom datafies as
-;; [(deref a)] (Clojure puts the value of the atom into a vector).
-;;
-;; Subsequent taps look better.
+;; The first tap of an atom looks a bit weird, since an atom datafies as a
+;; vector of one item that contains the dereferenced value of the atom.
 (tap> a)
 
+;; Once you change the state of the atom, Tab sends the new state of the atom
+;; to the browser.
+(swap! a conj 2)
+(swap! a conj 3)
+(swap! a conj 4)
+
+;; Let's make helper function that, given a function, calls it every second.
 (defn every-second
   "Given a no-arg fn, call the fn every second.
 
@@ -140,10 +136,13 @@
     (fn [] (.shutdown executor-service))))
 
 ;; Start a timer that taps the runtime stats every second.
-(def timer (every-second #(tap> (runtime-stats))))
+;;
+;; Since we set :print-length to 8, Tab will show no more than the first 8
+;; values of the vector in the atom.
+(def timer (every-second #(swap-vals! a (fn [xs] (conj xs (inc (peek xs)))))))
 
 ;; Halt the timer.
 (timer)
 
-;; Bye now!
-(halt tab)
+;; That's it for this intro. Bye now!
+(tab/halt tab)

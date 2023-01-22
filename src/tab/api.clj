@@ -97,7 +97,7 @@
             (swap! !watches conj x)))]
 
     (when add-tap? (doto send-event add-tap))
-    (when browse? (browse/browse-url address))
+    (when browse? (browse/browse-url (http/address http-server)))
 
     (reify Tab
       (tab> [_ x] (send-event x))

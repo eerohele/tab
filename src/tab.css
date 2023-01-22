@@ -73,9 +73,21 @@ body {
   font-size: 18px;
 }
 
+h1 {
+  font-weight: 300;
+}
+
 a:any-link {
   color: inherit;
   text-decoration: none;
+}
+
+.error-page a:any-link {
+  color: var(--color-red);
+}
+
+.error-page a:hover {
+  text-decoration: underline;
 }
 
 code {

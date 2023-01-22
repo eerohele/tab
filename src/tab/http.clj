@@ -2,6 +2,7 @@
   (:require [tab.ring :as ring]
             [tab.html :refer [$] :as html]
             [tab.log :as log]
+            [tab.template :as template]
             [tab.thread :as thread])
   (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
@@ -83,8 +84,11 @@
                             {:status 500
                              :headers {"Content-Type" "text/html"}
                              :body (html/page
-                                     ($ :p "I messed up. Sorry. "
-                                       ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?")))}))]
+                                     (template/page request
+                                       ($ :div {:class "error-page"}
+                                         ($ :h1 "I messed up.")
+                                         ($ :p "Sorry. "
+                                           ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?")))))}))]
 
                     (try
                       (ring/write-response output-stream response)

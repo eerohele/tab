@@ -104,7 +104,8 @@
          :body (html/page
                  (template/error-page request
                    ($ :h1 "This value is no longer available.")
-                   ($ :p "Resend the value to Tab to inspect it again.")))}))
+                   ($ :p "Resend the value to Tab to inspect it again.")
+                   ($ :p ($ :a {:href "/"} "Go back to the start."))))}))
     (catch IllegalArgumentException ex
       {:status 400
        :headers {"Content-Type" "text/html; charset=utf-8"}

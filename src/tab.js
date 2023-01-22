@@ -87,11 +87,14 @@ const toggle = (el, newState) => {
     const method = el.getAttribute('bx-request');
     const uri = el.getAttribute('bx-uri');
 
-    fetch(uri, {method: method, headers: {'bx-request': 'true'}}).then((response) => response.text()).then((html) => {
-      const parent = target.closest('td');
-      target.outerHTML = html;
-
-      init(parent);
+    fetch(uri, {method: method, headers: {'bx-request': 'true'}}).then((response) => {
+      if (response.ok) {
+        response.text().then(html => {
+          const parent = target.closest('td');
+          target.outerHTML = html;
+          init(parent);
+        });
+      }
     });
   } else {
     flipIcon(el, newState);

@@ -38,6 +38,8 @@
     :browse? (default: true)
       Whether to automatically open your default browser to show Tab.
 
+      Reportedly does not work on Windows Subsystem for Linux.
+
     :print-length (default: *print-length* or 8)
       Maximum number of items of a seq to show. To show all items, click on the
       ellipsis in the UI.

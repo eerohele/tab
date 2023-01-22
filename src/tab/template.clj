@@ -23,3 +23,8 @@
 (comment
   (html/html (page {:server-id "foo"} "hello"))
   ,,,)
+
+(defn error-page
+  [request & content]
+  (page request
+    ($ :div {:class "error-page"} content)))

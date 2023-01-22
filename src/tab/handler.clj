@@ -102,18 +102,16 @@
         {:status 410
          :headers {"Content-Type" "text/html; charset=utf-8"}
          :body (html/page
-                 (template/page request
-                   ($ :div {:class "error-page"}
-                     ($ :h1 "This value is no longer available.")
-                     ($ :p "Resend the value to Tab to inspect it again."))))}))
-    (catch IllegalArgumentException _
+                 (template/error-page request
+                   ($ :h1 "This value is no longer available.")
+                   ($ :p "Resend the value to Tab to inspect it again.")))}))
+    (catch IllegalArgumentException ex
       {:status 400
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body (html/page
-               (template/page request
-                 ($ :div {:class "error-page"}
-                   ($ :h1 "You messed up.")
-                   ($ :p "That doesn't look like a UUID to me."))))})))
+               (template/error-page request
+                 ($ :h1 "You messed up.")
+                 ($ :p "That doesn't look like a UUID to me.")))})))
 
 (defn ^:private db
   [{db :db}]

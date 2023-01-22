@@ -84,11 +84,10 @@
                             {:status 500
                              :headers {"Content-Type" "text/html"}
                              :body (html/page
-                                     (template/page request
-                                       ($ :div {:class "error-page"}
-                                         ($ :h1 "I messed up.")
-                                         ($ :p "Sorry. "
-                                           ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?")))))}))]
+                                     (template/error-page request
+                                       ($ :h1 "I messed up.")
+                                       ($ :p "Sorry. "
+                                         ($ :a {:href "https://github.com/eerohele/tab/issues"} "File an issue?"))))}))]
 
                     (try
                       (ring/write-response output-stream response)

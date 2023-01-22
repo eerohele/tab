@@ -27,7 +27,7 @@ Tab aims to be that something else.
 Given that you have the [Clojure CLI](https://clojure.org/guides/install_clojure) installed, on the command line, run:
 
 ```bash
-clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "https://github.com/eerohele/tab.git" :git/sha "154225040af35d8aa29c2e2f0fd915b64040d478"}}}'
+clj -Sdeps '{:deps {io.github.eerohele/tab {:git/url "https://github.com/eerohele/tab.git" :git/sha "aee0fbcf3969a8ecf492254eb971b2a54481dd03"}}}'
 ```
 
 Then, in the REPL:
@@ -102,9 +102,6 @@ user=> (doc tab/halt)
 ## Examples
 
 For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://github.com/eerohele/tab/blob/main/repl/demo/intro.repl).
-
-> **Note**
-> To run through all the examples, you must use the [`add-lib3` branch of tools.deps](https://github.com/clojure/tools.deps/tree/add-lib3).
 
 ## Features
 

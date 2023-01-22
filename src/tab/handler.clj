@@ -87,24 +87,33 @@
 
 (defn ^:private item
   [{db :db [uuid] :matches headers :headers :as request}]
-  (let [uuid (UUID/fromString uuid)
-        data (db/pull db uuid)]
-    (if data
-      {:status 200
-       :headers {"Content-Type" "text/html; charset=utf-8"
-                 "Cache-Control" "no-cache"
-                 "Expires" "0"}
-       :body (let [main (tabulator/-tabulate data db 0)]
-               (if (contains? headers "bx-request")
-                 (html/html main)
-                 (html/page (template/page request main))))}
-      {:status 410
+  (try
+    (let [uuid (UUID/fromString uuid)
+          data (db/pull db uuid)]
+      (if data
+        {:status 200
+         :headers {"Content-Type" "text/html; charset=utf-8"
+                   "Cache-Control" "no-cache"
+                   "Expires" "0"}
+         :body (let [main (tabulator/-tabulate data db 0)]
+                 (if (contains? headers "bx-request")
+                   (html/html main)
+                   (html/page (template/page request main))))}
+        {:status 410
+         :headers {"Content-Type" "text/html; charset=utf-8"}
+         :body (html/page
+                 (template/page request
+                   ($ :div {:class "error-page"}
+                     ($ :h1 "This value is no longer available.")
+                     ($ :p "Resend the value to Tab to inspect it again."))))}))
+    (catch IllegalArgumentException _
+      {:status 400
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body (html/page
                (template/page request
                  ($ :div {:class "error-page"}
-                   ($ :h1 "This value is no longer available.")
-                   ($ :p "Resend the value to Tab to inspect it again."))))})))
+                   ($ :h1 "You messed up.")
+                   ($ :p "That doesn't look like a UUID to me."))))})))
 
 (defn ^:private db
   [{db :db}]

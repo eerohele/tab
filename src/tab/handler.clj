@@ -68,30 +68,6 @@
              "Connection" "keep-alive"}
    :body (ArrayBlockingQueue. 1024)})
 
-(defn ^:private a-namespace
-  [{[ns-str] :matches db :db vals :vals :as request}]
-  (html-response request
-    (tabulator/tabulate {:db db
-                         :max-offset (count vals)
-                         :inst (LocalDateTime/now)
-                         :data (-> ns-str read-string find-ns datafy/datafy)})))
-
-(defn ^:private a-var
-  [{[ns-str var-str]:matches db :db vals :vals :as request}]
-  (html-response request
-    (tabulator/tabulate {:db db
-                         :max-offset (count vals)
-                         :inst (LocalDateTime/now)
-                         :data (datafy/datafy (ns-resolve (read-string ns-str) (read-string var-str)))})))
-
-(defn ^:private a-class
-  [{[class-str]:matches db :db vals :vals :as request}]
-  (html-response request
-    (tabulator/tabulate {:db db
-                         :max-offset (count vals)
-                         :inst (LocalDateTime/now)
-                         :data (-> class-str read-string resolve datafy/datafy)})))
-
 (defn ^:private item
   [{db :db [uuid] :matches headers :headers :as request}]
   (try
@@ -155,9 +131,6 @@
       [:get #"^/assets/js/(.+)$"] :>> js-asset
       [:get #"^/event-source$"] :>> event-source
       [:get #"^/val/-(\d+)$"] :>> a-val
-      [:get #"^/ns/(.+)$"] :>> a-namespace
-      [:get #"^/var/(.+?)/(.+)$"] :>> a-var
-      [:get #"^/class/(.+?)$"] :>> a-class
       [:post #"^/clip/(.+?)$"] :>> clip
       [:get #"^/db$"] :>> db
       [:get #".*"] :>> not-found

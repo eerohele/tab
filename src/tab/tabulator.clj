@@ -6,23 +6,12 @@
             [tab.base64 :as base64]
             [tab.db :as db]
             [tab.html :refer [$] :as html])
-  (:import (clojure.lang IPersistentMap Namespace Seqable Var)
-           (java.net URLEncoder)
+  (:import (clojure.lang IPersistentMap Seqable)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
 
 (def ^:dynamic *ann* annotate/annotate)
-
-(defn ^:private encode-uri
-  "Given a value, return the value as a URI-encoded string."
-  [v]
-  (-> v pr-str URLEncoder/encode))
-
-(defn ^:private link
-  [href text & {:keys [access-key]}]
-  ($ :a (cond-> {:href href} access-key (assoc :accesskey access-key))
-    text))
 
 (defn ^:private seq-label
   [this]
@@ -69,21 +58,9 @@
     (let [uuid (db/put! db (datafy/datafy this))]
       ($ :a {:href (format "/id/%s" uuid)} (*ann* (pr-str this)))))
 
-  Class
-  (-tabulate [this _ _]
-    (link (str "/class/" (.getName this)) (*ann* (pr-str this))))
-
   String
   (-tabulate [this _ _]
     ($ :pre (*ann* (pr-str this))))
-
-  Namespace
-  (-tabulate [this _ _]
-    (link (str "/ns/" (encode-uri (ns-name this))) (*ann* (pr-str this))))
-
-  Var
-  (-tabulate [this _ _]
-    (link (str "/var/" (encode-uri (ns-name (.ns this))) "/" (encode-uri (.sym this))) (*ann* (pr-str this))))
 
   IPersistentMap
   (-tabulate [this db level]

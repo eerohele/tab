@@ -79,22 +79,40 @@ const flipIcon = (el, newState) => {
   }
 }
 
+const bxDispatch = (el) => {
+  const bxTarget = el.getAttribute('bx-target');
+  const target = el.closest(el.getAttribute('bx-target'));
+  const href = el.getAttribute('href');
+  const method = el.getAttribute('bx-request');
+  const uri = el.getAttribute('bx-uri');
+  const swap = el.getAttribute('bx-swap') || "innerHTML";
+
+  fetch(uri, {method: method, headers: {'bx-request': 'true'}}).then((response) => {
+    if (response.ok) {
+      response.text().then(html => {
+        const parent = target.parentNode;
+
+        if (swap == "innerHTML") {
+          target.innerHTML = html
+        } else if (swap == "outerHTML") {
+          target.outerHTML = html;
+        }
+
+        init(parent);
+
+        const pushUrl = el.getAttribute('bx-push-url');
+
+        if (pushUrl && pushUrl.length > 0) {
+          history.pushState({}, "", pushUrl);
+        }
+      });
+    }
+  });
+}
+
 const toggle = (el, newState) => {
   if (el.getAttribute("bx-dispatch")) {
-    const target = el.closest(el.getAttribute('bx-target'));
-    const href = el.getAttribute('href');
-    const method = el.getAttribute('bx-request');
-    const uri = el.getAttribute('bx-uri');
-
-    fetch(uri, {method: method, headers: {'bx-request': 'true'}}).then((response) => {
-      if (response.ok) {
-        response.text().then(html => {
-          const parent = target.closest('td');
-          target.outerHTML = html;
-          init(parent);
-        });
-      }
-    });
+    bxDispatch(el);
   } else {
     flipIcon(el, newState);
     el.closest("table").dataset.state = newState;
@@ -136,7 +154,7 @@ const initToggleLength = (root) => {
 }
 
 const initZoom = (root) => {
-  root.querySelectorAll(".value-type").forEach(el => {
+  root.querySelectorAll(".value-type a").forEach(el => {
     el.addEventListener("click", (event) => {
       const el = event.currentTarget;
       const table = el.closest("table");
@@ -154,6 +172,9 @@ const initZoom = (root) => {
             }, 3000);
           }
         });
+      } else if (el.getAttribute("bx-dispatch")) {
+        event.preventDefault();
+        bxDispatch(el);
       }
     });
   });

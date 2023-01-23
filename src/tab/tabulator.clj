@@ -80,6 +80,7 @@
                    :bx-request "get"
                    :bx-uri href
                    :bx-target "table"
+                   :bx-swap "outerHTML"
                    :href href})
                 "＋")
               ($ :th {:class "count"} (count this))))))
@@ -93,7 +94,15 @@
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:colspan "2" :class "value-type"}
-                ($ :a {:href (format "/id/%s" uuid)} (map-label this)))))
+                (let [href (format "/id/%s" uuid)]
+                  ($ :a {:href href
+                         :bx-dispatch "click"
+                         :bx-request "get"
+                         :bx-uri href
+                         :bx-target "main"
+                         :bx-swap "innerHTML"
+                         :bx-push-url href}
+                    (map-label this))))))
           ($ :tbody
             (map
               (fn [[k v]]
@@ -121,6 +130,7 @@
                    :bx-request "get"
                    :bx-uri href
                    :bx-target "table"
+                   :bx-swap "outerHTML"
                    :href href}) "＋")
               ($ :th {:class "count"} (count this))))))
 
@@ -135,7 +145,15 @@
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} num-items)
               ($ :th {:colspan (pr-str (count ks)) :class "value-type"}
-                ($ :a {:href (format "/id/%s" uuid)} (seq-label this))))
+                (let [href (format "/id/%s" uuid)]
+                  ($ :a {:href href
+                         :bx-dispatch "click"
+                         :bx-request "get"
+                         :bx-uri href
+                         :bx-target "main"
+                         :bx-swap "innerHTML"
+                         :bx-push-url href}
+                    (seq-label this)))))
             ($ :tr {:class "sticky"}
               ($ :th {:title "Total number of items in this collection."
                       :class "count"} num-items)
@@ -163,7 +181,14 @@
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:class "value-type"}
-                ($ :a {:href (format "/id/%s" uuid)} (seq-label this)))))
+                (let [href (format "/id/%s" uuid)]
+                  ($ :a {:href href
+                         :bx-dispatch "click"
+                         :bx-request "get"
+                         :bx-uri href
+                         :bx-target "main"
+                         :bx-swap "innerHTML"
+                         :bx-push-url href} (seq-label this))))))
           ($ :tbody
             (map-indexed
               (fn [i seq]

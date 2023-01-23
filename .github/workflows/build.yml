@@ -17,6 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Just
+        run: |
+          curl -O --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/casey/just/v0.8.1/docs/install.sh
+          echo '6c66f68c33c6189216ef2fce7f3aaf9c04a9b3c51f850d3a50cdda979e109fce' install.sh | sha256sum -c
+          bash install.sh --tag v0.8.1 --to $GITHUB_WORKSPACE/bin
+          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+          echo '6415ecd7c53aea5553aee243aa130f363ccd53b42659104314b67e896a055ade' $GITHUB_WORKSPACE/bin/just | sha256sum -c
+
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -35,12 +43,10 @@ jobs:
           key: deps-${{ hashFiles('deps.edn') }}
           restore-keys: deps-
 
-      - run: clojure -X:dev user/check! '{:path "test"}'
+      - run: just test
         id: test
 
-      - run: clojure -X:dev user/check! '{:path "spec"}'
-
-      - run: clojure -A:dev -X cognitect.test-runner.api/test
+      - run: just spec
 
       - uses: actions/upload-artifact@v3
         if: failure() && steps.test.outcome == 'failure'

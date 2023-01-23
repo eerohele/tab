@@ -11,7 +11,11 @@
 (def playwright (Playwright/create))
 (xr/on-exit #(.close playwright))
 
-(def browser (.webkit playwright))
+(def browser
+  (case (System/getProperty "tab.e2e.browser" "webkit")
+    "firefox" (.firefox playwright)
+    "chromium" (.chromium playwright)
+    (.webkit playwright)))
 
 (defonce headless? true)
 

@@ -6,7 +6,7 @@
             [tab.base64 :as base64]
             [tab.db :as db]
             [tab.html :refer [$] :as html])
-  (:import (clojure.lang IPersistentMap Seqable)
+  (:import (clojure.lang Named IPersistentMap Seqable)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
@@ -57,6 +57,14 @@
   (-tabulate [this db _]
     (let [[uuid _] (db/put! db (datafy/datafy this))]
       ($ :a {:href (format "/id/%s" uuid)} (*ann* (pr-str this)))))
+
+  Named
+  (-tabulate [this _ _]
+    ($ :pre (*ann* (pr-str this))))
+
+  Number
+  (-tabulate [this _ _]
+    ($ :pre (*ann* (pr-str this))))
 
   String
   (-tabulate [this _ _]

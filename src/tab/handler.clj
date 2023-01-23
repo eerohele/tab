@@ -53,6 +53,13 @@
             main (tabulator/tabulate (assoc item :db (db/evacuate! db) :offset offset :max-offset (count vals)))]
         (html-response request main)))))
 
+(defn ^:private image-asset
+  [_]
+  {:status 200
+   :headers {"Content-Type" "text/css; charset=utf-8"
+             "Cache-Control" "private, max-age=31536000"}
+   :body (io/input-stream (io/resource "favicon.png"))})
+
 (defn ^:private event-source
   [_]
   {:status 200
@@ -143,6 +150,7 @@
 
       [:get #"^/$"] :>> index
       [:get #"^/id/(.+)$"] :>> item
+      [:get #"^/assets/images/(.+)$"] :>> image-asset
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset
       [:get #"^/event-source$"] :>> event-source

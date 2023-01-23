@@ -575,6 +575,61 @@
               ":arglists"
               ":raw-forms"]))
 
+;; going forward may not be the answer
+;; maybe i should go back
+
+(.click page "button[type = submit]")
+
+(.allTextContents (.locator page "main code"))
+
+(xr/check! (partial = ["(tap> :hello-world)\n"]))
+
+(tap> :foo)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":foo"]))
+
+(tap> :bar)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":bar"]))
+
+(tap> :baz)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":baz"]))
+
+(.goBack page)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":bar"]))
+
+(.goBack page)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":foo"]))
+
+(.goForward page)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":bar"]))
+
+(.goForward page)
+(.allTextContents (.locator page "main code"))
+(xr/check! (partial = [":baz"]))
+
+(tap> {:a {:b {:c {:d 1}}}})
+
+(.waitForResponse page "**/id/**" #(.click (type-header 2 0)))
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(xr/check! (partial = [":c"]))
+
+(.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(xr/check! (partial = [":d"]))
+
+(.goBack page)
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(xr/check! (partial = [":c"]))
+
+(.goBack page)
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(xr/check! (partial = [":a"]))
+
 (comment
   ;; clipboard
 

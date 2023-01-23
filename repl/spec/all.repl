@@ -544,9 +544,7 @@
 
 ;; zoom
 
-(.click (type-header 1 0))
-
-(wait-for-text ":map")
+(.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
 
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 

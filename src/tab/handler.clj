@@ -34,21 +34,21 @@
   [_]
   {:status 200
    :headers {"Content-Type" "text/javascript; charset=utf-8"
-             "Cache-Control" "private, max-age=31536000"}
+             "Cache-Control" "max-age=31536000"}
    :body (io/input-stream (io/resource "tab.js"))})
 
 (defn ^:private css-asset
   [_]
   {:status 200
    :headers {"Content-Type" "text/css; charset=utf-8"
-             "Cache-Control" "private, max-age=31536000"}
+             "Cache-Control" "max-age=31536000"}
    :body (io/input-stream (io/resource "tab.css"))})
 
 (defn ^:private image-asset
   [_]
   {:status 200
    :headers {"Content-Type" "text/css; charset=utf-8"
-             "Cache-Control" "private, max-age=31536000"}
+             "Cache-Control" "max-age=31536000"}
    :body (io/input-stream (io/resource "favicon.png"))})
 
 (defn ^:private event-source
@@ -66,7 +66,7 @@
       (if-some [{:keys [val] :as data} (db/pull db uuid)]
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"
-                   "Cache-Control" "max-age=86400"}
+                   "Cache-Control" "max-age=86400, immutable"}
          :body (if (contains? headers "bx-request")
                  (html/html (tabulator/-tabulate val db 0))
                  (html/page

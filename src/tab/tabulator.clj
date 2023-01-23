@@ -233,7 +233,14 @@
         ($ :button {:accesskey "x"
                     :type "submit"
                     :title "The number of values Tab currently has stored in its in-memory database. Click to empty the database and allow all values to be garbage-collected."}
-          (pprint/cl-format nil "~,,' :D vals" (db/size db))))
+          (let [db-size (db/size db)]
+            ($ :span
+              ($ :span {:class (cond
+                                 (> db-size 10000) "num-vals-warning-heavy"
+                                 (> db-size 5000) "num-vals-warning-soft"
+                                 :else "")}
+                (pprint/cl-format nil "~,,' :D" (db/size db)))
+              ($ :span " vals")))))
       ($ :div
         (when inst
           ($ :time {:datetime (str inst) :title (str inst)}

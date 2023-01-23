@@ -125,6 +125,14 @@ footer button:hover {
   text-decoration: underline;
 }
 
+footer .num-vals-warning-soft {
+  color: #e19c1d;
+}
+
+footer .num-vals-warning-heavy {
+  color: var(--color-red);
+}
+
 /* </FOOTER> */
 
 /* <PARAGRAPH> */

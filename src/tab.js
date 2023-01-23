@@ -8,24 +8,23 @@ const Base64 = {
   }
 };
 
-if (window.location.pathname === "/") {
-  const eventSource = new EventSource("/event-source");
+const eventSource = new EventSource("/event-source");
 
-  eventSource.onopen = (event) => {
-    console.debug(event);
-    document.querySelector(".event-source-error").classList.remove("show");
-  };
+eventSource.onopen = (event) => {
+  console.debug(event);
+  document.querySelector(".event-source-error").classList.remove("show");
+};
 
-  eventSource.addEventListener("tab", (event) => {
-    console.debug(event);
-    document.querySelector("main").outerHTML = Base64.decode(event.data);
-    document.dispatchEvent(new Event("DOMContentLoaded"));
-  });
+eventSource.addEventListener("tab", (event) => {
+  console.debug(event);
+  document.querySelector("main").outerHTML = Base64.decode(event.data);
+  history.pushState({}, "", `/id/${event.lastEventId}`);
+  document.dispatchEvent(new Event("DOMContentLoaded"));
+});
 
-  eventSource.onerror = (event) => {
-    console.error(event);
-    window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
-  }
+eventSource.onerror = (event) => {
+  console.error(event);
+  window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
 }
 
 const getTarget = (el) => {
@@ -164,6 +163,10 @@ const init = (el) => {
   initToggleLength(el);
   initToggleLevel(el);
   initZoom(el);
+
+  window.onpopstate = (event) => {
+    location.reload();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", (_) => {

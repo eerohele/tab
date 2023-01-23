@@ -1,14 +1,12 @@
 (ns tab.handler
   "HTTP request handler functions."
-  (:require [clojure.datafy :as datafy]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [tab.clip :as clip]
             [tab.db :as db]
             [tab.html :refer [$] :as html]
             [tab.tabulator :as tabulator]
             [tab.template :as template])
-  (:import (java.time LocalDateTime)
-           (java.util UUID)
+  (:import (java.util UUID)
            (java.util.concurrent ArrayBlockingQueue)))
 
 (set! *warn-on-reflection* true)
@@ -25,9 +23,12 @@
    :body "Not found"})
 
 (defn ^:private index
-  [{:keys [vals db] :as request}]
-  (html-response request
-    (tabulator/tabulate (assoc (peek vals) :db (db/evacuate! db) :max-offset (count vals)))))
+  [{:keys [db] :as request}]
+  (if-some [id (db/latest-id db)]
+    {:status 302
+     :headers {"Location" (format "/id/%s" id)}}
+    (let [[_ val] (db/put! db '(tap> :hello-world) {:latest? true})]
+      (html-response request (tabulator/tabulate val db)))))
 
 (defn ^:private js-asset
   [_]
@@ -42,16 +43,6 @@
    :headers {"Content-Type" "text/css; charset=utf-8"
              "Cache-Control" "private, max-age=31536000"}
    :body (io/input-stream (io/resource "tab.css"))})
-
-(defn ^:private a-val
-  [{:keys [db matches vals] :as request}]
-  (let [offset (-> matches first Long/parseLong)]
-    (if (>= offset (count vals))
-      {:status 302
-       :headers {"Location" "/"}}
-      (let [item (nth vals (- (dec (count vals)) offset))
-            main (tabulator/tabulate (assoc item :db (db/evacuate! db) :offset offset :max-offset (count vals)))]
-        (html-response request main)))))
 
 (defn ^:private image-asset
   [_]
@@ -71,25 +62,25 @@
 (defn ^:private item
   [{db :db [uuid] :matches headers :headers :as request}]
   (try
-    (let [uuid (UUID/fromString uuid)
-          data (db/pull db uuid)]
-      (if data
+    (let [uuid (UUID/fromString uuid)]
+      (if-some [{:keys [val] :as data} (db/pull db uuid)]
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"
-                   "Cache-Control" "no-cache"
-                   "Expires" "0"}
-         :body (let [main (tabulator/-tabulate data db 0)]
-                 (if (contains? headers "bx-request")
-                   (html/html main)
-                   (html/page (template/page request main))))}
+                   "Cache-Control" "max-age=86400"}
+         :body (if (contains? headers "bx-request")
+                 (html/html (tabulator/-tabulate val db 0))
+                 (html/page
+                   (template/page request
+                     (tabulator/tabulate data db))))}
         {:status 410
-         :headers {"Content-Type" "text/html; charset=utf-8"}
+         :headers {"Content-Type" "text/html; charset=utf-8"
+                   "Cache-Control" "max-age=86400"}
          :body (html/page
                  (template/error-page request
                    ($ :h1 "This value is no longer available.")
                    ($ :p "Resend the value to Tab to inspect it again.")
                    ($ :p ($ :a {:href "/"} "Go back to the start."))))}))
-    (catch IllegalArgumentException ex
+    (catch IllegalArgumentException _
       {:status 400
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body (html/page
@@ -97,11 +88,11 @@
                  ($ :h1 "You messed up.")
                  ($ :p "That doesn't look like a UUID to me.")))})))
 
-(defn ^:private db
-  [{db :db}]
-  {:status 200
-   :headers {"Content-Type" "text/plain"}
-   :body (pr-str (count @db))})
+(defn ^:private empty-db
+  [{db :db }]
+  (db/evacuate! db)
+  {:status 303
+   :headers {"Location" "/"}})
 
 (defn ^:private clip
   [{db :db [uuid] :matches}]
@@ -130,9 +121,8 @@
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset
       [:get #"^/event-source$"] :>> event-source
-      [:get #"^/val/-(\d+)$"] :>> a-val
       [:post #"^/clip/(.+?)$"] :>> clip
-      [:get #"^/db$"] :>> db
+      [:post #"^/db/empty$"] :>> empty-db
       [:get #".*"] :>> not-found
       not-found)))
 
@@ -146,8 +136,5 @@
   (handle {:method :get :uri "/nope"})
   (handle {:method :get :uri "/assets/css/tab.css"})
   (handle {:method :get :uri "/assets/js/tab.js"})
-
-  (handle {:method :get :uri "/val/-1"
-           :vals [{:inst (LocalDateTime/now) :data 1}
-                  {:inst (LocalDateTime/now) :data 2}]})
+  (handle {:method :get :uri "/assets/images/favicon.png"})
   ,,,)

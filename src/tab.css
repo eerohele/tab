@@ -96,53 +96,36 @@ code {
   white-space: pre;
 }
 
-/* <NAV> */
+/* <FOOTER> */
 
-nav {
+footer {
   background-color: var(--table-header-background-color);
   backdrop-filter: grayscale(0.5) blur(3px);
+  border-top-left-radius: 10px;
   -webkit-backdrop-filter: grayscale(0.5) blur(3px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  text-align: right;
+  font-size: 80%;
   position: fixed;
-  padding: .25em 0 .25em 0;
-  left: 0;
+  padding: .5em 2em;
+  right: 0;
   bottom: 0;
   z-index: 1;
-}
-
-nav .left {
   display: flex;
-  padding: 0 2em;
-  width: 150px;
-  justify-content: space-between;
-  font-size: 80%;
+  gap: 2em;
 }
 
-nav .left span {
-  cursor: not-allowed;
-  pointer-events: none;
-  opacity: 0.5;
+footer button {
+  background: transparent;
+  border: none;
+  color: var(--text-color-default);
+  cursor: pointer;
+  font-family: var(--font-family-monospace);
 }
 
-nav .right {
-  padding: 0 2em;
-  font-size: 70%;
-  width: 200px;
+footer button:hover {
+  text-decoration: underline;
 }
 
-nav a:any-link {
-  color: var(--nav-link-color);
-}
-
-nav a:hover {
-  color: var(--color-red);
-}
-
-/* </HEADER> */
+/* </FOOTER> */
 
 /* <PARAGRAPH> */
 

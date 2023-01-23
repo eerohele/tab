@@ -8,8 +8,7 @@
             [tab.tabulator :as tabulator]
             [tab.handler :as handler]
             [tab.html :as html]
-            [tab.http :as http])
-  (:import (java.time LocalDateTime)))
+            [tab.http :as http]))
 
 (set! *warn-on-reflection* true)
 
@@ -29,9 +28,6 @@
     :init-val
       The initial value to show in Tab.
 
-    :max-vals (default: 16)
-      The maximum number of values to retain in history.
-
     :add-tap? (default: true)
       Whether to wire up tap> to send vals to Tab.
 
@@ -49,18 +45,16 @@
       value as collapsed.
 
       To expand a collapsed object, click on the plus sign."
-  [& {:keys [init-val max-vals add-tap? browse? print-length print-level]
+  [& {:keys [init-val add-tap? browse? print-length print-level]
       :as opts
       :or {init-val '(tap> :hello-world)
-           max-vals 16
            add-tap? true
            browse? true}}]
   (let [print-length (or print-length *print-length* 8)
         print-level (or print-level *print-level* 2)
 
-        db (db/pristine)
+        db (doto (db/pristine) (db/put! (datafy/datafy init-val) {:latest? true}))
 
-        !vals (atom [{:inst (LocalDateTime/now) :data (datafy/datafy init-val)}])
         !watches (atom [])
 
         http-server
@@ -69,30 +63,17 @@
             (binding [*print-length* print-length
                       *print-level* print-level
                       tabulator/*ann* (memoize annotate/annotate)]
-              (handler/handle (assoc request :db db :vals @!vals))))
+              (handler/handle (assoc request :db db))))
           opts)
-
-        push-val
-        (fn [v]
-          (swap! !vals
-            (fn [vals v]
-              (if (>= (count vals) max-vals)
-                (conj (subvec vals 1) v)
-                (conj vals v)))
-            v))
 
         send-event
         (fn send [x]
           (binding [*print-length* print-length
                     *print-level* print-level]
-            (let [val {:inst (LocalDateTime/now) :data (datafy/datafy x)}
-                  data (->
-                         val
-                         (assoc :db db :max-offset (count (push-val val)))
-                         tabulator/tabulate
-                         html/html
-                         base64/encode)]
-              (http/broadcast http-server (format "event: tab\ndata: %s\n\n" data))))
+            (let [[id data] (db/put! db (datafy/datafy x) {:latest? true})]
+              (http/broadcast http-server
+                (format "id: %s\nevent: tab\ndata: %s\n\n" id
+                  (base64/encode (html/html (tabulator/tabulate data db)))))))
 
           (when (instance? clojure.lang.IRef x)
             (add-watch x :tab (fn [_ _ _ n] (send n)))

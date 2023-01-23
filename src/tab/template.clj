@@ -11,7 +11,7 @@
       ($ :link {:rel "stylesheet" :href (format "/assets/css/tab.%s.css" server-id)}))
     ($ :body
       ($ :script "0")
-      ($ :main main)
+      main
       ($ :div {:class "event-source-error"}
         ($ :p ($ :a {:href "/"} "disconnected from server, click to reload")))
       ($ :div {:class "ok"} "✓")

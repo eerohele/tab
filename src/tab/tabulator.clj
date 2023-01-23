@@ -55,7 +55,7 @@
 
   Object
   (-tabulate [this db _]
-    (let [uuid (db/put! db (datafy/datafy this))]
+    (let [[uuid _] (db/put! db (datafy/datafy this))]
       ($ :a {:href (format "/id/%s" uuid)} (*ann* (pr-str this)))))
 
   String
@@ -69,7 +69,7 @@
       (*ann* (pr-str this))
 
       (meets-print-level? level)
-      (let [uuid (db/put! db this)]
+      (let [[uuid _] (db/put! db this)]
         ($ :table {:id (str uuid) :data-state "collapsed"}
           ($ :thead
             ($ :tr
@@ -85,7 +85,7 @@
               ($ :th {:class "count"} (count this))))))
 
       :else
-      (let [uuid (db/put! db this)
+      (let [[uuid _] (db/put! db this)
             state (state-for level)]
         ($ :table {:id (str uuid) :data-state "expanded"}
           ($ :thead
@@ -110,7 +110,7 @@
       (*ann* (pr-str this))
 
       (and (or (every? map? this) (every? sequential? this)) (meets-print-level? level))
-      (let [uuid (db/put! db this)]
+      (let [[uuid _] (db/put! db this)]
         ($ :table {:id (str uuid) :data-state "collapsed"}
           ($ :thead
             ($ :tr
@@ -125,7 +125,7 @@
               ($ :th {:class "count"} (count this))))))
 
       (every? map? this)
-      (let [uuid (db/put! db this)
+      (let [[uuid _] (db/put! db this)
             state (state-for level)
             ks (sequence (comp (mapcat keys) (distinct)) this)
             num-items (count this)]
@@ -155,7 +155,7 @@
               this))))
 
       (every? sequential? this)
-      (let [uuid (db/put! db this)
+      (let [[uuid _] (db/put! db this)
             state (state-for level)]
         ($ :table {:id (str uuid) :data-state (name state)}
           ($ :thead
@@ -191,26 +191,17 @@
 (def ^:private ^DateTimeFormatter date-time-formatter
   (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss"))
 
-(def ^:private left-icon "❮")
-(def ^:private right-icon "❯")
-
 (defn tabulate
-  [{:keys [db data offset max-offset inst] :or {offset 0 max-offset 0}}]
+  [{:keys [inst val]} db]
   ($ :main
-    (-tabulate data db 0)
-    ($ :nav
-      ($ :div {:class "left"}
-        (if (< offset (dec max-offset))
-          (link (format "/val/-%d" (inc offset)) left-icon :access-key "h")
-          ($ :span left-icon))
-        (cond
-          (= 1 offset)
-          (link "/" right-icon :access-key "l")
-          (pos? offset)
-          (link (format "/val/-%d" (dec offset)) right-icon :access-key "l")
-          :else
-          ($ :span right-icon)))
-      ($ :div {:class "right"}
+    (-tabulate val db 0)
+    ($ :footer
+      ($ :form {:action "/db/empty" :method "POST"}
+        ($ :button {:accesskey "x"
+                    :type "submit"
+                    :title "The number of values Tab currently has stored in its in-memory database. Click to empty the database and allow all values to be garbage-collected."}
+          (pprint/cl-format nil "~,,' :D vals" (db/size db))))
+      ($ :div
         (when inst
           ($ :time {:datetime (str inst) :title (str inst)}
             (.format date-time-formatter inst)))))))

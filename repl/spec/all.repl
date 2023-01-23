@@ -549,8 +549,6 @@
 (xr/check!
   (partial = [":op" ":env" ":keys" ":vals" ":form" ":children" ":o-tag" ":tag"]))
 
-(.goBack page)
-
 ;; another large example
 
 (binding [*ns* (find-ns 'clojure.core.server)]

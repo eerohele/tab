@@ -32,7 +32,8 @@
   (LocalDateTime/now))
 
 (defn put!
-  "Given a database and a value, put the value into the database."
+  "Given a database and a value, if the value does not already exist in the
+  database, put the value into the database."
   ([db val]
    (put! db (uuid) val {:latest? false}))
   ([db val opts]

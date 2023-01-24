@@ -25,7 +25,11 @@
   "Given a database and an ID, pull the value with the given ID from the
   database."
   [db id]
-  (get-in @db [:id->val id]))
+  (get-in @db [:k->v id]))
+
+(defn now
+  []
+  (LocalDateTime/now))
 
 (defn put!
   "Given a database and a value, put the value into the database."
@@ -35,14 +39,14 @@
    (put! db (uuid) val opts))
   ([db id val {:keys [latest?] :or {latest? false}}]
    (when id
-     (if-some [[_ existing-id] (find (:val->id @db) val)]
-       [existing-id (pull db existing-id)]
-       (let [data {:inst (LocalDateTime/now) :val val}]
+     (if-some [[e-val e-id] (find (:v->k @db) val)]
+       [e-id {:inst (now) :val e-val}]
+       (let [data {:inst (now) :val val}]
          (swap! db (fn [db data]
                      (->
                        db
-                       (assoc-in [:val->id val] id)
-                       (assoc-in [:id->val id] data)
+                       (assoc-in [:v->k val] id)
+                       (assoc-in [:k->v id] data)
                        (cond-> latest? (assoc :latest-id id))))
            data)
          [id data])))))
@@ -54,7 +58,7 @@
 
 (defn size
   [db]
-  (count (:id->val @db)))
+  (count (:k->v @db)))
 
 (comment
   (def db (pristine))
@@ -65,5 +69,5 @@
   (pull db (first b))
   (deref db)
   (latest-id db)
-  (def c (put! db {:c 3} :latest? true))
+  (def c (put! db {:c 3} {:latest? true}))
   ,,,)

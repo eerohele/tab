@@ -63,12 +63,13 @@
   [{db :db [uuid] :matches headers :headers :as request}]
   (try
     (let [uuid (UUID/fromString uuid)]
-      (if-some [{:keys [val] :as data} (db/pull db uuid)]
+      (if-some [data (db/pull db uuid)]
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"
                    "Cache-Control" "max-age=86400, immutable"}
          :body (if (contains? headers "bx-request")
-                 (html/html (tabulator/-tabulate val db 0))
+                 (html/html
+                   (tabulator/tabulate data db))
                  (html/page
                    (template/page request
                      (tabulator/tabulate data db))))}

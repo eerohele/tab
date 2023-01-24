@@ -34,7 +34,6 @@
   ([db val opts]
    (put! db (uuid) val opts))
   ([db id val {:keys [latest?] :or {latest? false}}]
-
    (when id
      (if-some [[_ existing-id] (find (:val->id @db) val)]
        [existing-id (pull db existing-id)]

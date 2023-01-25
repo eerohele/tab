@@ -222,7 +222,7 @@
           ($ :pre full-value))))))
 
 (def ^:private ^DateTimeFormatter date-time-formatter
-  (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss"))
+  (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss:SSS"))
 
 (defn tabulate
   [{:keys [inst val]} db]

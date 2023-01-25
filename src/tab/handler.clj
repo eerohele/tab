@@ -98,7 +98,7 @@
 (defn ^:private clip
   [{db :db [uuid] :matches}]
   (let [uuid (UUID/fromString uuid)]
-    (case (clip/copy (db/pull db uuid))
+    (case (some-> (db/pull db uuid) :val (clip/copy))
       :ok {:status 200 :body "OK"}
       {:status "400"})))
 

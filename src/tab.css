@@ -165,10 +165,6 @@ table {
   border-spacing: 0;
 }
 
-table a {
-  display: block;
-}
-
 table th {
   font-weight: normal;
   text-align: left;

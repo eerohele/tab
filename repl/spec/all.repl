@@ -647,6 +647,56 @@
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 (xr/check! (partial = [":a"]))
 
+;; prev and next
+
+(.click page "button[type = submit]")
+
+(wait-for-text "(tap> :hello-world)")
+
+(tab/tab> tab "foo")
+(tab/tab> tab "bar")
+(tab/tab> tab "baz")
+
+(.click page "data-testid=prev")
+(wait-for-text "bar")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"bar\""]))
+
+(.click page "data-testid=prev")
+(wait-for-text "foo")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"foo\""]))
+
+(.click page "data-testid=prev")
+(wait-for-text "(tap> :hello-world)")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["(tap> :hello-world)\n"]))
+
+(.click page "data-testid=prev")
+(wait-for-text "(tap> :hello-world)")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["(tap> :hello-world)\n"]))
+
+(.click page "data-testid=next")
+(wait-for-text "foo")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"foo\""]))
+
+(.click page "data-testid=next")
+(wait-for-text "bar")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"bar\""]))
+
+(.click page "data-testid=next")
+(wait-for-text "baz")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"baz\""]))
+
+(.click page "data-testid=next")
+(wait-for-text "baz")
+(.allTextContents (.locator page "main pre"))
+(xr/check! (partial = ["\"baz\""]))
+
 (comment
   ;; clipboard
 

@@ -248,25 +248,29 @@
 
         ($ :nav
           (if (< offset (dec max-offset))
-            ($ :a {:href (format "/val/-%d" (inc offset))
+            ($ :a {:data-testid "prev"
+                   :href (format "/val/-%d" (inc offset))
                    :access-key "h"
                    :title "Go to previous value in history"} left-icon)
-            ($ :span {:class "noop"} left-icon))
+            ($ :span {:data-testid "prev" :class "noop"} left-icon))
 
           (if (> max-offset 1)
-            ($ :a {:href "/" :title "Go back to index"} "○")
+            ($ :a {:href "/"
+                   :title "Go back to index"} "○")
             ($ :span {:class "noop"} "○"))
 
           (cond
             (= 1 offset)
-            ($ :a {:href "/"
+            ($ :a {:data-testid "next"
+                   :href "/"
                    :access-key "l"} right-icon)
             (pos? offset)
-            ($ :a {:href (format "/val/-%d" (dec offset))
+            ($ :a {:data-testid "next"
+                   :href (format "/val/-%d" (dec offset))
                    :access-key "l"
                    :title "Go to next value in history"} right-icon)
             :else
-            ($ :span {:class "noop"} right-icon)))
+            ($ :span {:data-testid "next" :class "noop"} right-icon)))
 
         ($ :div
           (when inst

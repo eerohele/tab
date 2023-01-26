@@ -26,7 +26,7 @@
   [{:keys [db] :as request}]
   (if-some [data (db/peek db)]
     (html-response request (tabulator/tabulate data db))
-    (let [[_ val] (db/put! db '(tap> :hello-world) {:latest? true})]
+    (let [[_ val] (db/put! db '(tap> :hello-world) {:history? true})]
       (html-response request (tabulator/tabulate val db)))))
 
 (defn ^:private js-asset

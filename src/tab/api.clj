@@ -53,7 +53,7 @@
   (let [print-length (or print-length *print-length* 8)
         print-level (or print-level *print-level* 2)
 
-        db (doto (db/pristine) (db/put! (datafy/datafy init-val) {:latest? true}))
+        db (doto (db/pristine) (db/put! (datafy/datafy init-val) {:history? true}))
 
         !watches (atom [])
 
@@ -70,7 +70,7 @@
         (fn send [x]
           (binding [*print-length* print-length
                     *print-level* print-level]
-            (let [[id data] (db/put! db (datafy/datafy x) {:latest? true})]
+            (let [[id data] (db/put! db (datafy/datafy x) {:history? true})]
               (http/broadcast http-server
                 (format "id: %s\nevent: tab\ndata: %s\n\n" id
                   (base64/encode (html/html (tabulator/tabulate data db)))))))

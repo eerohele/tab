@@ -37,10 +37,10 @@
   "Given a database and a value, if the value does not already exist in the
   database, put the value into the database."
   ([db val]
-   (put! db (uuid) val {:latest? false}))
+   (put! db (uuid) val {:history? false}))
   ([db val opts]
    (put! db (uuid) val opts))
-  ([db id val {:keys [latest?] :or {latest? false}}]
+  ([db id val {:keys [history?] :or {history? false}}]
    (when id
      (if-some [[e-val e-id] (find (:v->k @db) val)]
        [e-id {:inst (now) :val e-val}]
@@ -50,7 +50,7 @@
                        db
                        (assoc-in [:v->k val] id)
                        (assoc-in [:k->v id] data)
-                       (cond-> latest? (update :history (fnil conj []) id))))
+                       (cond-> history? (update :history (fnil conj []) id))))
            data)
          [id data])))))
 

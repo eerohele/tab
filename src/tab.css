@@ -133,6 +133,25 @@ footer .num-vals-warning-heavy {
   color: var(--color-red);
 }
 
+footer nav {
+  display: flex;
+  gap: .5em;
+  justify-content: space-between;
+}
+
+footer a:any-link {
+  color: var(--color-blue);
+  transition: color 250ms ease-in-out;
+}
+
+footer a:hover {
+  color: #1dca51;
+}
+
+footer .noop {
+  opacity: .25;
+}
+
 /* </FOOTER> */
 
 /* <PARAGRAPH> */

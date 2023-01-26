@@ -224,24 +224,51 @@
 (def ^:private ^DateTimeFormatter date-time-formatter
   (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss:SSS"))
 
+(def ^:private left-icon "❮")
+(def ^:private right-icon "❯")
+
 (defn tabulate
-  [{:keys [inst val]} db]
-  ($ :main
-    (-tabulate val db 0)
-    ($ :footer
-      ($ :form {:action "/db/empty" :method "POST"}
-        ($ :button {:accesskey "x"
-                    :type "submit"
-                    :title "The number of values Tab currently has stored in its in-memory database. Click to empty the database and allow all values to be garbage-collected."}
-          (let [db-size (db/size db)]
-            ($ :span
-              ($ :span {:class (cond
-                                 (> db-size 10000) "num-vals-warning-heavy"
-                                 (> db-size 5000) "num-vals-warning-soft"
-                                 :else "")}
-                (pprint/cl-format nil "~,,' :D" (db/size db)))
-              ($ :span " vals")))))
-      ($ :div
-        (when inst
-          ($ :time {:datetime (str inst) :title (str inst)}
-            (.format date-time-formatter inst)))))))
+  [{:keys [inst val offset] :or {offset 0}} db]
+  (let [max-offset (db/history-size db)]
+    ($ :main
+      (-tabulate val db 0)
+      ($ :footer
+        ($ :form {:action "/db/empty" :method "POST"}
+          ($ :button {:accesskey "x"
+                      :type "submit"
+                      :title "The number of values Tab currently has stored in its in-memory database. Click to empty the database and allow all values to be garbage-collected."}
+            (let [db-size (db/size db)]
+              ($ :span
+                ($ :span {:class (cond
+                                   (> db-size 10000) "num-vals-warning-heavy"
+                                   (> db-size 5000) "num-vals-warning-soft"
+                                   :else "")}
+                  (pprint/cl-format nil "~,,' :D" (db/size db)))
+                ($ :span " vals")))))
+
+        ($ :nav
+          (if (< offset (dec max-offset))
+            ($ :a {:href (format "/val/-%d" (inc offset))
+                   :access-key "h"
+                   :title "Go to previous value in history"} left-icon)
+            ($ :span {:class "noop"} left-icon))
+
+          (if (> max-offset 1)
+            ($ :a {:href "/" :title "Go back to index"} "○")
+            ($ :span {:class "noop"} "○"))
+
+          (cond
+            (= 1 offset)
+            ($ :a {:href "/"
+                   :access-key "l"} right-icon)
+            (pos? offset)
+            ($ :a {:href (format "/val/-%d" (dec offset))
+                   :access-key "l"
+                   :title "Go to next value in history"} right-icon)
+            :else
+            ($ :span {:class "noop"} right-icon)))
+
+        ($ :div
+          (when inst
+            ($ :time {:datetime (str inst) :title (str inst)}
+              (.format date-time-formatter inst))))))))

@@ -29,6 +29,16 @@
     (let [[_ val] (db/put! db '(tap> :hello-world) {:history? true})]
       (html-response request (tabulator/tabulate val db)))))
 
+(defn ^:private a-val
+  [{:keys [db matches] :as request}]
+  (let [offset (-> matches first Long/parseLong)
+        data (db/nthlast db offset)]
+    (if (nil? data)
+      {:status 302
+       :headers {"Location" "/"}}
+      (let [main (tabulator/tabulate (assoc data :offset offset) db)]
+        (html-response request main)))))
+
 (defn ^:private js-asset
   [_]
   {:status 200
@@ -121,6 +131,7 @@
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset
       [:get #"^/event-source$"] :>> event-source
+      [:get #"^/val/-(\d+)$"] :>> a-val
       [:post #"^/clip/(.+?)$"] :>> clip
       [:post #"^/db/empty$"] :>> empty-db
       [:get #".*"] :>> not-found

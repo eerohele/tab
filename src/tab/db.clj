@@ -60,11 +60,34 @@
   (let [db @db]
     (get-in db [:k->v (core/peek (get db :history []))])))
 
+(defn nthlast
+  [db n]
+  (let [db @db
+        history (get db :history [])
+        cnt (count history)]
+    (when (< n cnt)
+      (let [index (- (dec cnt) n)
+            id (nth history index)]
+        (get-in db [:k->v id])))))
+
 (defn size
   [db]
   (count (:k->v @db)))
 
+(defn history-size
+  [db]
+  (count (:history @db)))
+
 (comment
+  (def db (pristine))
+  (put! db {:a 1} {:history? true})
+  (put! db {:b 2} {:history? true})
+  (deref db)
+
+  (nthlast db 0)
+  (nthlast db 1)
+  (nthlast db 2)
+
   (def db (pristine))
   (def a (put! db {:a 1}))
   (pull db (first a))

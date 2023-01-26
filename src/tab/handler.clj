@@ -24,9 +24,8 @@
 
 (defn ^:private index
   [{:keys [db] :as request}]
-  (if-some [id (db/latest-id db)]
-    {:status 302
-     :headers {"Location" (format "/id/%s" id)}}
+  (if-some [data (db/peek db)]
+    (html-response request (tabulator/tabulate data db))
     (let [[_ val] (db/put! db '(tap> :hello-world) {:latest? true})]
       (html-response request (tabulator/tabulate val db)))))
 

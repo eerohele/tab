@@ -1,5 +1,7 @@
 (ns tab.db
   "Tab's in-memory database."
+  (:refer-clojure :exclude [peek])
+  (:require [clojure.core :as core])
   (:import (java.util UUID)
            (java.time LocalDateTime)))
 
@@ -48,14 +50,15 @@
                        db
                        (assoc-in [:v->k val] id)
                        (assoc-in [:k->v id] data)
-                       (cond-> latest? (assoc :latest-id id))))
+                       (cond-> latest? (update :history (fnil conj []) id))))
            data)
          [id data])))))
 
-(defn latest-id
+(defn peek
   "Given a database, get the ID of the latest val in the database."
   [db]
-  (get @db :latest-id))
+  (let [db @db]
+    (get-in db [:k->v (core/peek (get db :history []))])))
 
 (defn size
   [db]
@@ -69,6 +72,5 @@
   (def b (put! db {:b 2}))
   (pull db (first b))
   (deref db)
-  (latest-id db)
-  (def c (put! db {:c 3} {:latest? true}))
+  (def c (put! db {:c 3} {:history? true}))
   ,,,)

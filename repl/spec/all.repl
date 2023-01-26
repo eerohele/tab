@@ -58,7 +58,7 @@
   ([level]
    (type-header level 0))
   ([level n]
-   (.nth (.locator page (str (table-selector level) "> thead > tr > .value-type")) n)))
+   (.nth (.locator page (str (table-selector level) "> thead > tr > .value-type > a")) n)))
 
 (defn count-header
   ([level]
@@ -466,7 +466,7 @@
 (tab/tab> tab {:nums (range 4)})
 
 (zero? (.count (.locator page "[data-action = toggle-length]")))
-(.textContent(.locator page "pre"))
+(.textContent (.locator page "td pre"))
 (xr/check! #{"(0 1 2 3)\n"})
 
 ;; ellipsis exceeding :print-level

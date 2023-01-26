@@ -373,7 +373,7 @@
 (tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
 
 (.click (toggle 3 0))
-(alt-click (toggle 2))
+(.waitForResponse page "**/table/**" #(alt-click (toggle 2)))
 (xr/check! true? (.isVisible (tbody 3 0)))
 (xr/check! true? (.isVisible (tbody 3 1)))
 (xr/check! true? (.isVisible (tbody 3 2)))
@@ -399,7 +399,7 @@
 (tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
 
 (.click (toggle 3 1))
-(alt-click (toggle 2))
+(.waitForResponse page "**/table/**" #(alt-click (toggle 2)))
 (xr/check! true? (.isVisible (tbody 3 0)))
 (xr/check! true? (.isVisible (tbody 3 1)))
 (xr/check! true? (.isVisible (tbody 3 2)))
@@ -591,48 +591,59 @@
 (xr/check! (partial = ["(tap> :hello-world)\n"]))
 
 (tap> :foo)
+(wait-for-text ":foo")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":foo"]))
 
 (tap> :bar)
+(wait-for-text ":bar")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":bar"]))
 
 (tap> :baz)
+(wait-for-text ":baz")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":baz"]))
 
 (.goBack page)
+(wait-for-text ":bar")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":bar"]))
 
 (.goBack page)
+(wait-for-text ":foo")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":foo"]))
 
 (.goForward page)
+(wait-for-text ":bar")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":bar"]))
 
 (.goForward page)
+(wait-for-text ":baz")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":baz"]))
 
 (tap> {:a {:b {:c {:d 1}}}})
 
 (.waitForResponse page "**/id/**" #(.click (type-header 2 0)))
+(wait-for-text ":c")
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 (xr/check! (partial = [":c"]))
 
 (.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
+(wait-for-text ":d")
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 (xr/check! (partial = [":d"]))
 
 (.goBack page)
+(wait-for-text ":c")
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 (xr/check! (partial = [":c"]))
 
 (.goBack page)
+(wait-for-text ":a")
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 (xr/check! (partial = [":a"]))
 

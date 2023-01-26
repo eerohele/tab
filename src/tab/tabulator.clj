@@ -250,7 +250,7 @@
           (if (< offset (dec max-offset))
             ($ :a {:data-testid "prev"
                    :href (format "/val/-%d" (inc offset))
-                   :access-key "h"
+                   :accesskey "h"
                    :title "Go to previous value in history"} left-icon)
             ($ :span {:data-testid "prev" :class "noop"} left-icon))
 
@@ -263,11 +263,11 @@
             (= 1 offset)
             ($ :a {:data-testid "next"
                    :href "/"
-                   :access-key "l"} right-icon)
+                   :accesskey "l"} right-icon)
             (pos? offset)
             ($ :a {:data-testid "next"
                    :href (format "/val/-%d" (dec offset))
-                   :access-key "l"
+                   :accesskey "l"
                    :title "Go to next value in history"} right-icon)
             :else
             ($ :span {:data-testid "next" :class "noop"} right-icon)))

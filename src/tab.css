@@ -102,16 +102,31 @@ code {
 footer {
   background-color: var(--table-header-background-color);
   backdrop-filter: grayscale(0.5) blur(3px);
-  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   -webkit-backdrop-filter: grayscale(0.5) blur(3px);
   font-size: 80%;
   position: fixed;
   padding: .5em 2em;
-  right: 0;
+  left: 0em;
   bottom: 0;
   z-index: 1;
   display: flex;
   gap: 2em;
+}
+
+footer form {
+  text-align: center;
+  width: 125px;
+}
+
+footer .time {
+  text-align: center;
+  width: 125px;
+}
+
+footer .time time {
+  opacity: 0;
+  transition: opacity 150ms ease-in;
 }
 
 footer button {
@@ -138,6 +153,7 @@ footer nav {
   display: flex;
   gap: .5em;
   justify-content: space-between;
+  width: 45px;
 }
 
 footer a:any-link {

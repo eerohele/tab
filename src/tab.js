@@ -8,6 +8,27 @@ const Base64 = {
   }
 };
 
+const timeUnits = {
+  year: 24 * 60 * 60 * 1000 * 365,
+  month: 24 * 60 * 60 * 1000 * 365/12,
+  day: 24 * 60 * 60 * 1000,
+  hour: 60 * 60 * 1000,
+  minute: 60 * 1000,
+  second: 1000
+}
+
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+const reltime = (d1, d2 = new Date()) => {
+  const elapsed = d1 - d2;
+
+  for (const [unit, millis] of Object.entries(timeUnits)) {
+    if (Math.abs(elapsed) > millis || unit == 'second') {
+      return rtf.format(Math.round(elapsed / millis), unit);
+    }
+  }
+}
+
 const eventSource = new EventSource("/event-source");
 
 eventSource.onopen = (event) => {
@@ -183,7 +204,32 @@ const initZoom = (root) => {
   });
 }
 
+const relativize = (time) => {
+  const attr = time.getAttribute("datetime");
+
+  if (attr !== "") {
+    const date = Date.parse(attr);
+
+    if (!isNaN(date)) {
+      time.textContent = reltime(date);
+      time.classList.add("show");
+    }
+  }
+}
+
+let interval;
+
 const init = (el) => {
+  const time = document.querySelector("footer time");
+
+  relativize(time);
+
+  if (interval != undefined) {
+    window.clearInterval(interval);
+  }
+
+  interval = window.setInterval(() => relativize(time), 5000);
+
   initToggleLength(el);
   initToggleLevel(el);
   initZoom(el);

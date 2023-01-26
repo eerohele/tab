@@ -224,6 +224,9 @@
 (def ^:private ^DateTimeFormatter date-time-formatter
   (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss:SSS"))
 
+(def ^:private ^DateTimeFormatter iso-8601-formatter
+  (DateTimeFormatter/ISO_INSTANT))
+
 (def ^:private left-icon "❮")
 (def ^:private right-icon "❯")
 
@@ -272,7 +275,7 @@
             :else
             ($ :span {:data-testid "next" :class "noop"} right-icon)))
 
-        ($ :div
+        ($ :div {:class "time"}
           (when inst
-            ($ :time {:datetime (str inst) :title (str inst)}
-              (.format date-time-formatter inst))))))))
+            ($ :time {:datetime (.format iso-8601-formatter inst) :title (str inst)}
+              #_(.format date-time-formatter inst))))))))

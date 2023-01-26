@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [peek])
   (:require [clojure.core :as core])
   (:import (java.util UUID)
-           (java.time LocalDateTime)))
+           (java.time ZonedDateTime)))
 
 (defn uuid
   "Return a UUID."
@@ -31,7 +31,7 @@
 
 (defn now
   []
-  (LocalDateTime/now))
+  (ZonedDateTime/now))
 
 (defn put!
   "Given a database and a value, if the value does not already exist in the

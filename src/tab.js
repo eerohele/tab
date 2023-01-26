@@ -127,13 +127,11 @@ const toggleHandler = (event) => {
   const table = el.closest("table");
 
   if (event.altKey) {
-    const table = el.closest("table");
     const toggles = table.querySelectorAll(":scope > tbody > tr > td > table > thead > tr > [data-action = toggle-level]");
     const newState = determineNewState(table.querySelectorAll(":scope > tbody > tr > td > table"));
 
     toggles.forEach(el => { toggle(el, newState) });
   } else {
-    const table = el.closest("table");
     toggle(el, flipState(table.dataset.state));
   }
 }

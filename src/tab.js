@@ -17,8 +17,13 @@ eventSource.onopen = (event) => {
 
 eventSource.addEventListener("tab", (event) => {
   console.debug(event);
-  document.querySelector("main").outerHTML = Base64.decode(event.data);
-  history.pushState({}, "", `/id/${event.lastEventId}`);
+  const json = JSON.parse(event.data);
+  document.querySelector("main").outerHTML = Base64.decode(json.html);
+
+  if (json.history) {
+    history.pushState({}, "", `/id/${event.lastEventId}`);
+  }
+
   document.dispatchEvent(new Event("DOMContentLoaded"));
 });
 

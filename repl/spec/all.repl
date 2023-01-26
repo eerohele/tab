@@ -489,12 +489,18 @@
 
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1]\n"})
+
+(def url (.url page))
+
 (swap! a conj 2)
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1 2]\n"})
+(xr/check! (partial = url) (.url page))
+
 (swap! a conj 3)
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1 2 3]\n"})
+(xr/check! (partial = url) (.url page))
 
 ;; "Large" input
 

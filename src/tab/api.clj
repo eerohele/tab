@@ -67,17 +67,21 @@
           opts)
 
         send-event
-        (fn send [x]
-          (binding [*print-length* print-length
-                    *print-level* print-level]
-            (let [[id data] (db/put! db (datafy/datafy x) {:history? true})]
-              (http/broadcast http-server
-                (format "id: %s\nevent: tab\ndata: %s\n\n" id
-                  (base64/encode (html/html (tabulator/tabulate data db)))))))
+        (fn send
+          ([x]
+           (send x {:history? true}))
+          ([x {:keys [history?]}]
+           (binding [*print-length* print-length
+                     *print-level* print-level]
+             (let [[id data] (db/put! db (datafy/datafy x) {:history? history?})]
+               (http/broadcast http-server
+                 (format "id: %s\nevent: tab\ndata: {\"history\": %s, \"html\": \"%s\"}\n\n" id
+                   history?
+                   (base64/encode (html/html (tabulator/tabulate data db)))))))
 
-          (when (instance? clojure.lang.IRef x)
-            (add-watch x :tab (fn [_ _ _ n] (send n)))
-            (swap! !watches conj x)))]
+           (when (instance? clojure.lang.IRef x)
+             (add-watch x :tab (fn [_ _ _ n] (send n {:history? false})))
+             (swap! !watches conj x))))]
 
     (when add-tap? (doto send-event add-tap))
     (when browse? (browse/browse-url (http/address http-server)))

@@ -98,6 +98,24 @@
                  ($ :h1 "You messed up.")
                  ($ :p "That doesn't look like a UUID to me.")))})))
 
+(defn ^:private table
+  [{db :db [uuid] :matches :as request}]
+  (try
+    (let [uuid (UUID/fromString uuid)]
+      (if-some [{:keys [val]} (db/pull db uuid)]
+        {:status 200
+         :headers {"Content-Type" "text/html; charset=utf-8"
+                   "Cache-Control" "max-age=86400, immutable"}
+         :body (html/html (tabulator/-tabulate val db 0))}
+        {:status 404}))
+    (catch IllegalArgumentException _
+      {:status 400
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body (html/page
+               (template/error-page request
+                 ($ :h1 "You messed up.")
+                 ($ :p "That doesn't look like a UUID to me.")))})))
+
 (defn ^:private empty-db
   [{db :db }]
   (db/evacuate! db)
@@ -127,6 +145,7 @@
 
       [:get #"^/$"] :>> index
       [:get #"^/id/(.+)$"] :>> item
+      [:get #"^/table/(.+)$"] :>> table
       [:get #"^/assets/images/(.+)$"] :>> image-asset
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset

@@ -82,7 +82,7 @@
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/id/%s" uuid)]
+                (let [href (format "/table/%s" uuid)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -132,7 +132,7 @@
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/id/%s" uuid)]
+                (let [href (format "/table/%s" uuid)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"

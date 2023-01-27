@@ -584,7 +584,7 @@
 ;; going forward may not be the answer
 ;; maybe i should go back
 
-(.click page "button[type = submit]")
+(.waitForResponse page "**/" #(.click page "button[type = submit]"))
 
 (.allTextContents (.locator page "main code"))
 
@@ -649,7 +649,7 @@
 
 ;; prev and next
 
-(.click page "button[type = submit]")
+(.waitForResponse page "**/" #(.click page "button[type = submit]"))
 
 (wait-for-text "(tap> :hello-world)")
 

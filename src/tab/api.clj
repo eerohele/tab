@@ -13,9 +13,9 @@
 (set! *warn-on-reflection* true)
 
 (defprotocol Tab
-  (tab> [this event])
-  (address [this])
-  (halt [this]))
+  (tab> [this x] "Broadcast a value to all clients the Tab serves.")
+  (address [this] "Return the address the given Tab listens on.")
+  (halt [this] "Halt the Tab."))
 
 (defn run
   "Run a Tab.

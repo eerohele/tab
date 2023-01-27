@@ -2,7 +2,7 @@
 
 Tab is a little program that turns Clojure data structures into tables.
 
-![Uploading image.png…]()
+<img width="1408" alt="image" src="https://user-images.githubusercontent.com/31859/215182910-f605dc32-b2f3-4bef-be13-4f0ea2331c0a.png">
 
 > **Note**
 > Tab is in **alpha**. While in alpha, breaking changes can happen.

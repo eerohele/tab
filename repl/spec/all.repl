@@ -431,7 +431,7 @@
 (xr/check! true? (.isVisible (tbody 2 0)))
 (xr/check! true? (.isVisible (tbody 2 1)))
 
-(tap> {:a 1 :b {:c 2 :d {:e 3} :f {:g 4}}})
+(tab/tab> tab {:a 1 :b {:c 2 :d {:e 3} :f {:g 4}}})
 
 (alt-click (toggle 0))
 (xr/check! false? (.isVisible (tbody 1 0)))
@@ -471,7 +471,7 @@
 
 ;; ellipsis exceeding :print-level
 
-(tap> {:a {:b {:c {:d (range 6)}}}})
+(tab/tab> tab {:a {:b {:c {:d (range 6)}}}})
 (.click (toggle 3))
 
 (.textContent (.locator page "[data-action = toggle-length]"))
@@ -504,7 +504,7 @@
 
 ;; "Large" input
 
-(tap> BigDecimal)
+(tab/tab> tab BigDecimal)
 
 (defn wait-for-text
   [text]
@@ -526,7 +526,7 @@
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
 (binding [*ns* (find-ns 'clojure.core)]
-  (tap> (analyzer.jvm/analyze (read-string (repl/source-fn 'clojure.core/inc)))))
+  (tab/tab> tab (analyzer.jvm/analyze (read-string (repl/source-fn 'clojure.core/inc)))))
 
 (wait-for-text "clojure.lang.Var")
 
@@ -560,7 +560,7 @@
 ;; another large example
 
 (binding [*ns* (find-ns 'clojure.core.server)]
-  (tap> (clojure.tools.analyzer.jvm/analyze (read-string (clojure.repl/source-fn 'clojure.core.server/prepl)))))
+  (tab/tab> tab (clojure.tools.analyzer.jvm/analyze (read-string (clojure.repl/source-fn 'clojure.core.server/prepl)))))
 
 (wait-for-text "clojure.lang.Var")
 
@@ -590,17 +590,17 @@
 
 (xr/check! (partial = ["(tap> :hello-world)\n"]))
 
-(tap> :foo)
+(tab/tab> tab :foo)
 (wait-for-text ":foo")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":foo"]))
 
-(tap> :bar)
+(tab/tab> tab :bar)
 (wait-for-text ":bar")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":bar"]))
 
-(tap> :baz)
+(tab/tab> tab :baz)
 (wait-for-text ":baz")
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":baz"]))
@@ -625,7 +625,7 @@
 (.allTextContents (.locator page "main code"))
 (xr/check! (partial = [":baz"]))
 
-(tap> {:a {:b {:c {:d 1}}}})
+(tab/tab> tab {:a {:b {:c {:d 1}}}})
 
 (.waitForResponse page "**/id/**" #(.click (type-header 2 0)))
 (wait-for-text ":c")
@@ -700,7 +700,7 @@
 (comment
   ;; clipboard
 
-  (tap> {:a 1})
+  (tab/tab> tab {:a 1})
 
   (wait-for-text ":a")
 

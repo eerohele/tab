@@ -17,9 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Just
-        uses: extractions/setup-just@v1
-
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -38,10 +35,14 @@ jobs:
           key: deps-${{ hashFiles('deps.edn') }}
           restore-keys: deps-
 
-      - run: just test
+      - run: clojure -X:dev user/check! '{:path "test"}'
         id: test
 
-      - run: just spec
+      - run: clojure -A:dev -X cognitect.test-runner.api/test
+
+      - run: clojure -J-Dtab.e2e.browser=webkit -X:dev user/check! '{:path "spec"}'
+      - run: clojure -J-Dtab.e2e.browser=firefox -X:dev user/check! '{:path "spec"}'
+      - run: clojure -J-Dtab.e2e.browser=chromium -X:dev user/check! '{:path "spec"}'
 
       - uses: actions/upload-artifact@v3
         if: failure() && steps.test.outcome == 'failure'

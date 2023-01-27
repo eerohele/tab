@@ -95,6 +95,8 @@ user=> (doc tab/halt)
 - Click a table header (e.g. `ARRAY MAP`) to zoom in on that table.
 - Press <kbd>Alt</kbd> and click a table header (e.g. `ARRAY MAP`) to copy the value backing that table to your clipboard.
 - Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
+- Click the text that says `$N vals` in the footer to empty Tab's in-memory database
+- Use the buttons in the footer to go to the next/previous value
 
 > **Note**
 > UI controls are subject to change while Tab is in alpha.

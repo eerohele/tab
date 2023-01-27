@@ -10,7 +10,37 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.11.1</version>
+      <version>1.10.2</version>
+    </dependency>
+    <dependency>
+      <groupId>clj-gatling</groupId>
+      <artifactId>clj-gatling</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>tools.analyzer.jvm</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.playwright</groupId>
+      <artifactId>playwright</artifactId>
+      <version>1.28.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cognitect</groupId>
+      <artifactId>transcriptor</artifactId>
+      <version>0.1.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.15.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId>
+      <version>1.1.1</version>
     </dependency>
   </dependencies>
   <build>

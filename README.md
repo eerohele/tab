@@ -118,6 +118,7 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 - You might be able to have Tab do a denial-of-service attack on itself if you <kbd>Alt</kbd>-click a node with _many_ children.
 - Requires a modern browser to look good. If your browser supports [`backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter), you should be good.
 - Might not work with Clojure versions older than 1.10.2.
+- Untested on Windows. `:browse? true` [reportedly has no effect on Windows Subsystem for Linux 2, at least](https://github.com/eerohele/tab/issues/1).
 
 ## Inspiration
 

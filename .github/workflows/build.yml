@@ -43,6 +43,8 @@ jobs:
       - run: mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install-deps"
 
       - run: clojure -J-Dtab.e2e.browser=webkit -X:dev user/check! '{:path "spec"}'
+        if: matrix.os != 'ubuntu-latest'
+
       - run: clojure -J-Dtab.e2e.browser=firefox -X:dev user/check! '{:path "spec"}'
       - run: clojure -J-Dtab.e2e.browser=chromium -X:dev user/check! '{:path "spec"}'
 

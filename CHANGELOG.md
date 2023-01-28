@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2023-01-28
+
+- Improve support for back/forward browser navigation
+- Redesign history retention
+
+  Tab now retains values in an in-memory database until you manually clear
+  them.
+
+- Use relative instead of absolute time in the UI
+- Add missing docstrings
+- Minor UI improvements
+
 ## 2023-01-21
 
 - Add support for [zooming in on values](https://github.com/eerohele/tab#user-manual)

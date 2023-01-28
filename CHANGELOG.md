@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
   them.
 
 - Use relative instead of absolute time in the UI
+- BREAKING: `:max-vals` arg to `tab.api/run` no longer has any effect
 - Add missing docstrings
 - Minor UI improvements
 

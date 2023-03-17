@@ -554,7 +554,7 @@
 
 (.allTextContents (.locator page "main > table > thead > tr > .value-type"))
 
-(xr/check! (partial = ["array map"]))
+(xr/check! #{"hash map" "array map"})
 
 ;; another large example
 

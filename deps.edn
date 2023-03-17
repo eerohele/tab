@@ -1,14 +1,14 @@
 {:aliases
  {:dev {:extra-paths ["dev/src" "test"]
-        :extra-deps {org.clojure/clojure {:mvn/version "1.10.2"}
+        :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
                      org.clojure/tools.deps ^:antq/exclude {:git/url "https://github.com/clojure/tools.deps.git":git/sha "8f8fc2571e721301b6d52e191129248355cb8c5a"}
                      org.clojure/test.check {:mvn/version "1.1.1"}
                      org.clojure/tools.analyzer.jvm {:mvn/version "1.2.3"}
                      com.cognitect/transcriptor {:mvn/version "0.1.5"}
-                     org.jsoup/jsoup {:mvn/version "1.15.3"}
+                     org.jsoup/jsoup {:mvn/version "1.15.4"}
                      clj-gatling/clj-gatling {:mvn/version "0.17.6"}
-                     com.microsoft.playwright/playwright {:mvn/version "1.28.1"}
+                     com.microsoft.playwright/playwright {:mvn/version "1.31.0"}
                      io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
 
-  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.2" :git/sha "fe6b140"}}
+  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "b0ee58b"}}
           :ns-default build}}}

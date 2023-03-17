@@ -221,9 +221,6 @@
                 (with-out-str (pprint/pprint this)))))
           ($ :pre full-value))))))
 
-(def ^:private ^DateTimeFormatter date-time-formatter
-  (DateTimeFormatter/ofPattern "E d. MMM HH:mm:ss:SSS"))
-
 (def ^:private ^DateTimeFormatter iso-8601-formatter
   (DateTimeFormatter/ISO_INSTANT))
 
@@ -277,5 +274,4 @@
 
         ($ :div {:class "time"}
           (when inst
-            ($ :time {:datetime (.format iso-8601-formatter inst) :title (str inst)}
-              #_(.format date-time-formatter inst))))))))
+            ($ :time {:datetime (.format iso-8601-formatter inst) :title (str inst)})))))))

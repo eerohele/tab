@@ -552,9 +552,8 @@
 
 (.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
 
-(.allTextContents (.locator page "main > table > thead > tr > .value-type"))
-
-(xr/check! #{"hash map" "array map"})
+(vec (.allTextContents (.locator page "main > table > thead > tr > .value-type")))
+(xr/check! (partial #{["hash map"] ["array map"]}))
 
 ;; another large example
 

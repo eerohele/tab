@@ -35,6 +35,11 @@ jobs:
           key: deps-${{ hashFiles('deps.edn') }}
           restore-keys: deps-
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('deps.edn') }}
+
       - run: clojure -X:dev user/check! '{:path "test"}'
         id: test
 

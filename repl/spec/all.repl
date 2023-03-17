@@ -493,11 +493,13 @@
 (def url (.url page))
 
 (swap! a conj 2)
+(.waitForSelector page "pre >> text=[1 2]\n")
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1 2]\n"})
 (xr/check! (partial = url) (.url page))
 
 (swap! a conj 3)
+(.waitForSelector page "pre >> text=[1 2 3]\n")
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1 2 3]\n"})
 (xr/check! (partial = url) (.url page))

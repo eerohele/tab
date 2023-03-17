@@ -6,7 +6,7 @@
             [tab.base64 :as base64]
             [tab.db :as db]
             [tab.html :refer [$] :as html])
-  (:import (clojure.lang Named IPersistentMap Seqable)
+  (:import (clojure.lang Named IObj IPersistentMap Seqable)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
@@ -46,43 +46,93 @@
   (case state :collapsed "＋" :expanded "－"))
 
 (defprotocol Tabulable
-  (-tabulate [this db level]))
+  (-tabulate [this level]))
+
+(defn ^:private identifier
+  [x]
+  (-> x meta ::id str))
+
+(defn ^:private put!
+  [db x]
+  (first (db/put! db (datafy/datafy x))))
+
+(defrecord ^:private Meta [obj])
+
+(defprotocol Identifiable
+  (identify [this db level]))
+
+(extend-protocol Identifiable
+  IPersistentMap
+  (identify [this db level]
+    (cond
+      (meets-print-level? level)
+      (with-meta this {::id (put! db this)})
+
+      :else
+      (reduce-kv
+        (fn [m k v]
+          (assoc m
+            (identify k db (inc level))
+            (identify v db (inc level))))
+        (with-meta {} {::id (put! db this)})
+        this)))
+
+  Seqable
+  (identify [this db _]
+    (with-meta this {::id (put! db this)}))
+
+  IObj
+  (identify [this db _]
+    (with-meta this {::id (put! db this)}))
+
+  Object
+  ;; FIXME: Add end-to-end test
+  (identify [this db _]
+    (with-meta (Meta. this) {::id (put! db this)}))
+
+  nil
+  (identify [this _ _] this))
 
 (extend-protocol Tabulable
   nil
-  (-tabulate [_ _ _]
+  (-tabulate [_ _]
     (*ann* "nil"))
 
   Object
-  (-tabulate [this db _]
-    (let [[uuid _] (db/put! db (datafy/datafy this))]
-      ($ :a {:href (format "/id/%s" uuid)} (*ann* (pr-str this)))))
+  (-tabulate [this _]
+    ($ :pre (*ann* (pr-str this))))
+
+  Meta
+  (-tabulate [this _]
+    ($ :pre
+      ($ :a {:href (format "/id/%s" (identifier this))}
+        (*ann* (pr-str (.obj this))))))
 
   Named
-  (-tabulate [this _ _]
+  (-tabulate [this _]
     ($ :pre (*ann* (pr-str this))))
 
   Number
-  (-tabulate [this _ _]
+  (-tabulate [this _]
     ($ :pre (*ann* (pr-str this))))
 
   String
-  (-tabulate [this _ _]
+  (-tabulate [this _]
     ($ :pre (*ann* (pr-str this))))
 
   IPersistentMap
-  (-tabulate [this db level]
+  (-tabulate [this level]
     (cond
       (empty? this)
       (*ann* (pr-str this))
 
       (meets-print-level? level)
-      (let [[uuid _] (db/put! db this)]
-        ($ :table {:id (str uuid) :data-state "collapsed"}
+      (let [id (identifier this)]
+        ($ :table {:id id :data-state "collapsed"}
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/table/%s" uuid)]
+                (let [href (format "/table/%s" id)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -94,15 +144,15 @@
               ($ :th {:class "count"} (count this))))))
 
       :else
-      (let [[uuid _] (db/put! db this)
+      (let [id (identifier this)
             state (state-for level)]
-        ($ :table {:id (str uuid) :data-state "expanded"}
+        ($ :table {:id id :data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:colspan "2" :class "value-type"}
-                (let [href (format "/id/%s" uuid)]
+                (let [href (format "/id/%s" id)]
                   ($ :a {:href href
                          :bx-dispatch "click"
                          :bx-request "get"
@@ -116,23 +166,23 @@
               (fn [[k v]]
                 ($ :tr
                   ($ :td {:class "filler"})
-                  ($ :th (-tabulate k db (inc level)))
-                  ($ :td (-tabulate v db (inc level)))))
+                  ($ :th (-tabulate k (inc level)))
+                  ($ :td (-tabulate v (inc level)))))
               this))))))
 
   Seqable
-  (-tabulate [this db level]
+  (-tabulate [this level]
     (cond
       (empty? this)
       (*ann* (pr-str this))
 
       (and (or (every? map? this) (every? sequential? this)) (meets-print-level? level))
-      (let [[uuid _] (db/put! db this)]
-        ($ :table {:id (str uuid) :data-state "collapsed"}
+      (let [id (identifier this)]
+        ($ :table {:id id :data-state "collapsed"}
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/table/%s" uuid)]
+                (let [href (format "/table/%s" id)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -143,17 +193,17 @@
               ($ :th {:class "count"} (count this))))))
 
       (every? map? this)
-      (let [[uuid _] (db/put! db this)
+      (let [id (identifier this)
             state (state-for level)
             ks (sequence (comp (mapcat keys) (distinct)) this)
             num-items (count this)]
-        ($ :table {:id (str uuid) :data-state "expanded"}
+        ($ :table {:id id :data-state "expanded"}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} num-items)
               ($ :th {:colspan (pr-str (count ks)) :class "value-type"}
-                (let [href (format "/id/%s" uuid)]
+                (let [href (format "/id/%s" id)]
                   ($ :a {:href href
                          :bx-dispatch "click"
                          :bx-request "get"
@@ -176,20 +226,20 @@
                          (let [v (get m k)]
                            ($ :td
                              (when (some? v)
-                               (-tabulate v db (inc level))))))
+                               (-tabulate v (inc level))))))
                     ks)))
               this))))
 
       (every? sequential? this)
-      (let [[uuid _] (db/put! db this)
+      (let [id (identifier this)
             state (state-for level)]
-        ($ :table {:id (str uuid) :data-state (name state)}
+        ($ :table {:id id :data-state (name state)}
           ($ :thead
             ($ :tr
               ($ :th {:data-action "toggle-level"} (toggle-icon state))
               ($ :th {:class "count"} (count this))
               ($ :th {:class "value-type"}
-                (let [href (format "/id/%s" uuid)]
+                (let [href (format "/id/%s" id)]
                   ($ :a {:href href
                          :bx-dispatch "click"
                          :bx-request "get"
@@ -202,7 +252,7 @@
               (fn [i seq]
                 ($ :tr
                   ($ :td {:class "index"} (pr-str i))
-                  ($ :td (-tabulate seq db level))))
+                  ($ :td (-tabulate seq level))))
               this))))
 
       :else
@@ -231,7 +281,7 @@
   [{:keys [inst val offset] :or {offset 0}} db]
   (let [max-offset (db/history-size db)]
     ($ :main
-      (-tabulate val db 0)
+      (-tabulate (identify val db 0) 0)
       ($ :footer
         ($ :form {:action "/db/empty" :method "POST"}
           ($ :button {:accesskey "x"

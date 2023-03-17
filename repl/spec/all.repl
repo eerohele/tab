@@ -1,3 +1,4 @@
+(require '[clojure.core.protocols :refer [Datafiable]])
 (require '[clojure.string :as string])
 (require '[cognitect.transcriptor :as xr])
 (require '[tab.api :as tab])
@@ -532,30 +533,30 @@
 
 (wait-for-text "clojure.lang.Var")
 
-(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(set (.allTextContents (.locator page "main > table > tbody > tr > th")))
 
 (xr/check!
-  (partial = [":children"
-              ":meta"
-              ":return-tag"
-              ":init"
-              ":name"
-              ":op"
-              ":env"
-              ":o-tag"
-              ":var"
-              ":top-level"
-              ":form"
-              ":tag"
-              ":arglists"
-              ":raw-forms"]))
+  (partial = #{":children"
+               ":meta"
+               ":return-tag"
+               ":init"
+               ":name"
+               ":op"
+               ":env"
+               ":o-tag"
+               ":var"
+               ":top-level"
+               ":form"
+               ":tag"
+               ":arglists"
+               ":raw-forms"}))
 
 ;; zoom
 
 (.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
 
 (vec (.allTextContents (.locator page "main > table > thead > tr > .value-type")))
-(xr/check! (partial #{["hash map"] ["array map"]}))
+(xr/check! (partial #{["hash map"] ["array map"] ["list"]}))
 
 ;; another large example
 
@@ -564,22 +565,22 @@
 
 (wait-for-text "clojure.lang.Var")
 
-(.allTextContents (.locator page "main > table > tbody > tr > th"))
+(set (.allTextContents (.locator page "main > table > tbody > tr > th")))
 
 (xr/check!
-  (partial = [":children"
-              ":meta"
-              ":init"
-              ":name"
-              ":op"
-              ":env"
-              ":o-tag"
-              ":var"
-              ":top-level"
-              ":form"
-              ":tag"
-              ":arglists"
-              ":raw-forms"]))
+  (partial = #{":children"
+               ":meta"
+               ":init"
+               ":name"
+               ":op"
+               ":env"
+               ":o-tag"
+               ":var"
+               ":top-level"
+               ":form"
+               ":tag"
+               ":arglists"
+               ":raw-forms"}))
 
 ;; going forward may not be the answer
 ;; maybe i should go back
@@ -696,6 +697,22 @@
 (wait-for-text "baz")
 (.allTextContents (.locator page "main pre"))
 (xr/check! (partial = ["\"baz\""]))
+
+;; opaque
+
+(extend-protocol Datafiable
+  clojure.lang.Var
+  (datafy [this]
+    (assoc (meta this) :var this)))
+
+(tab/tab> tab (find-ns 'tab.html))
+(.click page "a >> text=#'tab.html/emit")
+
+(.waitForSelector page "text=:name")
+(.allTextContents (.locator page "main > table > tbody > tr > th"))
+
+(xr/check!
+  (partial = [":name" ":arglists" ":doc" ":protocol" ":ns" ":var"]))
 
 (comment
   ;; clipboard

@@ -106,7 +106,7 @@
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"
                    "Cache-Control" "max-age=86400, immutable"}
-         :body (html/html (tabulator/-tabulate val db 0))}
+         :body (html/html (tabulator/-tabulate (tabulator/identify val db 0) 0))}
         {:status 404}))
     (catch IllegalArgumentException _
       {:status 400

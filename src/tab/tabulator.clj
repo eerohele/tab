@@ -86,7 +86,6 @@
     (with-meta this {::id (put! db this)}))
 
   Object
-  ;; FIXME: Add end-to-end test
   (identify [this db _]
     (with-meta (Meta. this) {::id (put! db this)}))
 

@@ -153,8 +153,8 @@ const toggleHandler = (event) => {
   const table = el.closest("table");
 
   if (event.altKey) {
-    const toggles = table.querySelectorAll(":scope > tbody > tr > td > table > thead > tr > [data-action = toggle-level]");
-    const newState = determineNewState(table.querySelectorAll(":scope > tbody > tr > td > table"));
+    const toggles = table.querySelectorAll(":scope > tbody > tr > * > table > thead > tr > [data-action = toggle-level]");
+    const newState = determineNewState(table.querySelectorAll(":scope > tbody > tr > * > table"));
 
     toggles.forEach(el => { toggle(el, newState) });
   } else {

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Fix toggling map keys that are maps #4
+
 ## 2023-01-28
 
 - Improve support for back/forward browser navigation

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 2023-04-14
 
 - Fix toggling map keys that are maps #4
 

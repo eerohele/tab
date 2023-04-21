@@ -146,6 +146,6 @@
 
         (.shutdown request-thread-pool)
         (.shutdown heartbeat-thread-pool)
-        (.shutdown queue-thread-pool)
+        (.shutdownNow queue-thread-pool)
         (future-cancel accept-loop)
         (.close socket)))))

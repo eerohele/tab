@@ -37,7 +37,8 @@
          sse-heartbeat-frequency-secs 10}}]
   (let [server-id (UUID/randomUUID)
         ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
-        request-thread-pool (Executors/newFixedThreadPool 4 (thread/make-factory :name-suffix :request))
+        thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)
+        request-thread-pool (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))
         heartbeat-thread-pool (Executors/newScheduledThreadPool 1 (thread/make-factory :name-suffix :heartbeat :ex-log-level :fine))
         queue-thread-pool (Executors/newCachedThreadPool (thread/make-factory :name-suffix :queue))
 

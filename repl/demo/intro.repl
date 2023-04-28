@@ -100,6 +100,9 @@
 (tap> (sort-by :name (:members ((requiring-resolve 'clojure.reflect/reflect) BigInteger))))
 
 ;; Tab can handle deeply nested maps pretty well, too. tools.analyzer.jvm can make us one.
+;;
+;; This part requires Clojure 1.12.0-alpha2 or newer.
+((requiring-resolve 'clojure.repl.deps/add-lib) 'org.clojure/tools.analyzer.jvm)
 (require '[clojure.tools.analyzer.jvm :as analyzer.jvm])
 
 (tap>

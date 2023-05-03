@@ -106,9 +106,7 @@ const flipIcon = (el, newState) => {
 }
 
 const bxDispatch = (el) => {
-  const bxTarget = el.getAttribute('bx-target');
   const target = el.closest(el.getAttribute('bx-target'));
-  const href = el.getAttribute('href');
   const method = el.getAttribute('bx-request');
   const uri = el.getAttribute('bx-uri');
   const swap = el.getAttribute('bx-swap') || "innerHTML";

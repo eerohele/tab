@@ -27,7 +27,7 @@ Tab aims to be that something else.
 Given that you have the [Clojure CLI](https://clojure.org/guides/install_clojure) installed, on the command line, run:
 
 ```bash
-clj -Sdeps '{:deps {io.github.eerohele/tab {:git/tag "2023-04-14.209", :git/sha "abb0d1c"}}}'
+clj -Sdeps '{:deps {io.github.eerohele/tab {:git/tag "2023-05-03.217", :git/sha "b41cc01"}}}'
 ```
 
 Then, in the REPL:

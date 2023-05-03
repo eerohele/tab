@@ -29,6 +29,30 @@ const reltime = (d1, d2 = new Date()) => {
   }
 }
 
+const eventSource = new EventSource("/event-source");
+
+eventSource.onopen = (event) => {
+  console.debug(event);
+  document.querySelector(".event-source-error").classList.remove("show");
+};
+
+eventSource.addEventListener("tab", (event) => {
+  console.debug(event);
+  const json = JSON.parse(event.data);
+  document.querySelector("main").outerHTML = Base64.decode(json.html);
+
+  if (json.history) {
+    history.pushState({}, "", `/id/${event.lastEventId}`);
+  }
+
+  document.dispatchEvent(new Event("DOMContentLoaded"));
+});
+
+eventSource.onerror = (event) => {
+  console.error(event);
+  window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
+}
+
 const getTarget = (el) => {
   if (el.dataset.target) {
     return el.closest(el.dataset.target);
@@ -194,30 +218,6 @@ const relativize = (time) => {
 let interval;
 
 const init = (el) => {
-  const eventSource = new EventSource("/event-source");
-
-  eventSource.onopen = (event) => {
-    console.debug(event);
-    document.querySelector(".event-source-error").classList.remove("show");
-  };
-
-  eventSource.addEventListener("tab", (event) => {
-    console.debug(event);
-    const json = JSON.parse(event.data);
-    document.querySelector("main").outerHTML = Base64.decode(json.html);
-
-    if (json.history) {
-      history.pushState({}, "", `/id/${event.lastEventId}`);
-    }
-
-    document.dispatchEvent(new Event("DOMContentLoaded"));
-  });
-
-  eventSource.onerror = (event) => {
-    console.error(event);
-    window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
-  }
-
   window.addEventListener("beforeunload", (event) => {
     eventSource.close();
   });

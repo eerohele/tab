@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2023-05-03
+
+- Fix Chrome UI freeze on back/forward navigation #5
+
 ## 2023-04-14
 
 - Fix toggling map keys that are maps #4

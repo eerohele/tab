@@ -126,7 +126,7 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 
 ## Prior art / superior alternatives
 
-- [REBL](https://docs.datomic.com/cloud/other-tools/REBL.html)
+- [Morse](https://github.com/nubank/morse)
 - [Portal](https://djblue.github.io/portal/)
 - [Reveal](https://vlaaad.github.io/reveal/)
 

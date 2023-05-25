@@ -93,7 +93,7 @@
   (emit [this] (emit (pr-str this))))
 
 (defn html
-  "Given a clojure.xml-compatible data structure describing a HTML document,
+  "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string."
   [element]
   (with-open [writer (StringWriter.)]
@@ -102,7 +102,7 @@
     (.toString writer)))
 
 (defn page
-  "Given a clojure.xml-compatible data structure describing a HTML document,
+  "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string, and prepend a HTML5 doctype."
   [element]
   (str "<!DOCTYPE html>" (html element)))

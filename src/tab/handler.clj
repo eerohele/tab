@@ -117,7 +117,7 @@
                  ($ :p "That doesn't look like a UUID to me.")))})))
 
 (defn ^:private empty-db
-  [{db :db }]
+  [{db :db}]
   (db/evacuate! db)
   {:status 303
    :headers {"Location" "/"}})

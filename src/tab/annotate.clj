@@ -1,6 +1,6 @@
 (ns tab.annotate
   "Given a string of Clojure code, return a Clojure representation of a HTML
-  frament that annotates the given code for syntax highlighting."
+  fragment that annotates the given code for syntax highlighting."
   (:require [clojure.string :as string]
             [tab.html :refer [$] :as html])
   (:import (java.io BufferedReader PushbackReader StringReader)))

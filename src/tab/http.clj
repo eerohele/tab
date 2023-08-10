@@ -97,17 +97,26 @@
                         (let [event-queue (:body response)
                               _ (swap! !queues conj event-queue)
                               evict-queue! (fn [] (swap! !queues disj event-queue))]
-                          (log/log :fine {:event :accept-queue :remote-addr remote-addr :connected-clients (count-queues)})
+                          (log/log :fine
+                            {:event :accept-queue
+                             :remote-addr remote-addr
+                             :connected-clients (count-queues)})
 
                           (.scheduleAtFixedRate heartbeat-thread-pool
                             (fn []
                               (try
-                                (log/log :fine {:event :send-heartbeat :remote-addr remote-addr :connected-clients (count-queues)})
+                                (log/log :fine
+                                  {:event :send-heartbeat
+                                   :remote-addr remote-addr
+                                   :connected-clients (count-queues)})
                                 (.write output-stream (.getBytes ":\n\n" StandardCharsets/UTF_8))
                                 (.flush output-stream)
                                 (catch SocketException ex
                                   (evict-queue!)
-                                  (log/log :fine {:event :evict-queue/send-heartbeat-failed :remote-addr remote-addr :connected-clients (count-queues)})
+                                  (log/log :fine
+                                    {:event :evict-queue/send-heartbeat-failed
+                                     :remote-addr remote-addr
+                                     :connected-clients (count-queues)})
                                   ;; rethrow to cancel scheduled task
                                   (throw ex))))
                             sse-heartbeat-initial-delay-secs
@@ -123,7 +132,10 @@
                                     (.flush output-stream)
                                     (recur))))
                               (catch SocketException _
-                                (log/log :fine {:event :evict-queue/queue-write-failed :remote-addr remote-addr :connected-clients (count-queues)}))
+                                (log/log :fine
+                                  {:event :evict-queue/queue-write-failed
+                                   :remote-addr remote-addr
+                                   :connected-clients (count-queues)}))
                               (finally
                                 (evict-queue!)
                                 (finish)))))

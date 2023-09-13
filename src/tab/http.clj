@@ -7,8 +7,9 @@
   (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)
-           (java.util.concurrent BlockingQueue Executors TimeUnit)
-           (java.util UUID)))
+           (java.util.concurrent BlockingQueue Executors ExecutorService TimeUnit)
+           (java.util UUID)
+           (clojure.lang Reflector)))
 
 (set! *warn-on-reflection* true)
 
@@ -16,6 +17,25 @@
   (address [this] "Given a HttpServer, return the address it listens on.")
   (broadcast [this event] "Send a server-sent event (SSE) to all connected clients.")
   (halt [this] "Halt a HttpServer."))
+
+(defn ^:private make-fallback-request-thread-pool
+  []
+  (let [thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)]
+    (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))))
+
+(defn ^:private make-request-thread-pool
+  ^ExecutorService []
+  (try
+    (Reflector/invokeStaticMethod
+      Executors
+      "newVirtualThreadPerTaskExecutor"
+      ^"[Ljava.lang.Object;" (into-array Object []))
+    ;; Virtual threads in preview, but no --enable-preview
+    (catch UnsupportedOperationException _
+      (make-fallback-request-thread-pool))
+    ;; No virtual thread support
+    (catch IllegalArgumentException _
+      (make-fallback-request-thread-pool))))
 
 (defn serve
   "Start a HTTP server.
@@ -37,8 +57,7 @@
          sse-heartbeat-frequency-secs 10}}]
   (let [server-id (UUID/randomUUID)
         ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
-        thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)
-        request-thread-pool (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))
+        request-thread-pool (make-request-thread-pool)
         heartbeat-thread-pool (Executors/newScheduledThreadPool 1 (thread/make-factory :name-suffix :heartbeat :ex-log-level :fine))
         queue-thread-pool (Executors/newCachedThreadPool (thread/make-factory :name-suffix :queue))
 

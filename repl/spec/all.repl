@@ -543,27 +543,27 @@
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 
 (xr/check!
-  (partial = [":children"
-              ":meta"
-              ":return-tag"
-              ":init"
-              ":name"
-              ":op"
+  (partial = [":arglists"
+              ":children"
               ":env"
-              ":o-tag"
-              ":var"
-              ":top-level"
               ":form"
+              ":init"
+              ":meta"
+              ":name"
+              ":o-tag"
+              ":op"
+              ":raw-forms"
+              ":return-tag"
               ":tag"
-              ":arglists"
-              ":raw-forms"]))
+              ":top-level"
+              ":var"]))
 
 ;; zoom
 
 (.waitForResponse page "**/id/**" #(.click (type-header 1 0)))
 
 (vec (.allTextContents (.locator page "main > table > thead > tr > .value-type")))
-(xr/check! (partial #{["hash map"] ["array map"]}))
+(xr/check! (partial #{["lazy seq"]}))
 
 ;; another large example
 
@@ -575,19 +575,19 @@
 (.allTextContents (.locator page "main > table > tbody > tr > th"))
 
 (xr/check!
-  (partial = [":children"
-              ":meta"
-              ":init"
-              ":name"
-              ":op"
+  (partial = [":arglists"
+              ":children"
               ":env"
-              ":o-tag"
-              ":var"
-              ":top-level"
               ":form"
+              ":init"
+              ":meta"
+              ":name"
+              ":o-tag"
+              ":op"
+              ":raw-forms"
               ":tag"
-              ":arglists"
-              ":raw-forms"]))
+              ":top-level"
+              ":var"]))
 
 ;; going forward may not be the answer
 ;; maybe i should go back

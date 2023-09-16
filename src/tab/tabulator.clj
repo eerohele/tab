@@ -259,7 +259,7 @@
                                    (> db-size 10000) "num-vals-warning-heavy"
                                    (> db-size 5000) "num-vals-warning-soft"
                                    :else "")}
-                  (pprint/cl-format nil "~,,' :D" (db/size db)))
+                  (pprint/cl-format nil "~,,' :D" db-size))
                 ($ :span " vals")))))
 
         ($ :nav

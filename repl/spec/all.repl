@@ -454,9 +454,11 @@
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 ...)\n"})
 (.click (.locator page "[data-action = toggle-length]"))
+(.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 4 5)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 4 5)\n"})
 (.click (.locator page "[data-action = toggle-length]"))
+(.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 ...)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 ...)\n"})
 
@@ -465,9 +467,11 @@
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 ...)\n"})
 (.click (.locator page "[data-action = toggle-length]"))
+(.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 4 5)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 4 5)\n"})
 (.click (.locator page "[data-action = toggle-length]"))
+(.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 ...)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 ...)\n"})
 
@@ -486,6 +490,7 @@
 (xr/check! #{"(0 1 2 3 ...)\n"})
 
 (.click (.locator page "[data-action = toggle-length]"))
+(.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 4 5)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 4 5)\n"})
 

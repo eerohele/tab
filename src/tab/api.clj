@@ -61,8 +61,7 @@
         (http/serve
           (fn [request]
             (binding [*print-length* print-length
-                      *print-level* print-level
-                      tabulator/*ann* (memoize annotate/annotate)]
+                      *print-level* print-level]
               (handler/handle (assoc request :tab/db db))))
           opts)
 

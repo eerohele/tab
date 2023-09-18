@@ -9,6 +9,7 @@
       ((requiring-resolve 'tab.api/run)
        :port 8080
        :browse? false
+       #_#_:init-val {:a {:b {:c {:d 1}}}}
        :print-level 2
        :print-length 8)))
 
@@ -34,7 +35,10 @@
   (/ 4 0)
   (tap> *e)
   (tap> java.net.ServerSocket)
+  (tap> [java.net.ServerSocket])
+  (tap> {:class java.net.ServerSocket})
   (tap> (java.time.ZonedDateTime/now))
+  (tap> [(java.time.ZonedDateTime/now) (java.time.ZonedDateTime/now)])
   (tap> {:zoned-date-time (java.time.ZonedDateTime/now) :instant (java.time.Instant/now)})
 
   (tap> {:os (java.lang.management.ManagementFactory/getOperatingSystemMXBean)
@@ -52,6 +56,7 @@
   (tap> {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
   (tap> {:a 1 :b {:c 2 :d {:e 3 :f 4} :g {:h 5 :f 6}}})
   (tap> {:a 1 :b {:c {:d 3 :e 4} :f {:g 5 :h 6} :i {:j 7 :l {:m 8}}}})
+  (tap> {{:a 1} {:b 2}})
   (tap> [{:a 1} {:b 2}])
   (tap> [{:a 1 :b 2} {:a 3 :c 4}])
   (tap> [{:a 1} 3])
@@ -59,9 +64,14 @@
   (tap> (range 32))
   (tap> {:a (range 32) :b 1})
   (tap> {:foo (repeat 32 ["FOO" [{:bar 44.48} '(["BAZ" [{:quux 15.19}]])]])})
+  (tap> {:a (lazy-seq '({:b {:c 3}}))})
   (tap> #{{:a 1 :b 2 :c 3}})
   (tap> [[{:a 1 :b 2}] [{:a 3 :b 4}]])
   (tap> [[{:a 1} {:b 2}] [{:c 3} {:d 4}]])
+
+  (let [hm (java.util.HashMap.)]
+    (.put hm 1 :a)
+    (tap> hm))
 
   ;; Atom
   (def a (atom []))

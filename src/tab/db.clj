@@ -2,13 +2,7 @@
   "Tab's in-memory database."
   (:refer-clojure :exclude [peek])
   (:require [clojure.core :as core])
-  (:import (java.util UUID)
-           (java.time ZonedDateTime)))
-
-(defn uuid
-  "Return a UUID."
-  []
-  (UUID/randomUUID))
+  (:import (java.time ZonedDateTime)))
 
 (defn pristine
   "Return an empty database."
@@ -33,26 +27,74 @@
   []
   (ZonedDateTime/now))
 
-(defn put!
-  "Given a database and a value, if the value does not already exist in the
-  database, put the value into the database."
+(defn collect
+  ([this]
+   (collect this 0))
+  ([this level]
+   (collect {} this level))
+  ([hash->obj this level]
+   (cond
+     (and
+       (map? this)
+       (int? *print-level*) (> level *print-level*))
+     {}
+
+     (map? this)
+     (reduce-kv (fn [hash->obj k v]
+                  (merge hash->obj
+                    (collect hash->obj k (inc level))
+                    (collect hash->obj v (inc level))))
+       (assoc hash->obj (hash this) this)
+       this)
+
+     (or (vector? this) (set? this) (seq? this))
+     (let [cnt (count this)]
+       (loop [hash->obj (assoc hash->obj (hash this) this)
+              xs this
+              len 0]
+         (if (or (= len cnt) (and (int? *print-length*) (= len *print-length*)))
+           hash->obj
+           (let [x (first xs)]
+             (recur (collect hash->obj x level) (rest xs) (inc len))))))
+
+     :else (assoc hash->obj (hash this) this))))
+
+(defn merge!
   ([db val]
-   (put! db (uuid) val {:history? false}))
-  ([db val opts]
-   (put! db (uuid) val opts))
-  ([db id val {:keys [history?] :or {history? false}}]
-   (when id
-     (if-some [[e-val e-id] (find (:v->k @db) val)]
-       [e-id {:inst (now) :val e-val}]
-       (let [data {:inst (now) :val val}]
-         (swap! db (fn [db data]
-                     (->
-                       db
-                       (assoc-in [:v->k val] id)
-                       (assoc-in [:k->v id] data)
-                       (cond-> history? (update :history (fnil conj []) id))))
-           data)
-         [id data])))))
+   (merge! db val {}))
+  ([db val {:keys [history?] :or {history? false}}]
+   (let [id (hash val)
+         val* (collect (hash-map id val) val 0)
+         now (now)
+         data (reduce-kv
+                (fn [m k v]
+                  (-> m
+                    (assoc k {:inst now :val v})))
+                {}
+                val*)]
+     (swap! db
+       (fn [db]
+         (-> db
+           (update :k->v merge data)
+           (cond-> history?
+             (update :history (fn [history id]
+                                (cond
+                                  (nil? history)
+                                  [id]
+
+                                  (= id (core/peek history))
+                                  history
+
+                                  :else (conj history id))) id)))))
+
+     [id {:inst now :val val}])))
+
+(comment
+  (def db (pristine))
+  (merge! db {:a {:b 1}})
+  (merge! db {:c {:d 2}})
+  (merge! db {:c {:d 2}} {:history? true})
+  ,,,)
 
 (defn peek
   "Given a database, get the ID of the latest val in the database."
@@ -80,8 +122,8 @@
 
 (comment
   (def db (pristine))
-  (put! db {:a 1} {:history? true})
-  (put! db {:b 2} {:history? true})
+  (merge! db {:a 1} {:history? true})
+  (merge! db {:b 2} {:history? true})
   (deref db)
 
   (nthlast db 0)
@@ -89,11 +131,11 @@
   (nthlast db 2)
 
   (def db (pristine))
-  (def a (put! db {:a 1}))
+  (def a (merge! db (hash {:a 1}) {:a 1}))
   (pull db (first a))
   (deref db)
-  (def b (put! db {:b 2}))
+  (def b (merge! db {:b 2}))
   (pull db (first b))
   (deref db)
-  (def c (put! db {:c 3} {:history? true}))
+  (def c (merge! db {:c 3} {:history? true}))
   ,,,)

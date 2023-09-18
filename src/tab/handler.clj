@@ -6,8 +6,7 @@
             [tab.html :refer [$] :as html]
             [tab.tabulator :as tabulator]
             [tab.template :as template])
-  (:import (java.util UUID)
-           (java.util.concurrent ArrayBlockingQueue)))
+  (:import (java.util.concurrent ArrayBlockingQueue)))
 
 (set! *warn-on-reflection* true)
 
@@ -25,9 +24,9 @@
 (defn ^:private index
   [{:keys [db] :as request}]
   (if-some [data (db/peek db)]
-    (html-response request (tabulator/tabulate data db))
-    (let [[_ val] (db/put! db '(tap> :hello-world) {:history? true})]
-      (html-response request (tabulator/tabulate val db)))))
+    (html-response request (tabulator/tabulation data db))
+    (let [[_ data] (db/merge! db '(tap> :hello-world) {:history? true})]
+      (html-response request (tabulator/tabulation data db)))))
 
 (defn ^:private a-val
   [{:keys [db matches] :as request}]
@@ -36,7 +35,7 @@
     (if (nil? data)
       {:status 302
        :headers {"Location" "/"}}
-      (let [main (tabulator/tabulate (assoc data :offset offset) db)]
+      (let [main (tabulator/tabulation (assoc data :offset offset) db)]
         (html-response request main)))))
 
 (defn ^:private js-asset
@@ -69,22 +68,20 @@
    :body (ArrayBlockingQueue. 1024)})
 
 (defn ^:private item
-  [{db :db [uuid] :matches headers :headers :as request}]
+  [{db :db [hash-code] :matches headers :headers :as request}]
   (try
-    (let [uuid (UUID/fromString uuid)]
-      (if-some [data (db/pull db uuid)]
+    (let [hash-code (Integer/parseInt hash-code)]
+      (if-some [data (db/pull db hash-code)]
         {:status 200
-         :headers {"Content-Type" "text/html; charset=utf-8"
-                   "Cache-Control" "max-age=86400, immutable"}
+         :headers {"Content-Type" "text/html; charset=utf-8"}
          :body (if (contains? headers "bx-request")
                  (html/html
-                   (tabulator/tabulate data db))
+                   (tabulator/tabulation data db))
                  (html/page
                    (template/page request
-                     (tabulator/tabulate data db))))}
+                     (tabulator/tabulation data db))))}
         {:status 410
-         :headers {"Content-Type" "text/html; charset=utf-8"
-                   "Cache-Control" "max-age=86400"}
+         :headers {"Content-Type" "text/html; charset=utf-8"}
          :body (html/page
                  (template/error-page request
                    ($ :h1 "This value is no longer available.")
@@ -96,17 +93,17 @@
        :body (html/page
                (template/error-page request
                  ($ :h1 "You messed up.")
-                 ($ :p "That doesn't look like a UUID to me.")))})))
+                 ($ :p "That doesn't look like a hash code to me.")))})))
 
 (defn ^:private table
-  [{db :db [uuid] :matches :as request}]
+  [{db :db [hash-code] :matches :as request}]
   (try
-    (let [uuid (UUID/fromString uuid)]
-      (if-some [{:keys [val]} (db/pull db uuid)]
-        {:status 200
-         :headers {"Content-Type" "text/html; charset=utf-8"
-                   "Cache-Control" "max-age=86400, immutable"}
-         :body (html/html (tabulator/-tabulate val db 0))}
+    (let [hash-code (Integer/parseInt hash-code)]
+      (if-some [{:keys [val]} (db/pull db hash-code)]
+        (do (db/merge! db val)
+          {:status 200
+           :headers {"Content-Type" "text/html; charset=utf-8"}
+           :body (html/html (tabulator/-tabulate val 0))})
         {:status 404}))
     (catch IllegalArgumentException _
       {:status 400
@@ -114,7 +111,7 @@
        :body (html/page
                (template/error-page request
                  ($ :h1 "You messed up.")
-                 ($ :p "That doesn't look like a UUID to me.")))})))
+                 ($ :p "That doesn't look like a hash code to me.")))})))
 
 (defn ^:private empty-db
   [{db :db}]
@@ -123,9 +120,9 @@
    :headers {"Location" "/"}})
 
 (defn ^:private clip
-  [{db :db [uuid] :matches}]
-  (let [uuid (UUID/fromString uuid)]
-    (case (some-> (db/pull db uuid) :val (clip/copy))
+  [{db :db [hash-code] :matches}]
+  (let [hash-code (Integer/parseInt hash-code)]
+    (case (some-> (db/pull db hash-code) :val (clip/copy))
       :ok {:status 200 :body "OK"}
       {:status "400"})))
 

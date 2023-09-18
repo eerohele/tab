@@ -1,15 +1,13 @@
 (ns tab.tabulator
   "Make tables."
   (:require [clojure.pprint :as pprint]
-            [tab.annotate :as annotate]
+            [tab.annotate :refer [annotate]]
             [tab.db :as db]
             [tab.html :refer [$] :as html])
   (:import (clojure.lang Named IPersistentMap Seqable)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
-
-(def ^:dynamic *ann* annotate/annotate)
 
 (defn ^:private seq-label
   [this]
@@ -65,29 +63,29 @@
 (extend-protocol Tabulable
   nil
   (-tabulate [_ _]
-    (*ann* "nil"))
+    (annotate "nil"))
 
   Object
   (-tabulate [this _]
-    ($ :a {:href (format "/id/%s" (hash this))} (*ann* (pr-str this))))
+    ($ :a {:href (format "/id/%s" (hash this))} (annotate (pr-str this))))
 
   Named
   (-tabulate [this _]
-    ($ :pre (*ann* (pr-str this))))
+    ($ :pre (annotate (pr-str this))))
 
   Number
   (-tabulate [this _]
-    ($ :pre (*ann* (pr-str this))))
+    ($ :pre (annotate (pr-str this))))
 
   String
   (-tabulate [this _]
-    ($ :pre (*ann* (pr-str this))))
+    ($ :pre (annotate (pr-str this))))
 
   IPersistentMap
   (-tabulate [this level]
     (cond
       (empty? this)
-      (*ann* (pr-str this))
+      (annotate (pr-str this))
 
       (meets-print-level? level)
       (let [id (hash this)]
@@ -137,7 +135,7 @@
   (-tabulate [this level]
     (cond
       (empty? this)
-      (*ann* (pr-str this))
+      (annotate (pr-str this))
 
       (and (or (every? map? this) (every? sequential? this)) (meets-print-level? level))
       (let [id (hash this)]
@@ -179,7 +177,7 @@
               ($ :th {:title "Total number of items in this collection."
                       :class "count"} num-items)
               (map (fn [th]
-                     ($ :th (*ann* (pr-str th)))) ks)))
+                     ($ :th (annotate (pr-str th)))) ks)))
           ($ :tbody
             (eduction
               (take (if (int? *print-length*) *print-length* (count this)))
@@ -259,7 +257,7 @@
                    :bx-request "get"
                    :bx-uri (format "/toggle/%s?print-length=nil" id)
                    :bx-swap "outerHTML"}
-            (*ann*
+            (annotate
               (binding [*print-level* nil
                         pprint/*print-right-margin* 80]
                 (with-out-str (pprint/pprint this)))))
@@ -268,7 +266,7 @@
                    :bx-request "get"
                    :bx-uri (format "/toggle/%s?print-length=*print-length*" id)
                    :bx-swap "outerHTML"}
-            (*ann*
+            (annotate
               (binding [*print-level* nil
                         *print-length* nil
                         pprint/*print-right-margin* 80]

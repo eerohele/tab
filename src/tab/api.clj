@@ -63,7 +63,7 @@
             (binding [*print-length* print-length
                       *print-level* print-level
                       tabulator/*ann* (memoize annotate/annotate)]
-              (handler/handle (assoc request :db db))))
+              (handler/handle (assoc request :tab/db db))))
           opts)
 
         send-event

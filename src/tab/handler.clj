@@ -24,15 +24,15 @@
    :body "Not found"})
 
 (defn ^:private index
-  [{:keys [db] :as request}]
+  [{db :tab/db :as request}]
   (if-some [data (db/peek db)]
     (html-response request (tabulator/tabulation data db))
     (let [[_ data] (db/merge! db '(tap> :hello-world) {:history? true})]
       (html-response request (tabulator/tabulation data db)))))
 
 (defn ^:private a-val
-  [{:keys [db matches] :as request}]
-  (let [offset (-> matches first Long/parseLong)
+  [{db :tab/db [offset] :matches :as request}]
+  (let [offset (Long/parseLong offset)
         data (db/nthlast db offset)]
     (if (nil? data)
       {:status 302
@@ -85,7 +85,7 @@
     (if (= '*print-length* print-length) *print-length* print-length)))
 
 (defn ^:private item
-  [{db :db [hash-code] :matches headers :headers :as request}]
+  [{db :tab/db [hash-code] :matches headers :headers :as request}]
   (try
     (let [hash-code (Integer/parseInt hash-code)]
       (if-some [data (db/pull db hash-code)]
@@ -113,7 +113,7 @@
                  ($ :p "That doesn't look like a hash code to me.")))})))
 
 (defn ^:private toggle
-  [{db :db [hash-code] :matches uri :uri :as request}]
+  [{db :tab/db [hash-code] :matches uri :uri :as request}]
   (try
     (let [hash-code (Integer/parseInt hash-code)]
       (if-some [{:keys [val]} (db/pull db hash-code)]
@@ -133,13 +133,13 @@
                  ($ :p "That doesn't look like a hash code to me.")))})))
 
 (defn ^:private empty-db
-  [{db :db}]
+  [{db :tab/db}]
   (db/evacuate! db)
   {:status 303
    :headers {"Location" "/"}})
 
 (defn ^:private clip
-  [{db :db [hash-code] :matches}]
+  [{db :tab/db [hash-code] :matches}]
   (let [hash-code (Integer/parseInt hash-code)]
     (case (some-> (db/pull db hash-code) :val (clip/copy))
       :ok {:status 200 :body "OK"}

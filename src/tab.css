@@ -27,6 +27,7 @@
   --color-red: #aa3731;
   --color-blue: #325cc0;
   --color-green: #448c27;
+  --color-light-green: #1dca51;
   --color-violet: #7a3e9d;
   --color-yellow: #fffabc;
 }
@@ -162,7 +163,7 @@ footer a:any-link {
 }
 
 footer a:hover {
-  color: #1dca51;
+  color: var(--color-light-green);
 }
 
 footer .noop {
@@ -263,6 +264,7 @@ table tbody td {
 
 [data-state = collapsed] tbody,
 [data-state = collapsed] thead tr:nth-child(2),
+[data-state = collapsed] tfoot,
 [data-state = collapsed] .value-type {
   display: none;
 }
@@ -312,8 +314,8 @@ th[data-action] {
   font-variant: small-caps;
 }
 
-.value-type a:any-link:hover {
-  text-decoration: underline;
+.value-type a:any-link:hover, tfoot a:any-link:hover {
+  color: var(--color-light-green);
 }
 
 .count {
@@ -326,6 +328,19 @@ th[data-action] {
   background-color: var(--table-header-background-color);
   border-right: none;
   border-bottom: none;
+}
+
+table tfoot th {
+  background-color: var(--table-header-background-color);
+  border-bottom: 1px solid var(--table-border-color);
+  border-right: 1px solid var(--table-border-color);
+  font-size: 75%;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+table tfoot a:any-link:hover {
+  color: var(--color-light-green);
 }
 
 /* <ANNOTATE> */

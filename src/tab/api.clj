@@ -37,8 +37,8 @@
       Reportedly does not work on Windows Subsystem for Linux.
 
     :print-length (default: *print-length* or 8)
-      Maximum number of items of a seq to show. To show all items, click on the
-      ellipsis in the UI.
+      Maximum number of items of a non-map coll to show. Use UI controls to
+      show the rest of the items.
 
     :print-level (default: *print-level* or 2)
       Tab shows every nested object whose nesting level exceeds this

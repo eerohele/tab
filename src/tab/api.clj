@@ -53,7 +53,7 @@
   (let [print-length (or print-length *print-length* 8)
         print-level (or print-level *print-level* 2)
 
-        db (doto (db/pristine) (db/put! (datafy/datafy init-val) {:history? true}))
+        db (doto (db/pristine) (db/merge! (datafy/datafy init-val) {:history? true}))
 
         !watches (atom [])
 
@@ -73,11 +73,11 @@
           ([x {:keys [history?]}]
            (binding [*print-length* print-length
                      *print-level* print-level]
-             (let [[id data] (db/put! db (datafy/datafy x) {:history? history?})]
+             (let [[id data] (db/merge! db (datafy/datafy x) {:history? history?})]
                (http/broadcast http-server
                  (format "id: %s\nevent: tab\ndata: {\"history\": %s, \"html\": \"%s\"}\n\n" id
                    history?
-                   (base64/encode (html/html (tabulator/tabulate data db)))))))
+                   (base64/encode (html/html (tabulator/tabulation data db)))))))
 
            (when (instance? clojure.lang.IRef x)
              (add-watch x :tab (fn [_ _ _ n] (send n {:history? false})))

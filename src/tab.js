@@ -106,7 +106,8 @@ const flipIcon = (el, newState) => {
 }
 
 const bxDispatch = (el) => {
-  const target = el.closest(el.getAttribute('bx-target'));
+  const targetAttr = el.getAttribute('bx-target');
+  const target = targetAttr ? el.closest(targetAttr) : el;
   const method = el.getAttribute('bx-request');
   const uri = el.getAttribute('bx-uri');
   const swap = el.getAttribute('bx-swap') || "innerHTML";
@@ -124,7 +125,12 @@ const bxDispatch = (el) => {
 
         init(parent);
 
+        const replaceUrl = response.headers.get("BX-Replace-Url");
         const pushUrl = el.getAttribute('bx-push-url');
+
+        if (replaceUrl) {
+          history.replaceState({}, "", replaceUrl);
+        }
 
         if (pushUrl && pushUrl.length > 0) {
           history.pushState({}, "", pushUrl);
@@ -169,8 +175,8 @@ const initToggleLevel = (root) => {
 const initToggleLength = (root) => {
   root.querySelectorAll("[data-action = toggle-length]").forEach((toggle) => {
     toggle.addEventListener("click", (event) => {
-      const el = event.currentTarget;
-      toggleLength(el, flipState(el.dataset.state));
+      event.preventDefault();
+      bxDispatch(event.currentTarget);
     });
   })
 }

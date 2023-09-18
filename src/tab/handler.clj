@@ -1,12 +1,14 @@
 (ns tab.handler
   "HTTP request handler functions."
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [tab.clip :as clip]
             [tab.db :as db]
             [tab.html :refer [$] :as html]
             [tab.tabulator :as tabulator]
             [tab.template :as template])
-  (:import (java.util.concurrent ArrayBlockingQueue)))
+  (:import (java.net URI)
+           (java.util.concurrent ArrayBlockingQueue)))
 
 (set! *warn-on-reflection* true)
 
@@ -67,6 +69,21 @@
              "Connection" "keep-alive"}
    :body (ArrayBlockingQueue. 1024)})
 
+(defn ^:private parse-query-params
+  [uri]
+  (into {}
+    (map #(string/split % #"="))
+    (some->
+      (URI. uri)
+      (.getQuery)
+      (string/split #"\?"))))
+
+(defn ^:private parse-print-length
+  "Given a string URI, return the value specified by the print-length query parameter."
+  [uri]
+  (let [print-length (some-> (parse-query-params uri) (get "print-length") read-string)]
+    (if (= '*print-length* print-length) *print-length* print-length)))
+
 (defn ^:private item
   [{db :db [hash-code] :matches headers :headers :as request}]
   (try
@@ -95,14 +112,16 @@
                  ($ :h1 "You messed up.")
                  ($ :p "That doesn't look like a hash code to me.")))})))
 
-(defn ^:private table
-  [{db :db [hash-code] :matches :as request}]
+(defn ^:private toggle
+  [{db :db [hash-code] :matches uri :uri :as request}]
   (try
     (let [hash-code (Integer/parseInt hash-code)]
       (if-some [{:keys [val]} (db/pull db hash-code)]
-        (do (db/merge! db val)
+        (binding [*print-length* (parse-print-length uri)]
+          (db/merge! db val)
           {:status 200
-           :headers {"Content-Type" "text/html; charset=utf-8"}
+           :headers {"Content-Type" "text/html; charset=utf-8"
+                     "BX-Replace-Url" (format "/id/%d?print-length=%s" hash-code (if (nil? *print-length*) "nil" *print-length*))}
            :body (html/html (tabulator/-tabulate val 0))})
         {:status 404}))
     (catch IllegalArgumentException _
@@ -134,7 +153,7 @@
     (not-found request)
     (condp
       (fn [[route-method route-pattern] {:keys [method uri]}]
-        (let [matches (some->> uri (re-matches route-pattern))]
+        (let [matches (some->> uri URI. .getPath (re-matches route-pattern))]
           (and (= route-method method)
             matches
             (assoc request :matches (rest matches)))))
@@ -142,7 +161,7 @@
 
       [:get #"^/$"] :>> index
       [:get #"^/id/(.+)$"] :>> item
-      [:get #"^/table/(.+)$"] :>> table
+      [:get #"^/toggle/(-?\d+)$"] :>> toggle
       [:get #"^/assets/images/(.+)$"] :>> image-asset
       [:get #"^/assets/css/(.+)$"] :>> css-asset
       [:get #"^/assets/js/(.+)$"] :>> js-asset

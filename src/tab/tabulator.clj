@@ -95,7 +95,7 @@
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/table/%s" id)]
+                (let [href (format "/toggle/%s?print-length=%s" id *print-length*)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -145,7 +145,7 @@
           ($ :thead
             ($ :tr
               ($ :th
-                (let [href (format "/table/%s" id)]
+                (let [href (format "/toggle/%s?print-length=%s" id *print-length*)]
                   {:data-action "toggle-level"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -181,17 +181,50 @@
               (map (fn [th]
                      ($ :th (*ann* (pr-str th)))) ks)))
           ($ :tbody
-            (map-indexed
-              (fn [i m]
-                ($ :tr
-                  ($ :td {:class "index"} (pr-str i))
-                  (map (fn [k]
-                         (let [v (get m k)]
-                           ($ :td
-                             (when (some? v)
-                               (-tabulate v db (inc level))))))
-                    ks)))
-              this))))
+            (eduction
+              (take (if (int? *print-length*) *print-length* (count this)))
+              (map-indexed
+                (fn [i m]
+                  ($ :tr
+                    ($ :td {:class "index"} (pr-str i))
+                    (map (fn [k]
+                           (let [v (get m k)]
+                             ($ :td
+                               (when (some? v)
+                                 (-tabulate v (inc level))))))
+                      ks))))
+              this)
+            (let [cnt (count this)]
+              (cond
+                (and (int? *print-length*) (> cnt *print-length*))
+                ($ :tfoot
+                  ($ :tr
+                    ($ :th {:colspan (-> ks count inc)}
+                      (let [href (format "/toggle/%s?print-length=nil" id)]
+                        ($ :a {:data-action "toggle-length"
+                               :href href
+                               :bx-dispatch "click"
+                               :bx-request "get"
+                               :bx-uri href
+                               :bx-target "table"
+                               :bx-swap "outerHTML"}
+                          (format "⇣ %d of %d" *print-length* cnt))))))
+
+                (nil? *print-length*)
+                ($ :tfoot
+                  ($ :tr
+                    ($ :th {:colspan (-> ks count inc)}
+                      (let [href (format "/toggle/%s?print-length=*print-length*" id)]
+                        (list
+                          ($ :span "⇡ ")
+                          ($ :a {:data-action "toggle-length"
+                                 :href href
+                                 :bx-dispatch "click"
+                                 :bx-request "get"
+                                 :bx-uri href
+                                 :bx-target "table"
+                                 :bx-swap "outerHTML"}
+                            (format "%d of %d" cnt cnt))))))))))))
 
       (every? sequential? this)
       (let [id (hash this)
@@ -219,20 +252,27 @@
               this))))
 
       :else
-      (let [full-value (*ann*
-                         (binding [*print-level* nil
-                                   *print-length* nil
-                                   pprint/*print-right-margin* 80]
-                           (with-out-str (pprint/pprint this))))]
+      (let [id (hash this)]
         (if (and (int? *print-length*) (> (count this) *print-length*))
           ($ :pre {:data-action "toggle-length"
-                   :data-state "collapsed"
-                   :data-value (base64/encode (html/html full-value))}
+                   :bx-dispatch "click"
+                   :bx-request "get"
+                   :bx-uri (format "/toggle/%s?print-length=nil" id)
+                   :bx-swap "outerHTML"}
             (*ann*
               (binding [*print-level* nil
                         pprint/*print-right-margin* 80]
                 (with-out-str (pprint/pprint this)))))
-          ($ :pre full-value))))))
+          ($ :pre {:data-action "toggle-length"
+                   :bx-dispatch "click"
+                   :bx-request "get"
+                   :bx-uri (format "/toggle/%s?print-length=*print-length*" id)
+                   :bx-swap "outerHTML"}
+            (*ann*
+              (binding [*print-level* nil
+                        *print-length* nil
+                        pprint/*print-right-margin* 80]
+                (with-out-str (pprint/pprint this))))))))))
 
 (def ^:private ^DateTimeFormatter iso-8601-formatter
   (DateTimeFormatter/ISO_INSTANT))

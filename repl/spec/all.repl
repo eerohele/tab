@@ -54,6 +54,12 @@
   ([level nth]
    (.nth (.locator page (str (table-selector level) " > tbody")) nth)))
 
+(defn tfoot
+  ([level]
+   (tfoot level 0))
+  ([level nth]
+   (.nth (.locator page (str (table-selector level) " > tfoot")) nth)))
+
 (defn type-header
   ([level]
    (type-header level 0))
@@ -373,7 +379,7 @@
 (tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
 
 (.click (toggle 3 0))
-(.waitForResponse page "**/table/**" #(alt-click (toggle 2)))
+(.waitForResponse page "**/toggle/**" #(alt-click (toggle 2)))
 (xr/check! true? (.isVisible (tbody 3 0)))
 (xr/check! true? (.isVisible (tbody 3 1)))
 (xr/check! true? (.isVisible (tbody 3 2)))
@@ -398,8 +404,8 @@
 
 (tab/tab> tab {:a {:b {:c {:d 1} :e {:f 2} :g {:h 3}}}})
 
-(.waitForResponse page "**/table/**" #(.click (toggle 3 1)))
-(.waitForResponse page "**/table/**" #(alt-click (toggle 2)))
+(.waitForResponse page "**/toggle/**" #(.click (toggle 3 1)))
+(.waitForResponse page "**/toggle/**" #(alt-click (toggle 2)))
 (xr/check! true? (.isVisible (tbody 3 0)))
 (xr/check! true? (.isVisible (tbody 3 1)))
 (xr/check! true? (.isVisible (tbody 3 2)))
@@ -493,6 +499,49 @@
 (.waitForSelector page "[data-action = toggle-length] >> text=(0 1 2 3 4 5)\n")
 (.textContent (.locator page "[data-action = toggle-length]"))
 (xr/check! #{"(0 1 2 3 4 5)\n"})
+
+;; expand/collapse seqs of maps
+
+(tab/tab> tab [{:a 1} {:a 2} {:a 3} {:a 4} {:a 5}])
+
+;; footer is visible
+(.isVisible (tfoot 0))
+(xr/check! true?)
+
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4"]})
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4" "5"]})
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4"]})
+
+;; footer is not visible when entire table is collapsed
+(.click (toggle 0))
+(.isVisible (tfoot 0))
+(xr/check! false?)
+
+;; expand/collapse, nested in map
+(tab/tab> tab {:xs [{:a 1} {:a 2} {:a 3} {:a 4} {:a 5}]})
+
+(.isVisible (tfoot 0))
+(xr/check! true?)
+
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4"]})
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4" "5"]})
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4"]})
+
+(tab/tab> tab [{:a 1} {:a 2} {:a 3} {:a 4}])
+
+;; footer not visible when seq length meets *print-length*
+(.isVisible (tfoot 0))
+(xr/check! false?)
 
 ;; atom
 

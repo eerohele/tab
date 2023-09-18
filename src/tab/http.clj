@@ -8,8 +8,7 @@
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)
            (java.util.concurrent BlockingQueue Executors ExecutorService TimeUnit)
-           (java.util UUID)
-           (clojure.lang Reflector)))
+           (java.util UUID)))
 
 (set! *warn-on-reflection* true)
 
@@ -18,24 +17,10 @@
   (broadcast [this event] "Send a server-sent event (SSE) to all connected clients.")
   (halt [this] "Halt a HttpServer."))
 
-(defn ^:private make-fallback-request-thread-pool
-  []
-  (let [thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)]
-    (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))))
-
 (defn ^:private make-request-thread-pool
   ^ExecutorService []
-  (try
-    (Reflector/invokeStaticMethod
-      Executors
-      "newVirtualThreadPerTaskExecutor"
-      ^"[Ljava.lang.Object;" (into-array Object []))
-    ;; Virtual threads in preview, but no --enable-preview
-    (catch UnsupportedOperationException _
-      (make-fallback-request-thread-pool))
-    ;; No virtual thread support
-    (catch IllegalArgumentException _
-      (make-fallback-request-thread-pool))))
+  (let [thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)]
+    (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))))
 
 (defn serve
   "Start a HTTP server.

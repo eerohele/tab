@@ -4,9 +4,8 @@
 (require '[org.httpkit.client :as http])
 (require '[tab.api :as tab])
 
-
 (def tab
-  (tab/run :browse? false :add-tap? false))
+  (tab/run :print-length nil :print-level nil :browse? false :add-tap? false))
 
 #_(tab/halt tab)
 

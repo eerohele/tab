@@ -2,7 +2,6 @@
   "Tab is a tool for visualizing Clojure data structures."
   (:require [clojure.datafy :as datafy]
             [clojure.java.browse :as browse]
-            [tab.annotate :as annotate]
             [tab.base64 :as base64]
             [tab.db :as db]
             [tab.tabulator :as tabulator]

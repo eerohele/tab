@@ -7,7 +7,8 @@
                      org.jsoup/jsoup {:mvn/version "1.15.4"}
                      clj-gatling/clj-gatling {:mvn/version "0.17.6"}
                      com.microsoft.playwright/playwright {:mvn/version "1.31.0"}
-                     io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
+                     io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}
+                     fipp/fipp {:mvn/version "0.6.26"}}}
 
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "b0ee58b"}}
           :ns-default build}}}

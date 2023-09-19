@@ -9,6 +9,8 @@
 
 (set! *warn-on-reflection* true)
 
+(def ^:dynamic *pprint* prn)
+
 (defn ^:private seq-label
   [this]
   (cond
@@ -258,9 +260,8 @@
                    :bx-uri (format "/toggle/%s?print-length=nil" id)
                    :bx-swap "outerHTML"}
             (annotate
-              (binding [*print-level* nil
-                        pprint/*print-right-margin* 80]
-                (with-out-str (pprint/pprint this)))))
+              (binding [*print-level* nil]
+                (with-out-str (*pprint* this)))))
           ($ :pre {:data-action "toggle-length"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -268,9 +269,8 @@
                    :bx-swap "outerHTML"}
             (annotate
               (binding [*print-level* nil
-                        *print-length* nil
-                        pprint/*print-right-margin* 80]
-                (with-out-str (pprint/pprint this))))))))))
+                        *print-length* nil]
+                (with-out-str (*pprint* this))))))))))
 
 (def ^:private ^DateTimeFormatter iso-8601-formatter
   (DateTimeFormatter/ISO_INSTANT))

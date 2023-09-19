@@ -73,11 +73,11 @@
 
                         output-stream (-> client .getOutputStream BufferedOutputStream.)
 
-                        finish (fn []
-                                 (try
-                                   (.close client)
-                                   (catch SocketException _
-                                     (log/log :fine {:event :socket-close-failed :remote-addr remote-addr}))))
+                        close (fn []
+                                (try
+                                  (.close client)
+                                  (catch SocketException _
+                                    (log/log :fine {:event :socket-close-failed :remote-addr remote-addr}))))
 
                         response
                         (try
@@ -140,8 +140,8 @@
                                    :connected-clients (count-queues)}))
                               (finally
                                 (evict-queue!)
-                                (finish)))))
-                        (finish))
+                                (close)))))
+                        (close))
                       (catch SocketException ex
                         (log/log :fine {:event :write-response-failed :ex ex}))))))
               (recur))

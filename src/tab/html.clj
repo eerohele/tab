@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [clojure.string :as string])
   (:import (clojure.lang IPersistentMap)
-           (java.io StringWriter)))
+           (java.io StringWriter Writer)))
 
 (set! *warn-on-reflection* true)
 
@@ -11,7 +11,7 @@
 
 (defn escape
   "Given a string, return a HTML-escaped version of that string."
-  [^String string]
+  ^String [^String string]
   (string/join
     (map (fn [ch]
            (if (or (#{34 38 39 60 61 62} ch) (> ch 127))
@@ -57,48 +57,50 @@
 
 (defprotocol Node
   "A node that can be emitted into an HTML string."
-  (emit [this]
+  (emit [this writer]
     "Print an object into an HTML string.
 
     Like clojure.xml/emit-element, but forgoes line breaks."))
 
 (extend-protocol Node
   nil
-  (emit [_])
+  (emit [_ _])
 
   String
-  (emit [this] (print (escape this)))
+  (emit [this ^Writer writer] (.write writer (escape this)))
 
   IPersistentMap
-  (emit [{:keys [tag attrs content]}]
-    (print (str "<" (name tag)))
+  (emit [{:keys [tag attrs content]} ^Writer writer]
+    (.write writer (str "<" (name tag)))
 
     (when attrs
-      (run! #(print (str " " (name (key %)) "=\"" (val %) "\"")) attrs))
+      (run! #(.write writer (str " " (name (key %)) "=\"" (val %) "\"")) attrs))
 
     (cond
       (seq content)
       (do
-        (print ">")
-        (run! emit content)
-        (print (str "</" (name tag) ">")))
+        (.write writer ">")
+        (run! #(emit % writer) content)
+        (.write writer (str "</" (name tag) ">")))
 
       (#{:area :base :br :col :embed :hr :img :input :link :meta :source :track :wbr} tag)
-      (print "/>")
+      (.write writer "/>")
 
       :else
-      (printf "></%s>" (name tag))))
+      (do
+        (.write writer "></")
+        (.write writer (name tag))
+        (.write writer ">"))))
 
   Object
-  (emit [this] (emit (pr-str this))))
+  (emit [this ^Writer writer] (emit (pr-str this) writer)))
 
 (defn html
   "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string."
   [element]
   (with-open [writer (StringWriter.)]
-    (binding [*out* writer]
-      (emit element))
+    (emit element writer)
     (.toString writer)))
 
 (defn page

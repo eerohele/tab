@@ -48,11 +48,10 @@
 
         address
         (let [^java.net.InetSocketAddress address (.getLocalSocketAddress socket)]
-          (format "http://%s:%s" (.getHostString address) (.getLocalPort socket)))]
+          (format "http://%s:%s" (.getHostString address) (.getLocalPort socket)))
 
-    (thread/exec accept-loop-thread-pool
-      (try
-        (loop []
+        accept-connection
+        (fn []
           (let [client (.accept socket)
                 remote-addr (str (.getRemoteSocketAddress client))]
             (log/log :fine {:event :accept-client :remote-addr remote-addr})
@@ -139,7 +138,12 @@
                             (close)))))
                     (close))
                   (catch SocketException ex
-                    (log/log :fine {:event :write-response-failed :ex ex}))))))
+                    (log/log :fine {:event :write-response-failed :ex ex})))))))]
+
+    (thread/exec accept-loop-thread-pool
+      (try
+        (loop []
+          (accept-connection)
           (recur))
         (catch SocketException ex
           (log/log :fine {:event :client-disappeared? :ex ex})

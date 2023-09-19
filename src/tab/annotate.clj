@@ -6,6 +6,11 @@
   (:import (java.io BufferedReader PushbackReader StringReader)
            (java.util.regex Pattern)))
 
+(defmacro ^:private ch
+  "Convert a char to an int at macro-expansion time (for performance)."
+  [n]
+  (int n))
+
 (set! *warn-on-reflection* true)
 
 (defn ^:private annotate-comment
@@ -16,7 +21,7 @@
                       (neg? i)
                       chars
 
-                      (= 10 i) ; newline
+                      (= (ch \newline) i)
                       (do
                         (.unread reader i)
                         chars)
@@ -39,7 +44,7 @@
                       (neg? i)
                       chars
 
-                      (or (terminating-macros i) (#{32 44 10} i))
+                      (or (terminating-macros i) (#{(ch \space) (ch \,) (ch \newline)} i))
                       (do
                         (.unread reader i)
                         chars)
@@ -59,7 +64,7 @@
                (let [i (.read reader)]
                  (cond
                    (neg? i) chars
-                   (#{32 44} i) ; space or comma
+                   (#{(ch \space) (ch \,)} i)
 
                    (do
                      (.unread reader i)
@@ -180,7 +185,7 @@
                         (= "#" s)
                         (let [i2 (.read reader)]
                           (.unread reader i2)
-                          (if (= (char i2) \") ; regex
+                          (if (= i2 (ch \")) ; regex
                             (do
                               (.unread reader i)
                               (let [form (read reader)]

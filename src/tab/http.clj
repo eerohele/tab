@@ -111,7 +111,7 @@
                             (catch SocketException ex
                               (evict-queue!)
                               (log/log :fine
-                                {:event :evict-queue/send-heartbeat-failed
+                                {:event :send-heartbeat-failed
                                  :remote-addr remote-addr
                                  :connected-clients (count-queues)})
                               ;; rethrow to cancel scheduled task
@@ -130,7 +130,12 @@
                                 (recur))))
                           (catch SocketException _
                             (log/log :fine
-                              {:event :evict-queue/queue-write-failed
+                              {:event :evict-queue-write-failed
+                               :remote-addr remote-addr
+                               :connected-clients (count-queues)}))
+                          (catch InterruptedException _
+                            (log/log :fine
+                              {:event :evict-queue-interrupted
                                :remote-addr remote-addr
                                :connected-clients (count-queues)}))
                           (finally

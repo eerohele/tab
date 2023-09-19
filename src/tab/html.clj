@@ -21,13 +21,14 @@
 
 (defn ^:private ->content
   [nodes]
-  (reduce
-    (fn [nodes node]
-      (if (sequential? node)
-        (into nodes node)
-        (conj nodes node)))
-    []
-    nodes))
+  (let [xs (transient [])]
+    (run!
+      (fn [node]
+        (if (sequential? node)
+          (run! #(conj! xs %) node)
+          (conj! xs node)))
+      nodes)
+    (persistent! xs)))
 
 (defn $
   "Given a tag (a keyword), optionally an attribute map, and any number of child

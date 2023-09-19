@@ -145,6 +145,13 @@
   [string]
   (-> string StringReader. BufferedReader. (PushbackReader. 2)))
 
+(defn ^:private s
+  "Given an int representing a character, convert it to a string."
+  [i]
+  (-> i char str))
+
+(comment (s 65) ,,,)
+
 (defn annotate
   "Given a string of Clojure code, return a clojure.xml-compatible data
   structure that annotates the code for syntax highlighting."
@@ -156,98 +163,97 @@
                 (let [i (.read reader)]
                   (if (neg? i)
                     element
-                    (let [s (-> i char str)]
-                      (cond
-                        (#{" " "\n" "\t"} s)
-                        (recur ctx (conj element s))
+                    (cond
+                      (#{(ch \space) (ch \newline) (ch \tab)} i)
+                      (recur ctx (conj element (s i)))
 
-                        (= "," s)
-                        (recur ctx (conj element ($ :span {:class "comma"} s)))
+                      (= (ch \,) i)
+                      (recur ctx (conj element ($ :span {:class "comma"} (s i))))
 
-                        (= "'" s)
-                        (recur ctx (conj element ($ :span {:class "quote"} s)))
+                      (= (ch \') i)
+                      (recur ctx (conj element ($ :span {:class "quote"} (s i))))
 
-                        (= "`" s)
-                        (recur ctx (conj element ($ :span {:class "syntax-quote"} s)))
+                      (= (ch \`) i)
+                      (recur ctx (conj element ($ :span {:class "syntax-quote"} (s i))))
 
-                        (= "~" s)
-                        (recur ctx (conj element ($ :span {:class "unquote"} s)))
+                      (= (ch \~) i)
+                      (recur ctx (conj element ($ :span {:class "unquote"} (s i))))
 
-                        (= "@" s)
-                        (recur ctx (conj element ($ :span {:class "deref"} s)))
+                      (= (ch \@) i)
+                      (recur ctx (conj element ($ :span {:class "deref"} (s i))))
 
-                        (= "^" s)
-                        (recur ctx (conj element ($ :span {:class "metadata"} s)))
+                      (= (ch \^) i)
+                      (recur ctx (conj element ($ :span {:class "metadata"} (s i))))
 
-                        (= "\\" s)
-                        (recur ctx (conj element (annotate-char reader)))
+                      (= (ch \\) i)
+                      (recur ctx (conj element (annotate-char reader)))
 
-                        (= "#" s)
-                        (let [i2 (.read reader)]
-                          (.unread reader i2)
-                          (if (= i2 (ch \")) ; regex
-                            (do
-                              (.unread reader i)
-                              (let [form (read reader)]
-                                (recur ctx (conj element (annotate-form form)))))
-                            (recur ctx (conj element ($ :span {:class "dispatch"} s)))))
+                      (= (ch \#) i)
+                      (let [i2 (.read reader)]
+                        (.unread reader i2)
+                        (if (= i2 (ch \")) ; regex
+                          (do
+                            (.unread reader i)
+                            (let [form (read reader)]
+                              (recur ctx (conj element (annotate-form form)))))
+                          (recur ctx (conj element ($ :span {:class "dispatch"} (s i))))))
 
-                        (= ";" s)
-                        (do (.unread reader i)
-                          (recur ctx (conj element (annotate-comment reader))))
+                      (= (ch \;) i)
+                      (do (.unread reader i)
+                        (recur ctx (conj element (annotate-comment reader))))
 
-                        (= ":" s)
-                        (do (.unread reader i)
-                          (recur ctx (conj element (annotate-keyword reader))))
+                      (= (ch \:) i)
+                      (do (.unread reader i)
+                        (recur ctx (conj element (annotate-keyword reader))))
 
-                        (#{"(" "[" "{"} s)
-                        (recur ctx
-                          (conj element ($ :span {:class "sexp"}
-                                          ($ :span {:class "punctuation"} s)
-                                          (aux [] []))))
+                      (#{(ch \() (ch \[) (ch \{)} i)
+                      (recur ctx
+                        (conj element ($ :span {:class "sexp"}
+                                        ($ :span {:class "punctuation"} (s i))
+                                        (aux [] []))))
 
-                        (#{")" "]" "}"} s)
-                        (conj element ($ :span {:class "punctuation"} s))
+                      (#{(ch \)) (ch \]) (ch \})} i)
+                      (conj element ($ :span {:class "punctuation"} (s i)))
 
-                        :else
-                        (do
-                          (.unread reader i)
+                      :else
+                      (do
+                        (.unread reader i)
 
-                          (let [form (read reader)]
-                            (cond
-                              (nil? form)
-                              (recur ctx (conj element ($ :span {:class "nil"} "nil")))
+                        (let [form (read reader)]
+                          (cond
+                            (nil? form)
+                            (recur ctx (conj element ($ :span {:class "nil"} "nil")))
 
-                              (boolean? form)
-                              (recur ctx (conj element ($ :span {:class "boolean"} (pr-str form))))
+                            (boolean? form)
+                            (recur ctx (conj element ($ :span {:class "boolean"} (pr-str form))))
 
-                              (and (symbol? form) (contains? def-syms form))
-                              (recur
-                                (conj ctx :def)
-                                (conj element ($ :span {:class "symbol"} (pr-str form))))
+                            (and (symbol? form) (contains? def-syms form))
+                            (recur
+                              (conj ctx :def)
+                              (conj element ($ :span {:class "symbol"} (pr-str form))))
 
-                              (and (symbol? form) (= form '&))
-                              (recur ctx (conj element ($ :span {:class "ampersand"} "&")))
+                            (and (symbol? form) (= form '&))
+                            (recur ctx (conj element ($ :span {:class "ampersand"} "&")))
 
-                              (and (symbol? form) (= :def (peek ctx)))
-                              (recur
-                                (pop ctx)
-                                (conj element ($ :span {:class "symbol var"} (pr-str form))))
+                            (and (symbol? form) (= :def (peek ctx)))
+                            (recur
+                              (pop ctx)
+                              (conj element ($ :span {:class "symbol var"} (pr-str form))))
 
-                              (symbol? form)
-                              (recur ctx (conj element ($ :span {:class "symbol"} (pr-str form))))
+                            (symbol? form)
+                            (recur ctx (conj element ($ :span {:class "symbol"} (pr-str form))))
 
-                              (regex? form)
-                              (recur ctx (conj element (annotate-regex form)))
+                            (regex? form)
+                            (recur ctx (conj element (annotate-regex form)))
 
-                              (string? form)
-                              (recur ctx (conj element (annotate-string form)))
+                            (string? form)
+                            (recur ctx (conj element (annotate-string form)))
 
-                              (number? form)
-                              (recur ctx (conj element ($ :span {:class "number"} (pr-str form))))
+                            (number? form)
+                            (recur ctx (conj element ($ :span {:class "number"} (pr-str form))))
 
-                              :else
-                              (recur ctx (conj element ($ :span {:class "unknown"} (pr-str form))))))))))))]
+                            :else
+                            (recur ctx (conj element ($ :span {:class "unknown"} (pr-str form)))))))))))]
         ($ :code {:class "ann"} (aux [] []))))))
 
 #_{:clj-kondo/ignore [:unresolved-namespace]}

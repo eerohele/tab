@@ -3,7 +3,8 @@
   fragment that annotates the given code for syntax highlighting."
   (:require [clojure.string :as string]
             [tab.html :refer [$] :as html])
-  (:import (java.io BufferedReader PushbackReader StringReader)))
+  (:import (java.io BufferedReader PushbackReader StringReader)
+           (java.util.regex Pattern)))
 
 (set! *warn-on-reflection* true)
 
@@ -85,7 +86,7 @@
 
 (defn regex?
   [x]
-  (instance? java.util.regex.Pattern x))
+  (instance? Pattern x))
 
 (defn ^:private annotate-regex
   [form]

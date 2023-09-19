@@ -22,6 +22,6 @@
   (let [no (AtomicInteger. 0)]
     (reify ThreadFactory
       (newThread [_ runnable]
-        (doto (Thread. runnable (format "tab-pool-%s-%d" (name name-suffix) (.incrementAndGet no)))
+        (doto (Thread. runnable (format "me.flowthing.tab-pool-%s-%d" (name name-suffix) (.incrementAndGet no)))
           (.setUncaughtExceptionHandler (logging-exception-handler ex-log-level))
           (.setDaemon daemon?))))))

@@ -3,13 +3,11 @@
   (:import (java.util.concurrent ThreadFactory)
            (java.util.concurrent.atomic AtomicInteger)))
 
-(def convey-bindings @#'clojure.core/binding-conveyor-fn)
-
 (defmacro exec
   "Given a ExecutorService thread pool and a body of forms, .execute the body
   (with binding conveyance) in the thread pool."
   [thread-pool & body]
-  `(.execute ~thread-pool (convey-bindings (fn [] ~@body))))
+  `(.execute ~thread-pool (bound-fn [] ~@body)))
 
 (defn logging-exception-handler
   [level]

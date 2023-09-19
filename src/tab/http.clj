@@ -75,8 +75,6 @@
 
                         finish (fn []
                                  (try
-                                   (.close output-stream)
-                                   (.close reader)
                                    (.close client)
                                    (catch SocketException _
                                      (log/log :fine {:event :socket-close-failed :remote-addr remote-addr}))))

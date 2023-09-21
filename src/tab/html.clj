@@ -1,23 +1,13 @@
 (ns tab.html
-  (:require [clojure.spec.alpha :as spec]
-            [clojure.string :as string])
+  (:require [clojure.spec.alpha :as spec])
   (:import (clojure.lang IPersistentMap)
-           (java.io StringWriter Writer)))
+           (java.io ByteArrayOutputStream PrintStream StringReader)
+           (java.nio.charset StandardCharsets)))
 
 (set! *warn-on-reflection* true)
 
 (defrecord Element
   [tag attrs content])
-
-(defn escape
-  "Given a string, return a HTML-escaped version of that string."
-  ^String [^String string]
-  (string/join
-    (map (fn [ch]
-           (if (or (#{34 38 39 60 61 62} ch) (> ch 127))
-             (format "&#%s;" ch)
-             (String. (Character/toChars ch))))
-      (some-> string .codePoints .iterator iterator-seq))))
 
 (defn ^:private ->content
   [nodes]
@@ -58,8 +48,8 @@
 
 (defprotocol Node
   "A node that can be emitted into an HTML string."
-  (emit [this writer]
-    "Print an object into an HTML string.
+  (emit [this print-stream]
+    "Print an object into a java.io.PrintStream.
 
     Like clojure.xml/emit-element, but forgoes line breaks."))
 
@@ -68,51 +58,84 @@
   (emit [_ _])
 
   String
-  (emit [this ^Writer writer] (.write writer (escape this)))
+  (emit [this ^PrintStream ps]
+    (with-open [reader (StringReader. this)]
+      (loop []
+        (let [n (.read reader)]
+          (when (pos? n)
+            ;; Escape
+            (if (or (#{34 38 39 60 61 62} n) (> n 127))
+              (do
+                (.print ps \&)
+                (.print ps \#)
+                (.print ps n)
+                (.print ps \;))
+              (.print ps (char n)))
+            (recur))))))
 
   IPersistentMap
-  (emit [{:keys [tag attrs content]} ^Writer writer]
-    (.write writer (str "<" (name tag)))
+  (emit [{:keys [tag attrs content]} ^PrintStream ps]
+    (.print ps "<")
+    (.print ps (name tag))
 
     (when attrs
-      (run! #(.write writer (str " " (name (key %)) "=\"" (val %) "\"")) attrs))
+      (run! #(.print ps (str " " (name (key %)) "=\"" (val %) "\"")) attrs))
 
     (cond
       (seq content)
       (do
-        (.write writer ">")
-        (run! #(emit % writer) content)
-        (.write writer (str "</" (name tag) ">")))
+        (.print ps ">")
+        (run! #(emit % ps) content)
+        (.print ps (str "</" (name tag) ">")))
 
       (#{:area :base :br :col :embed :hr :img :input :link :meta :source :track :wbr} tag)
-      (.write writer "/>")
+      (.print ps "/>")
 
       :else
       (do
-        (.write writer "></")
-        (.write writer (name tag))
-        (.write writer ">"))))
+        (.print ps "></")
+        (.print ps (name tag))
+        (.print ps ">"))))
 
   Object
-  (emit [this ^Writer writer] (emit (pr-str this) writer)))
+  (emit [this ^PrintStream writer] (emit (pr-str this) writer)))
+
+(defn stream
+  "Given a clojure.xml-compatible data structure describing an HTML document,
+  print the HTML document into a java.io.OutputStream.
+
+  The caller must close the output stream."
+  [element]
+  (let [baos (ByteArrayOutputStream. 8192)
+        stream (PrintStream. baos false StandardCharsets/UTF_8)]
+    (emit element stream)
+    (.flush stream)
+    baos))
 
 (defn string
   "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string."
   [element]
-  (with-open [writer (StringWriter.)]
-    (emit element writer)
-    (.toString writer)))
+  (-> element stream str))
 
 (defn page
   "Given a clojure.xml-compatible data structure describing an HTML document,
-  print the HTML document into a string, and prepend a HTML5 doctype."
+  print a HTML5 doctype followed by the HTML document into a
+  java.io.OutputStream.
+
+  The caller must close the output stream."
   [element]
-  (str "<!DOCTYPE html>" (string element)))
+  (let [baos (ByteArrayOutputStream. 8192)
+        stream (PrintStream. baos false StandardCharsets/UTF_8)]
+    (.print stream "<!DOCTYPE html>")
+    (emit element stream)
+    (.flush stream)
+    baos))
 
 (comment
   (string ($ :html))
   (string ($ :p "&"))
+  (string ($ :p "Hello, world!"))
   (string ($ :code {:class "ann"} ($ :span {:class "symbol"} "<=")))
   (string ($ :meta {:charset "utf-8"}))
   (string ($ :html ($ :head) ($ :body)))

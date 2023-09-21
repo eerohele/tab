@@ -92,7 +92,7 @@
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"}
          :body (if (contains? headers "bx-request")
-                 (html/string
+                 (html/stream
                    (tabulator/tabulation data db))
                  (html/page
                    (template/page request
@@ -122,7 +122,7 @@
           {:status 200
            :headers {"Content-Type" "text/html; charset=utf-8"
                      "BX-Replace-Url" (format "/id/%d?print-length=%s" hash-code (if (nil? *print-length*) "nil" *print-length*))}
-           :body (html/string (tabulator/-tabulate val 0))})
+           :body (html/stream (tabulator/-tabulate val 0))})
         {:status 404}))
     (catch IllegalArgumentException _
       {:status 400

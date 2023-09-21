@@ -51,7 +51,7 @@
       (spec/valid? ::html/node node)
       ;; Every annotation yields a data structure that Tab can print into HTML,
       ;; which JSoup can then parse.
-      (empty? (parse-errors (html/html node))))))
+      (empty? (parse-errors (html/string node))))))
 
 (xr/check! ::ret)
 

@@ -18,7 +18,7 @@
       ($ :script {:src (format "/assets/js/tab.%s.js" server-id) :defer "true"}))))
 
 (comment
-  (html/html (page {:server-id "foo"} "hello"))
+  (html/string (page {:server-id "foo"} "hello"))
   ,,,)
 
 (defn error-page

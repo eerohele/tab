@@ -3,7 +3,7 @@
             [tab.html :refer [$] :as html]))
 
 (deftest html
-  (are [input ret] (= ret (html/html input))
+  (are [input ret] (= ret (html/string input))
     ($ :html) "<html></html>"
     ($ :script {:src "tab.js"}) "<script src=\"tab.js\"></script>"
     ($ :meta {:charset "utf-8"}) "<meta charset=\"utf-8\"/>"

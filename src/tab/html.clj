@@ -96,7 +96,7 @@
   Object
   (emit [this ^Writer writer] (emit (pr-str this) writer)))
 
-(defn html
+(defn string
   "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string."
   [element]
@@ -108,15 +108,15 @@
   "Given a clojure.xml-compatible data structure describing an HTML document,
   print the HTML document into a string, and prepend a HTML5 doctype."
   [element]
-  (str "<!DOCTYPE html>" (html element)))
+  (str "<!DOCTYPE html>" (string element)))
 
 (comment
-  (html ($ :html))
-  (html ($ :p "&"))
-  (html ($ :code {:class "ann"} ($ :span {:class "symbol"} "<=")))
-  (html ($ :meta {:charset "utf-8"}))
-  (html ($ :html ($ :head) ($ :body)))
-  (html ($ :a {:href "#"}))
+  (string ($ :html))
+  (string ($ :p "&"))
+  (string ($ :code {:class "ann"} ($ :span {:class "symbol"} "<=")))
+  (string ($ :meta {:charset "utf-8"}))
+  (string ($ :html ($ :head) ($ :body)))
+  (string ($ :a {:href "#"}))
   ,,,)
 
 (spec/def ::tag simple-keyword?)

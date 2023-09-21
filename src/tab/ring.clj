@@ -69,13 +69,17 @@
 
   InputStream
   (writes [this ^OutputStream stream]
-    (.transferTo this stream)
-    (.close this))
+    (try
+      (.transferTo this stream)
+      (finally
+        (.close this))))
 
   ByteArrayOutputStream
   (writes [this ^OutputStream stream]
-    (.writeTo this stream)
-    (.close this))
+    (try
+      (.writeTo this stream)
+      (finally
+        (.close this))))
 
   Object
   (writes [_ _]))

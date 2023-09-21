@@ -77,7 +77,7 @@
                (http/broadcast http-server
                  (format "id: %s\nevent: tab\ndata: {\"history\": %s, \"html\": \"%s\"}\n\n" id
                    history?
-                   (base64/encode (html/html (tabulator/tabulation data db)))))))
+                   (base64/encode (html/string (tabulator/tabulation data db)))))))
 
            (when (instance? clojure.lang.IRef x)
              (add-watch x :tab (fn [_ _ _ n] (send n {:history? false})))

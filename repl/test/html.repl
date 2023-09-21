@@ -14,6 +14,6 @@
 
 (quick-check 50
   (for-all [node (spec/gen ::html/node)]
-    (instance? Document (Jsoup/parse (html/html node)))))
+    (instance? Document (Jsoup/parse (html/string node)))))
 
 (xr/check! ::ret)

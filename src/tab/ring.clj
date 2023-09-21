@@ -69,7 +69,8 @@
 
   InputStream
   (writes [this ^OutputStream stream]
-    (.transferTo this stream))
+    (.transferTo this stream)
+    (.close this))
 
   Object
   (writes [_ _]))

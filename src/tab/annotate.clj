@@ -143,7 +143,7 @@
 
 (defn ^:private make-reader
   [string]
-  (-> string StringReader. BufferedReader. (PushbackReader. 2)))
+  (-> string StringReader. (PushbackReader. 2)))
 
 (defn ^:private s
   "Given an int representing a character, convert it to a string."

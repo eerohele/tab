@@ -3,7 +3,7 @@
 
   See https://github.com/ring-clojure/ring for the original."
   (:require [clojure.string :as string])
-  (:import (java.io InputStream OutputStream)
+  (:import (java.io ByteArrayOutputStream InputStream OutputStream)
            (java.nio.charset StandardCharsets)
            (java.time Instant ZoneId)
            (java.time.format DateTimeFormatter)
@@ -70,6 +70,11 @@
   InputStream
   (writes [this ^OutputStream stream]
     (.transferTo this stream)
+    (.close this))
+
+  ByteArrayOutputStream
+  (writes [this ^OutputStream stream]
+    (.writeTo this stream)
     (.close this))
 
   Object

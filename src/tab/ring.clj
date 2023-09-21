@@ -89,6 +89,8 @@
     (write ^String (status-text status ""))
     (write "\r\n")
 
+    (.flush out)
+
     ;; Headers
     (let [headers (cond-> (assoc headers "Date" (.format date-time-formatter (Instant/now)))
                     (and (string? body) (seq body) (= 200 status))
@@ -102,6 +104,8 @@
           (write "\r\n"))
 
         (write "\r\n")))
+
+    (.flush out)
 
     ;; Body
     (when body

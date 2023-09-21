@@ -78,7 +78,7 @@
   "Given a java.io.OutputStream and a HTTP response map (á là Ring), write the
   response map into the writer and flush the writer."
   [^OutputStream out
-   {:keys [status headers ^String body]
+   {:keys [status headers body]
     :or {status 500 headers {}}}]
   (let [write (fn [x] (writes x out))]
     ;; Status line

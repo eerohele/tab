@@ -71,11 +71,9 @@
       :or {init-val '(tap> :hello-world)
            add-tap? true
            browse? true
-           pprint default-pprint
-           print-length 8
-           print-level 2}}]
-  (let [print-length (or print-length *print-length*)
-        print-level (or print-level *print-level*)
+           pprint default-pprint}}]
+  (let [print-length (if (contains? opts :print-length) print-length (or *print-length* 8))
+        print-level (if (contains? opts :print-level) print-level (or *print-level* 2))
 
         db (doto (db/pristine) (db/merge! (datafy/datafy init-val) {:history? true}))
 

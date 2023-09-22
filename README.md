@@ -87,6 +87,8 @@ user=> (doc tab/halt)
 ...
 ```
 
+Only `tab.api` and `tab.auto` are part of Tab's public API. All other namespaces are internal and subject to change.
+
 ## User manual
 
 - Click `-` to collapse a node.

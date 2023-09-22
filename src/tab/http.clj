@@ -7,14 +7,14 @@
   (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)
-           (java.util.concurrent BlockingQueue Executors TimeUnit)
+           (java.util.concurrent Executors TimeUnit)
            (java.util UUID)))
 
 (set! *warn-on-reflection* true)
 
 (defprotocol HttpServer
   (address [this] "Given a HttpServer, return the address it listens on.")
-  (broadcast [this event] "Send a server-sent event (SSE) to all connected clients.")
+  (sse-clients [this] "A set of server-sent event (SSE) clients connected to this server.")
   (halt [this] "Halt a HttpServer."))
 
 (defn serve
@@ -41,10 +41,8 @@
         thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)
         request-thread-pool (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))
         heartbeat-thread-pool (Executors/newScheduledThreadPool 1 (thread/make-factory :name-suffix :heartbeat :ex-log-level :fine))
-        queue-thread-pool (Executors/newCachedThreadPool (thread/make-factory :name-suffix :queue))
-
-        !queues (atom #{})
-        count-queues #(count @!queues)
+        !sse-clients (atom #{})
+        count-sse-clients #(count @!sse-clients)
 
         address
         (let [^java.net.InetSocketAddress address (.getLocalSocketAddress socket)]
@@ -92,59 +90,39 @@
                   (ring/write-response output-stream response)
 
                   (if (= (get-in response [:headers "Content-Type"]) "text/event-stream")
-                    (let [event-queue (:body response)
-                          _ (swap! !queues conj event-queue)
-                          evict-queue! (fn [] (swap! !queues disj event-queue))]
+                    (let [sse-client {:socket client :remote-addr remote-addr :output-stream output-stream}
+                          evict-client! (fn [] (swap! !sse-clients disj sse-client))]
+                      (swap! !sse-clients conj sse-client)
+
                       (log/log :fine
-                        {:event :accept-queue
+                        {:event :establish-sse-connection
                          :remote-addr remote-addr
-                         :connected-clients (count-queues)})
+                         :connected-clients (count-sse-clients)})
 
                       (.scheduleAtFixedRate heartbeat-thread-pool
                         (fn []
                           (try
                             (log/log :fine
-                              {:event :send-heartbeat
+                              {:event :send-sse-heartbeat
                                :remote-addr remote-addr
-                               :connected-clients (count-queues)})
+                               :connected-clients (count-sse-clients)})
                             (.write output-stream (.getBytes ":\n\n" StandardCharsets/UTF_8))
                             (.flush output-stream)
                             (catch SocketException ex
-                              (evict-queue!)
+                              (evict-client!)
                               (log/log :fine
-                                {:event :send-heartbeat-failed
+                                {:event :send-sse-heartbeat-failed
                                  :remote-addr remote-addr
-                                 :connected-clients (count-queues)})
+                                 :connected-clients (count-sse-clients)})
+                              (close)
                               ;; rethrow to cancel scheduled task
                               (throw ex))))
                         sse-heartbeat-initial-delay-secs
                         sse-heartbeat-frequency-secs
-                        TimeUnit/SECONDS)
-
-                      (thread/exec queue-thread-pool
-                        (try
-                          (loop []
-                            (let [^String item (.take ^BlockingQueue event-queue)]
-                              (when-not (identical? item ::quit)
-                                (.write output-stream (.getBytes item StandardCharsets/UTF_8))
-                                (.flush output-stream)
-                                (recur))))
-                          (catch SocketException _
-                            (log/log :fine
-                              {:event :evict-queue-write-failed
-                               :remote-addr remote-addr
-                               :connected-clients (count-queues)}))
-                          (catch InterruptedException _
-                            (log/log :fine
-                              {:event :evict-queue-interrupted
-                               :remote-addr remote-addr
-                               :connected-clients (count-queues)}))
-                          (finally
-                            (evict-queue!)
-                            (close)))))
+                        TimeUnit/SECONDS))
                     (close))
                   (catch SocketException ex
-                    (log/log :fine {:event :write-response-failed :ex ex})))))))]
+                    (log/log :fine {:event :sse-heartbeat-write-response-failed :ex ex})))))))]
 
     (thread/exec accept-loop-thread-pool
       (try
@@ -158,15 +136,11 @@
     (reify HttpServer
       (address [_] address)
 
-      (broadcast [_ event]
-        (run! (fn [^BlockingQueue queue] (.put queue event)) @!queues))
+      (sse-clients [_]
+        (deref !sse-clients))
 
       (halt [_]
-        ;; Put poison pill into event queue loop
-        (doseq [^BlockingQueue queue @!queues] (.put queue ::quit))
-
         (.shutdown request-thread-pool)
         (.shutdown heartbeat-thread-pool)
-        (.shutdownNow queue-thread-pool)
         (.shutdown accept-loop-thread-pool)
         (.close socket)))))

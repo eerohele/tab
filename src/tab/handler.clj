@@ -7,8 +7,7 @@
             [tab.html :refer [$] :as html]
             [tab.tabulator :as tabulator]
             [tab.template :as template])
-  (:import (java.net URI)
-           (java.util.concurrent ArrayBlockingQueue)))
+  (:import (java.net URI)))
 
 (set! *warn-on-reflection* true)
 
@@ -66,8 +65,7 @@
   {:status 200
    :headers {"Content-Type" "text/event-stream"
              "Cache-Control" "no-cache, must-revalidate, max-age=0"
-             "Connection" "keep-alive"}
-   :body (ArrayBlockingQueue. 1024)})
+             "Connection" "keep-alive"}})
 
 (defn ^:private parse-query-params
   [uri]

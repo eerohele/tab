@@ -7,7 +7,10 @@
             [tab.tabulator :as tabulator]
             [tab.handler :as handler]
             [tab.html :as html]
-            [tab.http :as http]))
+            [tab.http :as http]
+            [tab.log :as log])
+  (:import (java.io PrintStream)
+           (java.nio.charset StandardCharsets)))
 
 (set! *warn-on-reflection* true)
 
@@ -73,11 +76,34 @@
           ([x {:keys [history?]}]
            (binding [*print-length* print-length
                      *print-level* print-level]
-             (let [[id data] (db/merge! db (datafy/datafy x) {:history? history?})]
-               (http/broadcast http-server
-                 (format "id: %s\nevent: tab\ndata: {\"history\": %s, \"html\": \"%s\"}\n\n" id
-                   history?
-                   (base64/encode (html/string (tabulator/tabulation data db)))))))
+             (let [[id data] (db/merge! db (datafy/datafy x) {:history? history?})
+                   element (tabulator/tabulation data db)]
+
+               (try
+                 (run!
+                   (fn [{:keys [^java.io.OutputStream output-stream]}]
+                     ;; No with-open; we can't close this stream without
+                     ;; closing the underlying stream, which is the HTTP
+                     ;; server output stream for this client.
+                     (let [ps (PrintStream. output-stream false StandardCharsets/UTF_8)]
+                       ;; Metadata
+                       (.println ps (format "id: %s" id))
+                       (.println ps "event: tab")
+
+                       ;; Data blob
+                       (.print ps (format "data: {\"history\": %s, \"html\": \"" history?))
+                       (html/emit element (PrintStream. (base64/wrap output-stream) false StandardCharsets/UTF_8))
+                       (.print ps "\"}")
+
+                       ;; Terminator
+                       (.println ps)
+                       (.println ps)
+
+                       (.flush ps)))
+
+                   (http/sse-clients http-server))
+                 (catch java.net.SocketException _
+                   (log/log :fine {:event :evict-queue-write-failed})))))
 
            (when (instance? clojure.lang.IRef x)
              (add-watch x :tab (fn [_ _ _ n] (send n {:history? false})))

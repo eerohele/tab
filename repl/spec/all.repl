@@ -505,24 +505,29 @@
 (tab/tab> tab [{:a 1} {:a 2} {:a 3} {:a 4} {:a 5}])
 
 ;; footer is visible
+(.waitForSelector page "tfoot tr th >> text=4 of 5")
 (.isVisible (tfoot 0))
 (xr/check! true?)
 
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.waitForSelector page "tfoot tr th >> text=5 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4" "5"]})
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.waitForSelector page "tfoot tr th >> text=4 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 
 ;; expand, then refresh
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
 (.reload page)
+(.waitForSelector page "tfoot tr th >> text=5 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4" "5"]})
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.waitForSelector page "tfoot tr th >> text=4 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 
@@ -534,15 +539,18 @@
 ;; expand/collapse, nested in map
 (tab/tab> tab {:xs [{:a 1} {:a 2} {:a 3} {:a 4} {:a 5}]})
 
+(.waitForSelector page "tfoot tr th >> text=4 of 5")
 (.isVisible (tfoot 0))
 (xr/check! true?)
 
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.waitForSelector page "tfoot tr th >> text=5 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4" "5"]})
 (.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.waitForSelector page "tfoot tr th >> text=4 of 5")
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 

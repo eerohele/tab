@@ -1,4 +1,4 @@
-(ns tab.clip
+(ns tab.impl.clip
   (:require [clojure.string :as string]
             [clojure.pprint :as pprint])
   (:import (java.awt Toolkit)

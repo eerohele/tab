@@ -1,6 +1,6 @@
-(ns tab.html-test
+(ns tab.impl.html-test
   (:require [clojure.test :refer [deftest are]]
-            [tab.html :refer [$] :as html]))
+            [tab.impl.html :refer [$] :as html]))
 
 (deftest html
   (are [input ret] (= ret (html/string input))

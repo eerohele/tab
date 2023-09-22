@@ -5,8 +5,8 @@
 (require '[clojure.test.check.properties :refer [for-all]])
 (require '[clojure.test.check.generators :as gen])
 
-(require '[tab.annotate :refer [annotate]])
-(require '[tab.html :as html])
+(require '[tab.impl.annotate :refer [annotate]])
+(require '[tab.impl.html :as html])
 
 (spec/def ::pass? true?)
 (spec/def ::ret (spec/keys :req-un [::pass?]))

@@ -1,3 +1,3 @@
-(ns tab.clip)
+(ns tab.impl.clip)
 
 (defn copy [& _] :nok)

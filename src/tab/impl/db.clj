@@ -1,4 +1,4 @@
-(ns tab.db
+(ns tab.impl.db
   "Tab's in-memory database."
   (:refer-clojure :exclude [peek])
   (:require [clojure.core :as core])

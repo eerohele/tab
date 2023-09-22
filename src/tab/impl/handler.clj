@@ -1,12 +1,12 @@
-(ns tab.handler
+(ns tab.impl.handler
   "HTTP request handler functions."
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [tab.clip :as clip]
-            [tab.db :as db]
-            [tab.html :refer [$] :as html]
-            [tab.tabulator :as tabulator]
-            [tab.template :as template])
+            [tab.impl.clip :as clip]
+            [tab.impl.db :as db]
+            [tab.impl.html :refer [$] :as html]
+            [tab.impl.tabulator :as tabulator]
+            [tab.impl.template :as template])
   (:import (java.net URI)
            (java.util.concurrent ArrayBlockingQueue)))
 

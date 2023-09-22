@@ -1,5 +1,5 @@
-(ns tab.template
-  (:require [tab.html :refer [$] :as html]))
+(ns tab.impl.template
+  (:require [tab.impl.html :refer [$] :as html]))
 
 (defn page
   [{:keys [server-id]} main]

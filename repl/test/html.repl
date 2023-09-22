@@ -4,7 +4,7 @@
 (require '[clojure.test.check :refer [quick-check]])
 (require '[clojure.test.check.properties :refer [for-all]])
 
-(require '[tab.html :as html])
+(require '[tab.impl.html :as html])
 
 (spec/def ::pass? true?)
 (spec/def ::ret (spec/keys :req-un [::pass?]))

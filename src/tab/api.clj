@@ -3,12 +3,12 @@
   (:require [clojure.datafy :as datafy]
             [clojure.java.browse :as browse]
             [clojure.pprint :as pprint]
-            [tab.base64 :as base64]
-            [tab.db :as db]
-            [tab.tabulator :as tabulator]
-            [tab.handler :as handler]
-            [tab.html :as html]
-            [tab.http :as http]))
+            [tab.impl.base64 :as base64]
+            [tab.impl.db :as db]
+            [tab.impl.tabulator :as tabulator]
+            [tab.impl.handler :as handler]
+            [tab.impl.html :as html]
+            [tab.impl.http :as http]))
 
 (set! *warn-on-reflection* true)
 

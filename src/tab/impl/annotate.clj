@@ -1,8 +1,8 @@
-(ns tab.annotate
+(ns tab.impl.annotate
   "Given a string of Clojure code, return a Clojure representation of a HTML
   fragment that annotates the given code for syntax highlighting."
   (:require [clojure.string :as string]
-            [tab.html :refer [$] :as html])
+            [tab.impl.html :refer [$] :as html])
   (:import (java.io BufferedReader PushbackReader StringReader)
            (java.util.regex Pattern)))
 

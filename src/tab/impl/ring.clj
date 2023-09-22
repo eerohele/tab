@@ -1,4 +1,4 @@
-(ns tab.ring
+(ns tab.impl.ring
   "A very bad Ring implementation.
 
   See https://github.com/ring-clojure/ring for the original."

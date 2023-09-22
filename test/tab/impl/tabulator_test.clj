@@ -1,9 +1,9 @@
-(ns tab.tabulator-test
+(ns tab.impl.tabulator-test
   (:require [clojure.test :refer [deftest are]]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
-            [tab.tabulator :as tabulator]))
+            [tab.impl.tabulator :as tabulator]))
 
 (deftest sort-map
   (are [input ret] (= ret (tabulator/sort-map-by-keys input))

@@ -1,4 +1,4 @@
-(ns tab.tabulator
+(ns tab.impl.tabulator
   "Make tables."
   (:require [clojure.pprint :as pprint]
             [tab.impl.annotate :refer [annotate]]

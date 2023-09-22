@@ -1,9 +1,9 @@
-(ns tab.http
-  (:require [tab.ring :as ring]
-            [tab.html :refer [$] :as html]
-            [tab.log :as log]
-            [tab.template :as template]
-            [tab.thread :as thread])
+(ns tab.impl.http
+  (:require [tab.impl.ring :as ring]
+            [tab.impl.html :refer [$] :as html]
+            [tab.impl.log :as log]
+            [tab.impl.template :as template]
+            [tab.impl.thread :as thread])
   (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)

@@ -1,4 +1,4 @@
-(ns tab.log
+(ns tab.impl.log
   "Log things."
   (:require [clojure.tools.logging :as log]
             [taoensso.timbre :as timbre]))

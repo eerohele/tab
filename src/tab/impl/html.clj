@@ -1,4 +1,4 @@
-(ns tab.html
+(ns tab.impl.html
   (:require [clojure.spec.alpha :as spec]
             [clojure.string :as string])
   (:import (clojure.lang IPersistentMap)

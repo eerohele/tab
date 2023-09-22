@@ -1,4 +1,4 @@
-(ns tab.base64
+(ns tab.impl.base64
   "Base64 utilities."
   (:import (java.nio.charset StandardCharsets)
            (java.util Base64 Base64$Encoder)))

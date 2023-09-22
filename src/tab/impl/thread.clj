@@ -1,5 +1,5 @@
-(ns tab.thread
-  (:require [tab.log :as log])
+(ns tab.impl.thread
+  (:require [tab.impl.log :as log])
   (:import (java.util.concurrent ThreadFactory)
            (java.util.concurrent.atomic AtomicInteger)))
 

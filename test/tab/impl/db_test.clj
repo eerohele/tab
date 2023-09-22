@@ -1,10 +1,10 @@
-(ns tab.db-test
+(ns tab.impl.db-test
   (:require [clojure.spec.alpha :as spec]
             [clojure.test :refer [deftest are is testing]]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
-            [tab.db :as db]))
+            [tab.impl.db :as db]))
 
 (defn ^:private hash->map
   [xs]

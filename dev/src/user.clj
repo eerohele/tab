@@ -3,7 +3,7 @@
 #_{:clj-kondo/ignore [:unresolved-namespace]}
 (comment
   (do
-    ((requiring-resolve 'tab.log/set-level!) :fine)
+    ((requiring-resolve 'tab.impl.log/set-level!) :fine)
 
     (def tab
       ((requiring-resolve 'tab.api/run)

@@ -85,18 +85,19 @@
     (if (= '*print-length* print-length) *print-length* print-length)))
 
 (defn ^:private item
-  [{db :tab/db [hash-code] :matches headers :headers :as request}]
+  [{db :tab/db [hash-code] :matches uri :uri headers :headers :as request}]
   (try
     (let [hash-code (Integer/parseInt hash-code)]
       (if-some [data (db/pull db hash-code)]
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"}
-         :body (if (contains? headers "bx-request")
-                 (html/string
-                   (tabulator/tabulation data db))
-                 (html/page
-                   (template/page request
-                     (tabulator/tabulation data db))))}
+         :body (binding [*print-length* (parse-print-length uri)]
+                 (if (contains? headers "bx-request")
+                   (html/string
+                     (tabulator/tabulation data db))
+                   (html/page
+                     (template/page request
+                       (tabulator/tabulation data db)))))}
         {:status 410
          :headers {"Content-Type" "text/html; charset=utf-8"}
          :body (html/page

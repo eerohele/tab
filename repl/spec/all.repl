@@ -517,6 +517,15 @@
 (vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
 (xr/check! #{["1" "2" "3" "4"]})
 
+;; expand, then refresh
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(.reload page)
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4" "5"]})
+(.waitForResponse page "**/toggle/**" #(.click (.locator page "[data-action = toggle-length]")))
+(vec (.allTextContents (.locator page "tbody > tr > td:nth-child(2)")))
+(xr/check! #{["1" "2" "3" "4"]})
+
 ;; footer is not visible when entire table is collapsed
 (.click (toggle 0))
 (.isVisible (tfoot 0))
@@ -540,6 +549,21 @@
 (tab/tab> tab [{:a 1} {:a 2} {:a 3} {:a 4}])
 
 ;; footer not visible when seq length meets *print-length*
+(.isVisible (tfoot 0))
+(xr/check! false?)
+
+(tab/halt tab)
+
+;; footer not visible when print-length is nil
+#_{:clj-kondo/ignore [:redefined-var]}
+(def tab (tab/run :browse? false :print-length nil :print-level 3))
+#_{:clj-kondo/ignore [:redefined-var]}
+(def uri (tab/address tab))
+
+(.navigate page uri)
+
+(tab/tab> tab [{:a 1} {:a 2} {:a 3}])
+
 (.isVisible (tfoot 0))
 (xr/check! false?)
 

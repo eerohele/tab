@@ -9,6 +9,8 @@
 
 (set! *warn-on-reflection* true)
 
+(def ^:dynamic *initial-print-length* nil)
+
 (def ^:dynamic *pprint* prn)
 
 (defn ^:private seq-label
@@ -196,6 +198,8 @@
               this)
             (let [cnt (count this)]
               (cond
+                (nil? *initial-print-length*) nil
+
                 (and (int? *print-length*) (> cnt *print-length*))
                 ($ :tfoot
                   ($ :tr
@@ -210,7 +214,7 @@
                                :bx-swap "outerHTML"}
                           (format "⇣ %d of %d" *print-length* cnt))))))
 
-                (nil? *print-length*)
+                (and (some? *initial-print-length*) (nil? *print-length*))
                 ($ :tfoot
                   ($ :tr
                     ($ :th {:colspan (-> ks count inc)}

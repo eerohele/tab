@@ -84,6 +84,7 @@
           (fn [request]
             (binding [*print-length* print-length
                       *print-level* print-level
+                      tabulator/*initial-print-length* print-length
                       tabulator/*pprint* pprint]
               (handler/handle (assoc request :tab/db db))))
           opts)
@@ -95,6 +96,7 @@
           ([x {:keys [history?]}]
            (binding [*print-length* print-length
                      *print-level* print-level
+                     tabulator/*initial-print-length* print-length
                      tabulator/*pprint* pprint]
              (let [[id data] (db/merge! db (datafy/datafy x) {:history? history?})]
                (http/broadcast http-server

@@ -71,6 +71,7 @@
                     close (fn []
                             (try
                               (.close client)
+                              (log/log :fine {:event :socket-close-ok :remote-addr remote-addr})
                               (catch SocketException _
                                 (log/log :fine {:event :socket-close-failed :remote-addr remote-addr}))))
 

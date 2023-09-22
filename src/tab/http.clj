@@ -152,7 +152,7 @@
           (accept-connection)
           (recur))
         (catch SocketException ex
-          (log/log :fine {:event :client-disappeared? :ex ex})
+          (log/log :fine {:event :server-halted :ex ex})
           :halted)))
 
     (reify HttpServer

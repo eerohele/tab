@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## UNRELEASED
+
+- Sort maps by key #9
+- Show expand/collapse controls when seq of maps exceeds `:print-length` #7
+- Reduce memory use and improve performance
+- Add `:pprint` option to `tab.api/run`
+- Ensure Tab respects `:print-length nil` and `:print-level nil`
+
 ## 2023-05-03
 
 - Fix Chrome UI freeze on back/forward navigation #5

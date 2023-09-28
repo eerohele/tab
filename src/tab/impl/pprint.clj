@@ -71,7 +71,7 @@
     (print-method form writer)
     (str writer)))
 
-(defn ^:private pprint-impl
+(defn ^:private -pprint
   [writer form
    & {:keys [level ^String indentation reserve]
       :or {level 0 indentation "" reserve 0}}]
@@ -82,7 +82,7 @@
       (let [k (key form)
             v (val form)]
 
-        (pprint-impl writer k :level (inc level) :indentation indentation :reserve reserve)
+        (-pprint writer k :level (inc level) :indentation indentation :reserve reserve)
 
         (if (>= (.length (print-linear v)) (- (remaining writer) reserve))
           (do
@@ -90,7 +90,7 @@
             (write writer indentation))
           (write writer " "))
 
-        (pprint-impl writer v :level (inc level) :indentation indentation :reserve reserve))
+        (-pprint writer v :level (inc level) :indentation indentation :reserve reserve))
 
       (coll? form)
       (if (and (int? *print-level*) (= level *print-level*))
@@ -104,8 +104,8 @@
               (when (seq m)
                 (write writer "^")
                 (if (and (= (count m) 1) (:tag m))
-                  (pprint-impl writer (:tag m) :level level :indentation indentation :reserve reserve)
-                  (pprint-impl writer m :level level :indentation indentation :reserve reserve))
+                  (-pprint writer (:tag m) :level level :indentation indentation :reserve reserve)
+                  (-pprint writer m :level level :indentation indentation :reserve reserve))
                 (case mode :miser (nl writer) (write writer " ")))))
 
           (write writer o)
@@ -127,9 +127,9 @@
                     (let [f (first form)
                           n (next form)]
                       (if (empty? n)
-                        (pprint-impl writer f :level (inc level) :indentation indentation :reserve (inc reserve))
+                        (-pprint writer f :level (inc level) :indentation indentation :reserve (inc reserve))
                         (do
-                          (pprint-impl writer f :level (inc level) :indentation indentation :reserve (if (map-entry? f) 1 0))
+                          (-pprint writer f :level (inc level) :indentation indentation :reserve (if (map-entry? f) 1 0))
                           (when (map-entry? f) (write writer ","))
                           (case mode :miser (nl writer) (write writer " "))
                           (recur n (inc index))))))))))
@@ -152,7 +152,7 @@
      "first arg to pprint must be a java.io.Writer")
 
    (let [writer (count-keeping-writer writer max-width)]
-     (pprint-impl writer x)
+     (-pprint writer x)
      (nl writer)
      nil)))
 

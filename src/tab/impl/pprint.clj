@@ -10,7 +10,12 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tab.impl.pprint
-  "A pretty-printer for Clojure data structures."
+  "A pretty-printer for Clojure data structures.
+
+  Loosely based on the algorithm described in \"Pretty-Printing,
+  Converting List to Linear Structure\" by Ira Goldstein (Artificial
+  Intelligence, Memo No. 279 in Massachusetts Institute of Technology
+  A.I. Laboratory, February 1973)."
   {:author "Eero Helenius"}
   (:import (java.io StringWriter Writer)))
 

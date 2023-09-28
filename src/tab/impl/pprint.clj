@@ -91,148 +91,138 @@
   (and (int? *print-level*) (= level *print-level*)))
 
 (defn ^:private -pprint
-  "Given a java.io.Writer, a form, and an options map, pretty-print the
-  form into the writer.
+  "Given a java.io.Writer and a form, pretty-print the form into the
+  writer.
 
-  Options:
+  Other arguments are internal.
 
-    :level (long)
+  Internal args:
+
+    level (long)
       The current nesting level. For example, in [[:a 1]], the outer
       vector is nested at level 0, and the inner vector is nested at
       level 1.
 
-    :indentation (String)
+    indentation (String)
       The string that represents the current indentation level.
 
-    :reserve-chars (long)
+    reserve-chars (long)
       The number of characters reserved for closing delimiters of
       S-expressions above the current nesting level."
-  [writer form
-   & {:keys [level ^String indentation reserve-chars]
-      :or {level 0 indentation "" reserve-chars 0}}]
-  (cond
-    (and (coll? form) (meets-print-level? level))
-    (write writer "#")
+  ([writer form]
+   (-pprint writer form 0))
+  ([writer form level]
+   (-pprint writer form level "" 0))
+  ([writer form level indentation]
+   (-pprint writer form level indentation 0))
+  ([writer form level indentation reserve-chars]
+   (cond
+     (and (coll? form) (meets-print-level? level))
+     (write writer "#")
 
-    ;; We have to special-case map entries because they normally print
-    ;; like vectors (e.g. [:a 1]), but we don't want to print those
-    ;; square brackets.
-    ;;
-    ;; Additionally, we want to keep the key and the value on the same
-    ;; line whenever we can.
-    (map-entry? form)
-    (let [k (key form)]
-      (-pprint writer k
-        :level (inc level)
-        :indentation indentation
-        :reserve-chars reserve-chars)
+     ;; We have to special-case map entries because they normally print
+     ;; like vectors (e.g. [:a 1]), but we don't want to print those
+     ;; square brackets.
+     ;;
+     ;; Additionally, we want to keep the key and the value on the same
+     ;; line whenever we can.
+     (map-entry? form)
+     (let [k (key form)]
+       (-pprint writer k (inc level) indentation reserve-chars)
 
-      (let [v (val form)
-            s (print-linear v)
-            ;; If, after writing the map entry key, there's enough space
-            ;; to write the val on the same line, do so. Otherwise,
-            ;; write indentation followed by val on the following line.
-            mode (print-mode writer s reserve-chars)]
-        (write-sep writer mode)
-        (when (= :miser mode) (write writer indentation))
+       (let [v (val form)
+             s (print-linear v)
+             ;; If, after writing the map entry key, there's enough space
+             ;; to write the val on the same line, do so. Otherwise,
+             ;; write indentation followed by val on the following line.
+             mode (print-mode writer s reserve-chars)]
+         (write-sep writer mode)
+         (when (= :miser mode) (write writer indentation))
 
-        (-pprint writer v
-          :level (inc level)
-          :indentation indentation
-          :reserve-chars reserve-chars)))
+         (-pprint writer v (inc level) indentation reserve-chars)))
 
-    (coll? form)
-    (let [s (print-linear form)
-          o (open-delim form)
+     (coll? form)
+     (let [s (print-linear form)
+           o (open-delim form)
 
-          ;; The indentation level is the indentation level of the
-          ;; parent S-expression plus a number of spaces equal to the
-          ;; length of the open delimiter (e.g. one for "(", two for
-          ;; "#{").
-          indentation (str indentation (.repeat " " (.length o)))
+           ;; The indentation level is the indentation level of the
+           ;; parent S-expression plus a number of spaces equal to the
+           ;; length of the open delimiter (e.g. one for "(", two for
+           ;; "#{").
+           indentation (str indentation (.repeat " " (.length o)))
 
-          ;; If, after (possibly) reserving space for any closing
-          ;; delimiters of ancestor S-expressions, there's enough space
-          ;; to print the entire form in linear style on this line, do
-          ;; so.
-          ;;
-          ;; Otherwise, print the form in miser style.
-          mode (print-mode writer s reserve-chars)]
+           ;; If, after (possibly) reserving space for any closing
+           ;; delimiters of ancestor S-expressions, there's enough space
+           ;; to print the entire form in linear style on this line, do
+           ;; so.
+           ;;
+           ;; Otherwise, print the form in miser style.
+           mode (print-mode writer s reserve-chars)]
 
-      ;; Print possible meta
-      (when (and *print-meta* *print-readably*)
-        (when-some [m (meta form)]
-          (when (seq m)
-            (write writer "^")
-            ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
-            (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
-              (-pprint writer m
-                :level level
-                :indentation indentation
-                :reserve-chars reserve-chars))
-            (write-sep writer mode))))
+       ;; Print possible meta
+       (when (and *print-meta* *print-readably*)
+         (when-some [m (meta form)]
+           (when (seq m)
+             (write writer "^")
+             ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
+             (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
+               (-pprint writer m level indentation reserve-chars))
+             (write-sep writer mode))))
 
-      ;; Print open delimiter
-      (write writer o)
+       ;; Print open delimiter
+       (write writer o)
 
-      ;; Print S-expression content
-      (if (= *print-length* 0)
-        (write writer "...")
-        (when (seq form)
-          (loop [form form
-                 index 0]
-            (if (= index *print-length*)
-              (do
-                (when (= mode :miser) (write writer indentation))
-                (write writer "..."))
+       ;; Print S-expression content
+       (if (= *print-length* 0)
+         (write writer "...")
+         (when (seq form)
+           (loop [form form
+                  index 0]
+             (if (= index *print-length*)
+               (do
+                 (when (= mode :miser) (write writer indentation))
+                 (write writer "..."))
 
-              (do
-                ;; In miser mode, prepend indentation to every form
-                ;; except the first one. We don't want to prepend
-                ;; indentation for the first form, because it
-                ;; immediately follows the open delimiter.
-                (when (and (= mode :miser) (pos? index))
-                  (write writer indentation))
+               (do
+                 ;; In miser mode, prepend indentation to every form
+                 ;; except the first one. We don't want to prepend
+                 ;; indentation for the first form, because it
+                 ;; immediately follows the open delimiter.
+                 (when (and (= mode :miser) (pos? index))
+                   (write writer indentation))
 
-                (let [f (first form)
-                      n (next form)]
-                  (cond
-                    (empty? n)
-                    (-pprint writer f
-                      :level (inc level)
-                      :indentation indentation
-                      ;; This is the last child, so reserve an
-                      ;; additional slot for the closing delimiter of
-                      ;; the parent S-expression.
-                      :reserve-chars (inc reserve-chars))
+                 (let [f (first form)
+                       n (next form)]
+                   (cond
+                     (empty? n)
+                     ;; This is the last child, so reserve an additional
+                     ;; slot for the closing delimiter of the parent
+                     ;; S-expression.
+                     (-pprint writer f
+                       (inc level)
+                       indentation
+                       (inc reserve-chars))
 
-                    (map-entry? f)
-                    (do
-                      (-pprint writer f
-                        :level (inc level)
-                        :indentation indentation
-                        ;; Reserve a slot for the comma trailing the
-                        ;; map entry.
-                        :reserve-chars 1)
+                     (map-entry? f)
+                     (do
+                       ;; Reserve a slot for the comma trailing the
+                       ;; map entry.
+                       (-pprint writer f (inc level) indentation 1)
+                       (write writer ",")
+                       (write-sep writer mode)
+                       (recur n (inc index)))
 
-                      (write writer ",")
-                      (write-sep writer mode)
-                      (recur n (inc index)))
+                     :else
+                     (do
+                       (-pprint writer f (inc level) indentation)
+                       (write-sep writer mode)
+                       (recur n (inc index))))))))))
 
-                    :else
-                    (do
-                      (-pprint writer f
-                        :level (inc level)
-                        :indentation indentation)
+       ;; Print close delimiter
+       (write writer (close-delim form)))
 
-                      (write-sep writer mode)
-                      (recur n (inc index))))))))))
-
-      ;; Print close delimiter
-      (write writer (close-delim form)))
-
-    :else
-    (write writer (print-linear form))))
+     :else
+     (write writer (print-linear form)))))
 
 (defn pprint
   "Pretty-print a form.

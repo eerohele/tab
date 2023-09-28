@@ -124,8 +124,8 @@
     (write writer "#")
 
     ;; We have to special-case map entries because they normally print
-    ;; like vectors (e.g. [:a 1]), but we don't want to print them when
-    ;; printing maps.
+    ;; like vectors (e.g. [:a 1]), but we don't want to print those
+    ;; square brackets.
     ;;
     ;; Additionally, we want to keep the key and the value on the same
     ;; line whenever we can.

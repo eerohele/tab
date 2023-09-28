@@ -235,13 +235,13 @@
 (defn pprint
   "Pretty-print a form.
 
-  Given one arg, a form, pretty-prints the form into *out* using the
+  Given one arg (a form), pretty-prints the form into *out* using the
   default options.
 
-  Given two args, a form and an options map, pretty-prints the form into
-  *out* using the given options.
+  Given two args (a form and an options map), pretty-prints the form
+  into *out* using the given options.
 
-  Given three args, a java.io.Writer, a form, and an options map,
+  Given three args (a java.io.Writer, a form, and an options map),
   pretty-prints the form into the writer using the given options.
 
   Options:

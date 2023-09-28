@@ -93,13 +93,6 @@
     :miser (nl writer)
     (write writer " ")))
 
-(defn ^:private within-print-level?
-  "Given a level (a long), return true if the level is within
-  *print-level*."
-  [level]
-  (or (nil? *print-level*)
-    (and (int? *print-level*) (< level *print-level*))))
-
 (defn ^:private meets-print-level?
   "Given a level (a long), return true if the level is the same as
   *print-level*."
@@ -127,13 +120,16 @@
    & {:keys [level ^String indentation reserve-chars]
       :or {level 0 indentation "" reserve-chars 0}}]
   (cond
+    (and (coll? form) (meets-print-level? level))
+    (write writer "#")
+
     ;; We have to special-case map entries because they normally print
     ;; like vectors (e.g. [:a 1]), but we don't want to print them when
     ;; printing maps.
     ;;
     ;; Additionally, we want to keep the key and the value on the same
     ;; line whenever we can.
-    (and (map-entry? form) (within-print-level? level))
+    (map-entry? form)
     (let [k (key form)]
       (-pprint writer k
         :level (inc level)
@@ -153,9 +149,6 @@
           :level (inc level)
           :indentation indentation
           :reserve-chars reserve-chars)))
-
-    (and (coll? form) (meets-print-level? level))
-    (write writer "#")
 
     (coll? form)
     (let [s (print-linear form)

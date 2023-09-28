@@ -88,21 +88,35 @@
     :linear
     :miser))
 
+(defn ^:private under-print-level?
+  "Given a level (a long), return true if the level is under
+  *print-level*."
+  [level]
+  (or (nil? *print-level*)
+    (and (int? *print-level*) (< level *print-level*))))
+
 (defn ^:private -pprint
   "Given a java.io.Writer, a form, and an options map, pretty-print the
   form into the writer.
 
   Options:
 
-    :level
-      The level the form is nested at."
+    :level (long)
+      The current nesting level. For example, in [[:a 1]], the outer
+      vector is nested at level 0, and the inner vector is nested at
+      level 1.
+
+    :indentation (String)
+      The string that represents the current indentation level.
+
+    :reserve-chars (long)
+      The number of characters reserved for closing delimiters of
+      S-expressions above the current nesting level."
   [writer form
    & {:keys [level ^String indentation reserve-chars]
       :or {level 0 indentation "" reserve-chars 0}}]
   (cond
-    (and (map-entry? form)
-      (or (nil? *print-level*)
-        (and (int? *print-level*) (< level *print-level*))))
+    (and (map-entry? form) (under-print-level? level))
     (let [k (key form)
           v (val form)
           s (print-linear v)]
@@ -131,6 +145,11 @@
       (write writer "#")
       (let [s (print-linear form)
             o (open-delim form)
+
+            ;; The indentation level is the indentation level of the
+            ;; parent S-expression plus a number of spaces equal to the
+            ;; length of the open delimiter (e.g. one for "(", two for
+            ;; "#{}").
             indentation (str indentation (.repeat " " (.length o)))
 
             ;; If, after possibly reserving space to print any close
@@ -169,6 +188,10 @@
                   (write writer "..."))
 
                 (do
+                  ;; In miser mode, prepend indentation to every form
+                  ;; except the first one. We don't want to prepend
+                  ;; indentation for the first form, because it
+                  ;; immediately follows the open delimiter.
                   (when (and (= mode :miser) (pos? index))
                     (write writer indentation))
 
@@ -189,9 +212,7 @@
                           :reserve-chars 1)
 
                         (write writer ",")
-
                         (write-sep writer mode)
-
                         (recur n (inc index)))
 
                       :else
@@ -202,7 +223,6 @@
                           :reserve-chars 0)
 
                         (write-sep writer mode)
-
                         (recur n (inc index))))))))))
 
         ;; Print close delimiter
@@ -212,6 +232,22 @@
     (write writer (print-linear form))))
 
 (defn pprint
+  "Pretty-print a form.
+
+  Given one arg, a form, pretty-prints the form into *out* using the
+  default options.
+
+  Given two args, a form and an options map, pretty-prints the form into
+  *out* using the given options.
+
+  Given three args, a java.io.Writer, a form, and an options map,
+  pretty-prints the form into the writer using the given options.
+
+  Options:
+
+    :max-width (long)
+      Avoid printing anything beyond the column indicated by this
+      value."
   ([x]
    (pprint *out* x nil))
   ([x opts]

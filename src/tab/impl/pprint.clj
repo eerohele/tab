@@ -149,10 +149,10 @@
           ;; "#{").
           indentation (str indentation (.repeat " " (.length o)))
 
-          ;; If, after possibly reserving space to print any close
-          ;; delimiters from wrapping S-expressions, there's enough
-          ;; space to print the entire form in linear style on this
-          ;; line, do so.
+          ;; If, after (possibly) reserving space for any closing
+          ;; delimiters of ancestor S-expressions, there's enough space
+          ;; to print the entire form in linear style on this line, do
+          ;; so.
           ;;
           ;; Otherwise, print the form in miser style.
           mode (print-mode writer s reserve-chars)]

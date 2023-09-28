@@ -254,12 +254,6 @@
   ([x opts]
    (pprint *out* x opts))
   ([writer x {:keys [max-width] :or {max-width 72}}]
-   (assert (nat-int? max-width)
-     ":max-width must be a natural int")
-
-   (assert (instance? Writer writer)
-     "first arg to pprint must be a java.io.Writer")
-
    (let [writer (count-keeping-writer writer max-width)]
      (-pprint writer x)
      (nl writer)

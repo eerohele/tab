@@ -50,12 +50,14 @@
     (reify CountKeepingWriter
       (write [_ s]
         (.write writer ^String s)
-        (vswap! c #(+ % (.length ^String s))))
+        (vswap! c #(+ % (.length ^String s)))
+        nil)
       (remaining [_]
         (- max-width @c))
       (nl [_]
         (.write writer "\n")
-        (vreset! c 0)))))
+        (vreset! c 0)
+        nil))))
 
 (defn ^:private print-linear
   "Given a form, print it into a string without regard to how much
@@ -256,8 +258,7 @@
   ([writer x {:keys [max-width] :or {max-width 72}}]
    (let [writer (count-keeping-writer writer max-width)]
      (-pprint writer x)
-     (nl writer)
-     nil)))
+     (nl writer))))
 
 (comment
   ;; Bad input

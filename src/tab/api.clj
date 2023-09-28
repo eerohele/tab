@@ -2,13 +2,13 @@
   "Tab is a tool for visualizing Clojure data structures."
   (:require [clojure.datafy :as datafy]
             [clojure.java.browse :as browse]
-            [clojure.pprint :as pprint]
             [tab.impl.base64 :as base64]
             [tab.impl.db :as db]
             [tab.impl.tabulator :as tabulator]
             [tab.impl.handler :as handler]
             [tab.impl.html :as html]
-            [tab.impl.http :as http]))
+            [tab.impl.http :as http]
+            [tab.impl.pprint :as pp]))
 
 (set! *warn-on-reflection* true)
 
@@ -19,8 +19,7 @@
 
 (defn ^:private default-pprint
   [x]
-  (binding [pprint/*print-right-margin* 80]
-    (pprint/pprint x)))
+  (pp/pprint x {:max-width 80}))
 
 (defn run
   "Run a Tab.

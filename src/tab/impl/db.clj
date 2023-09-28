@@ -47,7 +47,7 @@
        (assoc hash->obj (hash this) this)
        this)
 
-     (or (vector? this) (set? this) (seq? this))
+     (coll? this) ; non-map coll
      (let [cnt (count this)]
        (loop [hash->obj (assoc hash->obj (hash this) this)
               xs this

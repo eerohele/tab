@@ -146,7 +146,7 @@
           ;; The indentation level is the indentation level of the
           ;; parent S-expression plus a number of spaces equal to the
           ;; length of the open delimiter (e.g. one for "(", two for
-          ;; "#{}").
+          ;; "#{").
           indentation (str indentation (.repeat " " (.length o)))
 
           ;; If, after possibly reserving space to print any close

@@ -76,14 +76,6 @@
     (print-method form writer)
     (str writer)))
 
-(defn ^:private write-sep
-  "Given a java.io.Writer and a printing mode, print a separator (a
-  space or a newline) into the writer."
-  [writer mode]
-  (case mode
-    :miser (nl writer)
-    (write writer " ")))
-
 (defn ^:private print-mode
   "Given a java.io.Writer, a string representation of a form, and a
   number of characters to reserve for closing delimiters, return a
@@ -92,6 +84,14 @@
   (if (<= (.length s) (- (remaining writer) reserve-chars))
     :linear
     :miser))
+
+(defn ^:private write-sep
+  "Given a java.io.Writer and a printing mode, print a separator (a
+  space or a newline) into the writer."
+  [writer mode]
+  (case mode
+    :miser (nl writer)
+    (write writer " ")))
 
 (defn ^:private within-print-level?
   "Given a level (a long), return true if the level is within

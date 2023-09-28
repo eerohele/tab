@@ -82,6 +82,12 @@
     :miser (nl writer)
     (write writer " ")))
 
+(defn ^:private print-mode
+  [writer ^String s reserve-chars]
+  (if (<= (.length s) (- (remaining writer) reserve-chars))
+    :linear
+    :miser))
+
 (defn ^:private -pprint
   "Given a java.io.Writer, a form, and an options map, pretty-print the
   form into the writer.
@@ -93,115 +99,117 @@
   [writer form
    & {:keys [level ^String indentation reserve-chars]
       :or {level 0 indentation "" reserve-chars 0}}]
-  (let [s (print-linear form)]
-    (cond
-      (and (map-entry? form)
-        (or (nil? *print-level*)
-          (and (int? *print-level*) (< level *print-level*))))
-      (let [k (key form)
-            v (val form)]
+  (cond
+    (and (map-entry? form)
+      (or (nil? *print-level*)
+        (and (int? *print-level*) (< level *print-level*))))
+    (let [k (key form)
+          v (val form)
+          s (print-linear v)]
 
-        (-pprint writer k
-          :level (inc level)
-          :indentation indentation
-          :reserve-chars reserve-chars)
+      (-pprint writer k
+        :level (inc level)
+        :indentation indentation
+        :reserve-chars reserve-chars)
 
-        ;; miser
-        (if (>= (.length (print-linear v)) (- (remaining writer) reserve-chars))
-          (do
-            (nl writer)
-            (write writer indentation))
-          (write writer " "))
+      (case (print-mode writer s reserve-chars)
+        :linear
+        (write writer " ")
 
-        (-pprint writer v
-          :level (inc level)
-          :indentation indentation
-          :reserve-chars reserve-chars))
+        :miser
+        (do
+          (nl writer)
+          (write writer indentation)))
 
-      (coll? form)
-      (if (and (int? *print-level*) (= level *print-level*))
-        (write writer "#")
-        (let [o (open-delim form)
-              indentation (str indentation (.repeat " " (.length o)))
-              ;; If, after possibly reserving space to print any close
-              ;; delimiters from wrapping S-expressions, there's enough
-              ;; space to print the entire form in linear style on this
-              ;; line, do so.
-              ;;
-              ;; Otherwise, print the form in miser style.
-              mode (if (<= (.length s) (- (remaining writer) reserve-chars))
-                     :linear
-                     :miser)]
+      (-pprint writer v
+        :level (inc level)
+        :indentation indentation
+        :reserve-chars reserve-chars))
 
-          ;; Print meta
-          (when (and *print-meta* *print-readably*)
-            (when-some [m (meta form)]
-              (when (seq m)
-                (write writer "^")
-                ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
-                (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
-                  (-pprint writer m
-                    :level level
-                    :indentation indentation
-                    :reserve-chars reserve-chars))
-                (write-sep writer mode))))
+    (coll? form)
+    (if (and (int? *print-level*) (= level *print-level*))
+      (write writer "#")
+      (let [s (print-linear form)
+            o (open-delim form)
+            indentation (str indentation (.repeat " " (.length o)))
 
-          ;; Print open delimiter
-          (write writer o)
+            ;; If, after possibly reserving space to print any close
+            ;; delimiters from wrapping S-expressions, there's enough
+            ;; space to print the entire form in linear style on this
+            ;; line, do so.
+            ;;
+            ;; Otherwise, print the form in miser style.
+            mode (print-mode writer s reserve-chars)]
 
-          ;; Print S-expression content
-          (if (= *print-length* 0)
-            (write writer "...")
-            (when (seq form)
-              (loop [form form
-                     index 0]
-                (if (= index *print-length*)
-                  (do
-                    (when (= mode :miser) (write writer indentation))
-                    (write writer "..."))
+        ;; Print possible meta
+        (when (and *print-meta* *print-readably*)
+          (when-some [m (meta form)]
+            (when (seq m)
+              (write writer "^")
+              ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
+              (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
+                (-pprint writer m
+                  :level level
+                  :indentation indentation
+                  :reserve-chars reserve-chars))
+              (write-sep writer mode))))
 
-                  (do
-                    (when (and (= mode :miser) (pos? index))
-                      (write writer indentation))
+        ;; Print open delimiter
+        (write writer o)
 
-                    (let [f (first form)
-                          n (next form)]
-                      (cond
-                        (empty? n)
+        ;; Print S-expression content
+        (if (= *print-length* 0)
+          (write writer "...")
+          (when (seq form)
+            (loop [form form
+                   index 0]
+              (if (= index *print-length*)
+                (do
+                  (when (= mode :miser) (write writer indentation))
+                  (write writer "..."))
+
+                (do
+                  (when (and (= mode :miser) (pos? index))
+                    (write writer indentation))
+
+                  (let [f (first form)
+                        n (next form)]
+                    (cond
+                      (empty? n)
+                      (-pprint writer f
+                        :level (inc level)
+                        :indentation indentation
+                        :reserve-chars (inc reserve-chars))
+
+                      (map-entry? f)
+                      (do
                         (-pprint writer f
                           :level (inc level)
                           :indentation indentation
-                          :reserve-chars (inc reserve-chars))
+                          :reserve-chars 1)
 
-                        (map-entry? f)
-                        (do
-                          (-pprint writer f
-                            :level (inc level)
-                            :indentation indentation
-                            :reserve-chars 1)
+                        (write writer ",")
 
-                          (write writer ",")
+                        (write-sep writer mode)
 
-                          (write-sep writer mode)
+                        (recur n (inc index)))
 
-                          (recur n (inc index)))
+                      :else
+                      (do
+                        (-pprint writer f
+                          :level (inc level)
+                          :indentation indentation
+                          :reserve-chars 0)
 
-                        :else
-                        (do
-                          (-pprint writer f
-                            :level (inc level)
-                            :indentation indentation
-                            :reserve-chars 0)
+                        (write-sep writer mode)
 
-                          (write-sep writer mode)
+                        (recur n (inc index))))))))))
 
-                          (recur n (inc index))))))))))
+        ;; Print close delimiter
+        (write writer (close-delim form))))
 
-          ;; Print close delimiter
-          (write writer (close-delim form))))
-
-      :else
-      (write writer s))))
+    :else
+    (write writer (print-linear form))))
 
 (defn pprint
   ([x]
@@ -232,7 +240,6 @@
      :d 4
      :e {:a 1 :b 2 :c 3 :d 4 :e {:f 6 :g 7 :h 8 :i 9 :j 10}}}
     {:max-width 24})
-
 
   (require '[clojure.pprint :as cpp])
 

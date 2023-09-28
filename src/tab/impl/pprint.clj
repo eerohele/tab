@@ -44,7 +44,7 @@
     "Write a string into the underlying java.io.Writer.")
 
   (remaining [this]
-    "Return the number of available characters on the current line.")
+    "Return the number of characters available on the current line.")
 
   (nl [this]
     "Write a newline into the underlying java.io.Writer.

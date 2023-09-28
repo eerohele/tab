@@ -76,6 +76,12 @@
     (print-method form writer)
     (str writer)))
 
+(defn ^:private write-sep
+  [writer mode]
+  (case mode
+    :miser (nl writer)
+    (write writer " ")))
+
 (defn ^:private -pprint
   "Given a java.io.Writer, a form, and an options map, pretty-print the
   form into the writer.
@@ -85,8 +91,8 @@
     :level
       The level the form is nested at."
   [writer form
-   & {:keys [level ^String indentation reserve]
-      :or {level 0 indentation "" reserve 0}}]
+   & {:keys [level ^String indentation reserve-chars]
+      :or {level 0 indentation "" reserve-chars 0}}]
   (let [s (print-linear form)]
     (cond
       (and (map-entry? form)
@@ -98,9 +104,10 @@
         (-pprint writer k
           :level (inc level)
           :indentation indentation
-          :reserve reserve)
+          :reserve-chars reserve-chars)
 
-        (if (>= (.length (print-linear v)) (- (remaining writer) reserve))
+        ;; miser
+        (if (>= (.length (print-linear v)) (- (remaining writer) reserve-chars))
           (do
             (nl writer)
             (write writer indentation))
@@ -109,7 +116,7 @@
         (-pprint writer v
           :level (inc level)
           :indentation indentation
-          :reserve reserve))
+          :reserve-chars reserve-chars))
 
       (coll? form)
       (if (and (int? *print-level*) (= level *print-level*))
@@ -122,7 +129,7 @@
               ;; line, do so.
               ;;
               ;; Otherwise, print the form in miser style.
-              mode (if (<= (.length s) (- (remaining writer) reserve))
+              mode (if (<= (.length s) (- (remaining writer) reserve-chars))
                      :linear
                      :miser)]
 
@@ -131,16 +138,13 @@
             (when-some [m (meta form)]
               (when (seq m)
                 (write writer "^")
-                (if (and (= (count m) 1) (:tag m))
-                  (-pprint writer (:tag m)
-                    :level level
-                    :indentation indentation
-                    :reserve reserve)
+                ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
+                (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
                   (-pprint writer m
                     :level level
                     :indentation indentation
-                    :reserve reserve))
-                (case mode :miser (nl writer) (write writer " ")))))
+                    :reserve-chars reserve-chars))
+                (write-sep writer mode))))
 
           ;; Print open delimiter
           (write writer o)
@@ -167,20 +171,18 @@
                         (-pprint writer f
                           :level (inc level)
                           :indentation indentation
-                          :reserve (inc reserve))
+                          :reserve-chars (inc reserve-chars))
 
                         (map-entry? f)
                         (do
                           (-pprint writer f
                             :level (inc level)
                             :indentation indentation
-                            :reserve 1)
+                            :reserve-chars 1)
 
                           (write writer ",")
 
-                          (case mode
-                            :miser (nl writer)
-                            (write writer " "))
+                          (write-sep writer mode)
 
                           (recur n (inc index)))
 
@@ -189,11 +191,9 @@
                           (-pprint writer f
                             :level (inc level)
                             :indentation indentation
-                            :reserve 0)
+                            :reserve-chars 0)
 
-                          (case mode
-                            :miser (nl writer)
-                            (write writer " "))
+                          (write-sep writer mode)
 
                           (recur n (inc index))))))))))
 

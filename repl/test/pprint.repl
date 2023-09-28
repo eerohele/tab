@@ -1,0 +1,169 @@
+(require '[cognitect.transcriptor :as xr])
+
+(require '[clojure.pprint :as cpp])
+(require '[clojure.spec.alpha :as spec])
+(require '[clojure.test.check :refer [quick-check]])
+(require '[clojure.test.check.generators :as gen])
+(require '[clojure.test.check.properties :refer [for-all]])
+
+(require '[tab.impl.pprint :as pp])
+
+(spec/def ::pass? true?)
+(spec/def ::ret (spec/keys :req-un [::pass?]))
+
+(set! *print-length* nil)
+(set! *print-level* nil)
+
+;; Prints readably
+(quick-check 100000
+  (for-all [x gen/any-printable-equatable]
+    (= x (read-string (with-out-str (pp/pprint x))))))
+
+(xr/check! ::ret)
+
+;; TODO: Generative test that checks that nothing gets printed past
+;; :max-width except strings? Not sure how easy it is to check whether
+;; the thing past max-width is within a string, though.
+
+;; A hack to force clojure.pprint/pprint to print (var foo) instead of
+;; #'foo.
+(@#'clojure.pprint/use-method
+ clojure.pprint/simple-dispatch
+ clojure.lang.ISeq
+ #'clojure.pprint/pprint-simple-list)
+
+(quick-check 1000
+  (for-all [print-level gen/nat
+            print-length gen/nat
+            x (gen/vector gen/int)]
+    (binding [*print-level* print-level
+              *print-length* print-length]
+      (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
+
+;; Prints basic maps the same way as clojure.pprint/pprint.
+;;
+;; Would be nice to include *print-level* and *print-length* in this
+;; test, but can't due to this issue:
+;;
+;; https://ask.clojure.org/index.php/13337/print-method-inconsistent-regard-clojure-pprint-print-level
+(quick-check 1000
+  (for-all [x (gen/map gen/keyword gen/int)]
+    (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x)))))
+
+;; A generative test that checks that pp/print and cpp/print print any
+;; gen/any-printable-equatable the same way would be great, but
+;; cpp/print sometimes prints things in miser mode even when there's
+;; enough space to use linear mode, and I don't want to have my impl do
+;; that.
+
+(require '[clojure.repl :as repl])
+
+(def clojure-core-sources
+  (eduction
+    (map val)
+    (map symbol)
+    (keep
+      (fn [sym]
+        (try
+          (repl/source-fn sym)
+          (catch RuntimeException _))))
+    (map (fn [s] (read-string {:read-cond :preserve} s)))
+    (ns-interns 'clojure.core)))
+
+(def differences
+  (remove
+    #(= (with-out-str (cpp/pprint %)) (with-out-str (pp/pprint %)))
+    clojure-core-sources))
+
+(count differences)
+
+;; There are at most 30 differences between how clojure.pprint and SUT
+;; print clojure.core sources.
+;;
+;; Haven't gone through all of them yet, but the many of them seem to be
+;; cases where clojure.pprint exceeds *print-right-margin* even though
+;; it doesn't have to.
+(xr/check! (partial >= 30))
+
+;; Benchmarks
+
+;; Fipp
+
+(require '[fipp.edn :as fipp])
+
+(import '(java.io Writer))
+
+(def null-writer (Writer/nullWriter))
+
+(require '[criterium.core :refer [quick-bench]])
+
+;; Numbers
+(def numbers (vec (range 10000)))
+
+'clojure.pprint/pprint
+(quick-bench
+  (cpp/pprint numbers null-writer))
+
+'fipp.edn/pprint
+(quick-bench
+  (binding [*out* null-writer] (fipp/pprint numbers {:width 72})))
+
+'tutkain.impl.pprint/pprint
+(quick-bench
+  (pp/pprint null-writer numbers {:max-width 72}))
+
+;; Code
+(require '[clojure.java.io :as io])
+(import '(clojure.lang LineNumberingPushbackReader))
+
+(def code
+  (with-open [reader (->
+                       "fipp/engine.cljc"
+                       io/resource
+                       io/reader
+                       LineNumberingPushbackReader.)]
+    (doall
+      (take-while #(not= ::EOF %)
+        (repeatedly #(read {:read-cond :allow :eof ::EOF} reader))))))
+
+'clojure.pprint/pprint
+(quick-bench
+  (cpp/pprint code null-writer))
+
+'fipp.edn/pprint
+(quick-bench
+  (binding [*out* null-writer] (fipp/pprint code {:width 72})))
+
+'tutkain.impl.pprint/pprint
+(quick-bench
+  (pp/pprint null-writer code {:max-width 72}))
+
+;; Generative
+(def forms (gen/sample gen/any-printable-equatable 1e3))
+
+(quick-bench
+  (cpp/pprint forms null-writer))
+
+(quick-bench
+  (binding [*out* null-writer] (fipp/pprint forms {:width 72})))
+
+(quick-bench
+  (pp/pprint null-writer forms {:max-width 72}))
+
+;; Analyzer
+(require '[clojure.tools.analyzer.jvm :as analyzer])
+
+(def analyzer-output
+  (analyzer/analyze
+    '(sequence
+       (comp (filter odd?) (map inc) (partition-by even?))
+       (range 10))))
+
+(quick-bench
+  (cpp/pprint analyzer-output null-writer))
+
+(quick-bench
+  (binding [*out* null-writer] (fipp/pprint analyzer-output {:width 72})))
+
+(quick-bench
+  (pp/pprint null-writer analyzer-output {:max-width 72}))

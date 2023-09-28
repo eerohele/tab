@@ -52,7 +52,7 @@
 
   ;; Meta
   ($ (with-meta {:a 1} {:b 2}) :print-meta true)
-  ($ (with-meta {:a 1} {:b 2}) :print-meta true {:max-width 2})
+  ($ (with-meta {:a 1} {:b 2}) :print-meta true :max-width 2)
 
   ;; Print level
   ($ {:a 1} :print-level 0)

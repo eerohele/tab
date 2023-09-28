@@ -210,6 +210,9 @@
                     (-pprint writer f
                       :level (inc level)
                       :indentation indentation
+                      ;; This is the last child, so reserve an
+                      ;; additional slot for the closing delimiter of
+                      ;; the parent S-expression.
                       :reserve-chars (inc reserve-chars))
 
                     (map-entry? f)

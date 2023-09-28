@@ -3,15 +3,14 @@
   (:require [clojure.pprint :as pprint]
             [tab.impl.annotate :refer [annotate]]
             [tab.impl.db :as db]
-            [tab.impl.html :refer [$] :as html])
+            [tab.impl.html :refer [$] :as html]
+            [tab.impl.pprint :as pp])
   (:import (clojure.lang Named IPersistentMap Seqable)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
 
 (def ^:dynamic *initial-print-length* nil)
-
-(def ^:dynamic *pprint* prn)
 
 (defn ^:private seq-label
   [this]
@@ -265,7 +264,7 @@
                    :bx-swap "outerHTML"}
             (annotate
               (binding [*print-level* nil]
-                (with-out-str (*pprint* this)))))
+                (with-out-str (pp/pprint this)))))
           ($ :pre {:data-action "toggle-length"
                    :bx-dispatch "click"
                    :bx-request "get"
@@ -274,7 +273,7 @@
             (annotate
               (binding [*print-level* nil
                         *print-length* nil]
-                (with-out-str (*pprint* this))))))))))
+                (with-out-str (pp/pprint this))))))))))
 
 (def ^:private ^DateTimeFormatter iso-8601-formatter
   (DateTimeFormatter/ISO_INSTANT))

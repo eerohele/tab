@@ -2,7 +2,6 @@
   "Tab is a tool for visualizing Clojure data structures."
   (:require [clojure.datafy :as datafy]
             [clojure.java.browse :as browse]
-            [clojure.pprint :as pprint]
             [tab.impl.base64 :as base64]
             [tab.impl.db :as db]
             [tab.impl.tabulator :as tabulator]
@@ -16,11 +15,6 @@
   (tab> [this x] "Broadcast a value to all clients the Tab serves.")
   (address [this] "Return the address the given Tab listens on.")
   (halt [this] "Halt the Tab."))
-
-(defn ^:private default-pprint
-  [x]
-  (binding [pprint/*print-right-margin* 80]
-    (pprint/pprint x)))
 
 (defn run
   "Run a Tab.
@@ -41,22 +35,6 @@
 
       Reportedly does not work on Windows Subsystem for Linux.
 
-    :pprint
-      A function that takes one argument and pretty-prints it into *out*.
-
-      Tab uses this function to print everything except maps and colls of maps
-      into the HTML documents it makes.
-
-      By default, a slightly modified variant of clojure.pprint/pprint, which
-      is extremely slow. To make Tab faster, use e.g. Fipp (see
-      https://github.com/brandonbloom/fipp). For example:
-
-          :pprint (requiring-resolve 'fipp.clojure/pprint)
-
-      If you don't need pretty-printing and want maximum performance, use prn:
-
-          :pprint prn
-
     :print-length (default: *print-length* or 8)
       Maximum number of items of a non-map coll to show. Use UI controls to
       show the rest of the items.
@@ -70,8 +48,7 @@
       :as opts
       :or {init-val '(tap> :hello-world)
            add-tap? true
-           browse? true
-           pprint default-pprint}}]
+           browse? true}}]
   (let [print-length (if (contains? opts :print-length) print-length (or *print-length* 8))
         print-level (if (contains? opts :print-level) print-level (or *print-level* 2))
 
@@ -84,8 +61,7 @@
           (fn [request]
             (binding [*print-length* print-length
                       *print-level* print-level
-                      tabulator/*initial-print-length* print-length
-                      tabulator/*pprint* pprint]
+                      tabulator/*initial-print-length* print-length]
               (handler/handle (assoc request :tab/db db))))
           opts)
 
@@ -96,8 +72,7 @@
           ([x {:keys [history?]}]
            (binding [*print-length* print-length
                      *print-level* print-level
-                     tabulator/*initial-print-length* print-length
-                     tabulator/*pprint* pprint]
+                     tabulator/*initial-print-length* print-length]
              (let [[id data] (db/merge! db (datafy/datafy x) {:history? history?})]
                (http/broadcast http-server
                  (format "id: %s\nevent: tab\ndata: {\"history\": %s, \"html\": \"%s\"}\n\n" id

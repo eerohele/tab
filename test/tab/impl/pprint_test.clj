@@ -55,6 +55,7 @@
   ($ (with-meta {:a 1} {:b 2}) :print-meta true {:max-width 2})
 
   ;; Print level
+  ($ {:a 1} :print-level 0)
   ($ {:a {:b 2}} :print-level 1)
   ($ {:a {:b 2}} :print-level 2)
   ($ {:a {:b 2}} :print-level 3)

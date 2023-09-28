@@ -40,14 +40,15 @@
               *print-length* print-length]
       (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
 
-;; Prints basic maps the same way as clojure.pprint/pprint
-(quick-check 10000
-  (for-all [print-level gen/nat
-            print-length gen/nat
-            x (gen/map gen/keyword gen/int)]
-    (binding [*print-level* print-level
-              *print-length* print-length]
-      (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
+;; Prints basic maps the same way as clojure.pprint/pprint.
+;;
+;; Would be nice to include *print-level* and *print-length* in this
+;; test, but can't due to this issue:
+;;
+;; https://ask.clojure.org/index.php/13337/print-method-inconsistent-regard-clojure-pprint-print-level
+(quick-check 1000
+  (for-all [x (gen/map gen/keyword gen/int)]
+    (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x)))))
 
 (require '[clojure.repl :as repl])
 

@@ -1,4 +1,6 @@
 (ns tab.impl.pprint
+  "A pretty-printer for Clojure data structures."
+  {:author "Eero Helenius"}
   (:import (java.io StringWriter Writer)))
 
 (set! *warn-on-reflection* true)
@@ -31,7 +33,7 @@
   (nl [this]
     "Write a newline into the underlying java.io.Writer.
 
-    Resets the number of available characters on the current line to
+    Resets the number of characters allocated to the current line to
     zero. Writing a string with a newline via the write method does
     not."))
 
@@ -51,12 +53,14 @@
         (vreset! c 0)))))
 
 (defn ^:private print-linear
+  "Given a form, print it into a string without regard to how much
+  horizontal space the string takes."
   ^String [form]
   (with-open [writer (StringWriter.)]
     (print-method form writer)
     (str writer)))
 
-(defn ^:private pprint*
+(defn ^:private pprint-impl
   [writer form
    & {:keys [level ^String indentation reserve]
       :or {level 0 indentation "" reserve 0}}]
@@ -67,7 +71,7 @@
       (let [k (key form)
             v (val form)]
 
-        (pprint* writer k :level (inc level) :indentation indentation :reserve reserve)
+        (pprint-impl writer k :level (inc level) :indentation indentation :reserve reserve)
 
         (if (>= (.length (print-linear v)) (- (remaining writer) reserve))
           (do
@@ -75,7 +79,7 @@
             (write writer indentation))
           (write writer " "))
 
-        (pprint* writer v :level (inc level) :indentation indentation :reserve reserve))
+        (pprint-impl writer v :level (inc level) :indentation indentation :reserve reserve))
 
       (coll? form)
       (if (and (int? *print-level*) (= level *print-level*))
@@ -89,8 +93,8 @@
               (when (seq m)
                 (write writer "^")
                 (if (and (= (count m) 1) (:tag m))
-                  (pprint* writer (:tag m) :level level :indentation indentation :reserve reserve)
-                  (pprint* writer m :level level :indentation indentation :reserve reserve))
+                  (pprint-impl writer (:tag m) :level level :indentation indentation :reserve reserve)
+                  (pprint-impl writer m :level level :indentation indentation :reserve reserve))
                 (case mode :miser (nl writer) (write writer " ")))))
 
           (write writer o)
@@ -112,9 +116,9 @@
                     (let [f (first form)
                           n (next form)]
                       (if (empty? n)
-                        (pprint* writer f :level (inc level) :indentation indentation :reserve (inc reserve))
+                        (pprint-impl writer f :level (inc level) :indentation indentation :reserve (inc reserve))
                         (do
-                          (pprint* writer f :level (inc level) :indentation indentation :reserve (if (map-entry? f) 1 0))
+                          (pprint-impl writer f :level (inc level) :indentation indentation :reserve (if (map-entry? f) 1 0))
                           (when (map-entry? f) (write writer ","))
                           (case mode :miser (nl writer) (write writer " "))
                           (recur n (inc index))))))))))
@@ -137,7 +141,7 @@
      "first arg to pprint must be a java.io.Writer")
 
    (let [writer (count-keeping-writer writer max-width)]
-     (pprint* writer x)
+     (pprint-impl writer x)
      (nl writer)
      nil)))
 

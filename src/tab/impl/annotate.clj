@@ -3,7 +3,7 @@
   fragment that annotates the given code for syntax highlighting."
   (:require [clojure.string :as string]
             [tab.impl.html :refer [$] :as html])
-  (:import (java.io BufferedReader PushbackReader StringReader)
+  (:import (java.io PushbackReader StringReader)
            (java.util.regex Pattern)))
 
 (defmacro ^:private ch

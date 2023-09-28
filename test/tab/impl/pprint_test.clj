@@ -86,4 +86,7 @@
 (deftest pprint-meta
   ;; clojure.pprint prints this incorrectly with meta
   (binding [*print-meta* true *print-readably* false]
-    (is (= "{:a 1}\n" (pp-str (with-meta {:a 1} {:b 2}))))))
+    (is (= "{:a 1}\n" (pp-str (with-meta {:a 1} {:b 2})))))
+
+  (binding [*print-meta* true]
+    (is (= "{:a 1}\n" (pp-str (with-meta {:a 1} {}))))))

@@ -72,17 +72,28 @@
     (str writer)))
 
 (defn ^:private -pprint
+  "Given a java.io.Writer, a form, and an options map, pretty-print the
+  form into the writer.
+
+  Options:
+
+    :level
+      The level the form is nested at."
   [writer form
    & {:keys [level ^String indentation reserve]
       :or {level 0 indentation "" reserve 0}}]
   (let [s (print-linear form)]
     (cond
       (and (map-entry? form)
-        (or (nil? *print-level*) (and (int? *print-level*) (< level *print-level*))))
+        (or (nil? *print-level*)
+          (and (int? *print-level*) (< level *print-level*))))
       (let [k (key form)
             v (val form)]
 
-        (-pprint writer k :level (inc level) :indentation indentation :reserve reserve)
+        (-pprint writer k
+          :level (inc level)
+          :indentation indentation
+          :reserve reserve)
 
         (if (>= (.length (print-linear v)) (- (remaining writer) reserve))
           (do
@@ -90,26 +101,46 @@
             (write writer indentation))
           (write writer " "))
 
-        (-pprint writer v :level (inc level) :indentation indentation :reserve reserve))
+        (-pprint writer v
+          :level (inc level)
+          :indentation indentation
+          :reserve reserve))
 
       (coll? form)
       (if (and (int? *print-level*) (= level *print-level*))
         (write writer "#")
         (let [o (open-delim form)
               indentation (str indentation (.repeat " " (.length o)))
-              mode (if (<= (.length s) (- (remaining writer) reserve)) :linear :miser)]
+              ;; If, after possibly reserving space to print any close
+              ;; delimiters from wrapping S-expressions, there's enough
+              ;; space to print the entire form in linear style on this
+              ;; line, do so.
+              ;;
+              ;; Otherwise, print the form in miser style.
+              mode (if (<= (.length s) (- (remaining writer) reserve))
+                     :linear
+                     :miser)]
 
+          ;; Print meta
           (when (and *print-meta* *print-readably*)
             (when-some [m (meta form)]
               (when (seq m)
                 (write writer "^")
                 (if (and (= (count m) 1) (:tag m))
-                  (-pprint writer (:tag m) :level level :indentation indentation :reserve reserve)
-                  (-pprint writer m :level level :indentation indentation :reserve reserve))
+                  (-pprint writer (:tag m)
+                    :level level
+                    :indentation indentation
+                    :reserve reserve)
+                  (-pprint writer m
+                    :level level
+                    :indentation indentation
+                    :reserve reserve))
                 (case mode :miser (nl writer) (write writer " ")))))
 
+          ;; Print open delimiter
           (write writer o)
 
+          ;; Print S-expression content
           (if (= *print-length* 0)
             (write writer "...")
             (when (seq form)
@@ -126,14 +157,42 @@
 
                     (let [f (first form)
                           n (next form)]
-                      (if (empty? n)
-                        (-pprint writer f :level (inc level) :indentation indentation :reserve (inc reserve))
+                      (cond
+                        (empty? n)
+                        (-pprint writer f
+                          :level (inc level)
+                          :indentation indentation
+                          :reserve (inc reserve))
+
+                        (map-entry? f)
                         (do
-                          (-pprint writer f :level (inc level) :indentation indentation :reserve (if (map-entry? f) 1 0))
-                          (when (map-entry? f) (write writer ","))
-                          (case mode :miser (nl writer) (write writer " "))
+                          (-pprint writer f
+                            :level (inc level)
+                            :indentation indentation
+                            :reserve 1)
+
+                          (write writer ",")
+
+                          (case mode
+                            :miser (nl writer)
+                            (write writer " "))
+
+                          (recur n (inc index)))
+
+                        :else
+                        (do
+                          (-pprint writer f
+                            :level (inc level)
+                            :indentation indentation
+                            :reserve 0)
+
+                          (case mode
+                            :miser (nl writer)
+                            (write writer " "))
+
                           (recur n (inc index))))))))))
 
+          ;; Print close delimiter
           (write writer (close-delim form))))
 
       :else
@@ -176,6 +235,9 @@
 
   ;; clojure.pprint incorrectly prints this with meta
   (binding [*print-meta* true *print-readably* false] (cpp/pprint (with-meta {:a 1} {:b 2})))
+
+  ;; clojure.pprint incorrectly prints empty meta
+  (binding [*print-meta* true *print-readably* false] (cpp/pprint (with-meta {:a 1} {})))
 
   ;; inconsistency between prn and clojure.pprint
   (binding [*print-level* 0 *print-length* 11]

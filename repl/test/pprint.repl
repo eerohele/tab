@@ -84,7 +84,7 @@
 
 (count differences)
 
-(xr/check! (partial > 25))
+(xr/check! (partial > 30))
 
 ;; Benchmarks
 
@@ -115,21 +115,29 @@
 
 ;; Code
 (require '[clojure.java.io :as io])
+(import '(clojure.lang LineNumberingPushbackReader))
 
 (def code
-  (with-open [reader (-> "fipp/engine.cljc" io/resource io/reader clojure.lang.LineNumberingPushbackReader.)]
+  (with-open [reader (->
+                       "fipp/engine.cljc"
+                       io/resource
+                       io/reader
+                       LineNumberingPushbackReader.)]
     (doall
       (take-while #(not= ::EOF %)
         (repeatedly #(read {:read-cond :allow :eof ::EOF} reader))))))
 
 'clojure.pprint/pprint
-(quick-bench (cpp/pprint code null-writer))
+(quick-bench
+  (cpp/pprint code null-writer))
 
 'fipp.edn/pprint
-(quick-bench (binding [*out* null-writer] (fipp/pprint code {:width 72})))
+(quick-bench
+  (binding [*out* null-writer] (fipp/pprint code {:width 72})))
 
 'tutkain.impl.pprint/pprint
-(quick-bench (pp/pprint null-writer code {:max-width 72}))
+(quick-bench
+  (pp/pprint null-writer code {:max-width 72}))
 
 ;; Generative
 (def forms (gen/sample gen/any-printable-equatable 1e3))

@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 - Sort maps by key #9
 - Show expand/collapse controls when seq of maps exceeds `:print-length` #7
 - Reduce memory use and improve performance
-- Add `:pprint` option to `tab.api/run`
+- Use (significantly faster) custom pprint impl instead of `clojure.pprint/pprint`
 - Ensure Tab respects `:print-length nil` and `:print-level nil`
 
 ## 2023-05-03

@@ -830,6 +830,18 @@
 (vec (.allTextContents (.locator page "main > table > tbody > tr > th")))
 (xr/check! (partial = ["3" "2" "1"]))
 
+;; sorted sets
+
+(tab/tab> tab (sorted-set-by (fn [m1 m2] (compare (:a m1) (:a m2))) {:a 2 :b 3} {:a 1 :b 4}))
+
+(wait-for-text "sorted set")
+(vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
+(xr/check! (partial = ["2" ":a" ":b"]))
+(vec (.allTextContents (.locator page "main > table > tbody > tr:nth-child(1) > td")))
+(xr/check! (partial = ["0" "1" "4"]))
+(vec (.allTextContents (.locator page "main > table > tbody > tr:nth-child(2) > td")))
+(xr/check! (partial = ["1" "2" "3"]))
+
 (comment
   ;; clipboard
 

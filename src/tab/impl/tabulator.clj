@@ -17,6 +17,7 @@
   (cond
     (vector? this) "vector"
     (list? this) "list"
+    (and (sorted? this) (set? this)) "sorted set"
     (set? this) "set"
     (lazy-seq this) "lazy seq"
     (instance? clojure.lang.Range this) "range"

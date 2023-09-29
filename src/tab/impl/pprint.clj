@@ -38,13 +38,13 @@
   (nl [this]
     "Write a newline into the underlying java.io.Writer.
 
-    Resets the number of characters allocated to the current line to
+    Resets the number of characters allotted to the current line to
     zero. Writing a string with a newline via the write method does
     not."))
 
 (defn ^:private count-keeping-writer
-  "Wrap a java.io.Writer such that it keeps count of the length of the
-  strings written into it."
+  "Wrap a java.io.Writer into a CountKeepingWriter: a writer that keeps
+  count of the length of the strings written into each line."
   [^Writer writer max-width]
   (let [c (volatile! 0)]
     (reify CountKeepingWriter

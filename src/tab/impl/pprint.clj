@@ -91,7 +91,7 @@
   (and (int? *print-level*) (= level *print-level*)))
 
 (defn ^:private -pprint
-  "Given a java.io.Writer and a form, pretty-print the form into the
+  "Given a CountKeepingWriter and a form, pretty-print the form into the
   writer.
 
   Other arguments are internal.

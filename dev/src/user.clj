@@ -47,6 +47,7 @@
   (tap> "foo")
   (tap> "bar")
   (tap> "baz")
+  (tap> (sorted-map-by > 1 "a" 2 "b" 3 "c"))
   (tap> {:a 1})
   (tap> {:a 1 :b {:c 2} :d {:e 3}})
   (tap> {:a 1 3 2})

@@ -822,6 +822,14 @@
 (vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
 (xr/check! (partial = ["2" "#inst \"2023-09-29T08:22:46.840-00:00\"" "#inst \"2023-09-29T08:22:58.348-00:00\""]))
 
+;; sorted maps
+
+(tab/tab> tab (sorted-map-by > 1 "a" 2 "b" 3 "c"))
+
+(wait-for-text "sorted map")
+(vec (.allTextContents (.locator page "main > table > tbody > tr > th")))
+(xr/check! (partial = ["3" "2" "1"]))
+
 (comment
   ;; clipboard
 

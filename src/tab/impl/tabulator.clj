@@ -133,7 +133,7 @@
                   ($ :td {:class "filler"})
                   ($ :th (-tabulate k (inc level)))
                   ($ :td (-tabulate v (inc level)))))
-              (sort-map-by-keys this)))))))
+              (cond-> this (not (sorted? this)) (sort-map-by-keys))))))))
 
   Seqable
   (-tabulate [this level]

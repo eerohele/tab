@@ -7,8 +7,14 @@ All notable changes to this project will be documented in this file.
 - Sort maps by key #9
 - Show expand/collapse controls when seq of maps exceeds `:print-length` #7
 - Reduce memory use and improve performance
-- Use (significantly faster) custom pprint impl instead of `clojure.pprint/pprint`
-- Ensure Tab respects `:print-length nil` and `:print-level nil`
+- Use custom pprint impl instead of `clojure.pprint/pprint`
+
+  `tab.impl.pprint/pprint` is hundreds of times faster than `clojure.pprint/pprint` with some payloads, and at least 10x faster for most payloads. It is 12-15x faster than `fipp.edn/pprint` at Fipp's own benchmark.
+
+  Furthermore, `tab.impl.pprint/pprint` allocates 25x fewer bytes than `clojure.pprint/pprint` and 10x fewer bytes than `fipp.edn/pprint`.
+
+- Ensure Tab respects `:print-length nil` and `:print-level nil` even
+  when `*print-length*` and `*print-level*` are set
 
 ## 2023-05-03
 

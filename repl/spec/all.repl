@@ -581,6 +581,7 @@
 
 (tab/tab> tab a)
 
+(.waitForSelector page "pre >> text=[1]\n")
 (.textContent (.locator page "pre"))
 (xr/check! #{"[1]\n"})
 

@@ -48,14 +48,14 @@
        this)
 
      (coll? this) ; non-map coll
-     (let [cnt (count this)]
-       (loop [hash->obj (assoc hash->obj (hash this) this)
-              xs this
-              len 0]
-         (if (or (= len cnt) (and (int? *print-length*) (= len *print-length*)))
-           hash->obj
-           (let [x (first xs)]
-             (recur (collect hash->obj x level) (rest xs) (inc len))))))
+     (loop [hash->obj (assoc hash->obj (hash this) this)
+            xs this
+            len 0]
+       (if (and (int? *print-length*) (= len *print-length*))
+         hash->obj
+         (if-some [x (first xs)]
+           (recur (collect hash->obj x level) (rest xs) (inc len))
+           hash->obj)))
 
      :else (assoc hash->obj (hash this) this))))
 

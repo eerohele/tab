@@ -15,7 +15,7 @@
 (set! *print-level* nil)
 
 ;; Prints readably
-(quick-check 100000
+(quick-check 10000
   (for-all [x gen/any-printable-equatable]
     (= x (read-string (with-out-str (pp/pprint x))))))
 

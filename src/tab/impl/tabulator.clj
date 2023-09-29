@@ -181,21 +181,22 @@
                       :class "count"} num-items)
               (map (fn [th]
                      ($ :th (annotate (pr-str th)))) ks)))
-          ($ :tbody
-            (eduction
-              (take (if (int? *print-length*) *print-length* (count this)))
-              (map-indexed
-                (fn [i m]
-                  ($ :tr
-                    ($ :td {:class "index"} (pr-str i))
-                    (map (fn [k]
-                           (let [v (get m k)]
-                             ($ :td
-                               (when (some? v)
-                                 (-tabulate v (inc level))))))
-                      ks))))
-              this)
-            (let [cnt (count this)]
+          (let [cnt (count this)]
+            ($ :tbody
+              (eduction
+                (take (if (int? *print-length*) *print-length* cnt))
+                (map-indexed
+                  (fn [i m]
+                    ($ :tr
+                      ($ :td {:class "index"} (pr-str i))
+                      (map (fn [k]
+                             (let [v (get m k)]
+                               ($ :td
+                                 (when (some? v)
+                                   (-tabulate v (inc level))))))
+                        ks))))
+                this)
+
               (cond
                 (nil? *initial-print-length*) nil
 

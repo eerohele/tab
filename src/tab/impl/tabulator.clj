@@ -44,13 +44,14 @@
   [state]
   (case state :collapsed "＋" :expanded "－"))
 
-(def ^:private sorted-map-with-fallback
-  (sorted-map-by
-    (fn [k1 k2]
-      (try
-        (compare k1 k2)
-        (catch ClassCastException _
-          (compare (str k1) (str k2)))))))
+(defn ^:private compare-with-fallback
+  "A compare fn that falls back to comparing by string value if args
+  are not comparable."
+  [k1 k2]
+  (try
+    (compare k1 k2)
+    (catch ClassCastException _
+      (compare (str k1) (str k2)))))
 
 (defn sort-map-by-keys
   "Given a map, return a map sorted by its keys.
@@ -58,7 +59,7 @@
   If keys are not comparable or are of different types, compare using the string
   representation of each key."
   [m]
-  (into sorted-map-with-fallback m))
+  (into (sorted-map-by compare-with-fallback) m))
 
 (defprotocol Tabulable
   (-tabulate [this level]))
@@ -132,7 +133,7 @@
                   ($ :td {:class "filler"})
                   ($ :th (-tabulate k (inc level)))
                   ($ :td (-tabulate v (inc level)))))
-              (into sorted-map-with-fallback this)))))))
+              (sort-map-by-keys this)))))))
 
   Seqable
   (-tabulate [this level]
@@ -159,7 +160,8 @@
       (every? map? this)
       (let [id (hash this)
             state (state-for level)
-            ks (sequence (comp (mapcat keys) (distinct)) this)
+            ks (sort-by identity compare-with-fallback
+                 (eduction (comp (mapcat keys) (distinct)) this))
             num-items (count this)]
         ($ :table {:id (str id) :data-state "expanded"}
           ($ :thead

@@ -791,6 +791,36 @@
 (.allTextContents (.locator page "main pre"))
 (xr/check! (partial = ["\"baz\""]))
 
+;; seqs of maps sorted by key
+
+(tab/tab> tab [{:a 1}])
+
+(wait-for-text "vector")
+(vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
+(xr/check! (partial = ["1" ":a"]))
+
+(tab/tab> tab [{:z 1} {:c 2} {:s 3} {:d 4}])
+
+(wait-for-text "vector")
+(vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
+(xr/check! (partial = ["4" ":c" ":d" ":s" ":z"]))
+
+;; map keys
+(tab/tab> tab [{{:b 2} 2} {{:a 1} 1}])
+
+(wait-for-text "vector")
+(vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
+(xr/check! (partial = ["2" "{:a 1}" "{:b 2}"]))
+
+(def date-1 (java.util.Date. 1695975766840))
+(def date-2 (java.util.Date. 1695975778348))
+
+(tab/tab> tab [{date-2 2} {date-1 1}])
+
+(wait-for-text "vector")
+(vec (.allTextContents (.locator page "main > table > thead > tr:nth-child(2) > th")))
+(xr/check! (partial = ["2" "#inst \"2023-09-29T08:22:46.840-00:00\"" "#inst \"2023-09-29T08:22:58.348-00:00\""]))
+
 (comment
   ;; clipboard
 

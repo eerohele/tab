@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## UNRELEASED
 
-- Sort maps by key #9
+- Sort maps and seqs of maps by key #9
 - Show expand/collapse controls when seq of maps exceeds `:print-length` #7
 - Reduce memory use and improve performance
 - Use custom pprint impl instead of `clojure.pprint/pprint`

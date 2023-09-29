@@ -167,3 +167,39 @@
 
 (quick-bench
   (pp/pprint null-writer analyzer-output {:max-width 72}))
+
+;; Allocated bytes
+
+(import '(java.text StringCharacterIterator))
+(import '(java.lang.management ManagementFactory))
+(import '(com.sun.management ThreadMXBean))
+
+(defn human-readable-byte-count
+  [bytes]
+  (if (< -1000 bytes 1000)
+    (str bytes " B")
+    (let [ci (StringCharacterIterator. "kMGTPE")
+          bytes (loop [bytes bytes]
+                  (if (or (<= bytes -999950) (>= bytes 999950))
+                    (do (.next ci) (recur (/ bytes 1000)))
+                    bytes))]
+      (format "%.1f %cB" (/ bytes 1000.0) (.current ci)))))
+
+(defmacro allocated-bytes
+  [& body]
+  `(let [^ThreadMXBean bean# (ManagementFactory/getThreadMXBean)
+         bytes-before# (.getCurrentThreadAllocatedBytes bean#)]
+     ~@body
+     (let [bytes-after# (.getCurrentThreadAllocatedBytes bean#)]
+       (println
+         (human-readable-byte-count (- bytes-after# bytes-before#))
+         "allocated"))))
+
+(allocated-bytes
+  (cpp/pprint analyzer-output null-writer))
+
+(allocated-bytes
+  (binding [*out* null-writer] (fipp/pprint analyzer-output {:width 72})))
+
+(allocated-bytes
+  (pp/pprint null-writer analyzer-output {:max-width 72}))

@@ -33,6 +33,8 @@
 
 (deftest pprint
   ;; Basic
+  ($ {})
+  ($ [nil nil])
   ($ {:a 1})
   ($ '(1 nil))
   ($ {:a 1 :b 2 :c 3 :d 4} :max-width 24)
@@ -86,7 +88,13 @@
   ;; Width
   ($ {[]
       [-1000000000000000000000000000000000000000000000000000000000000000N]}
-    :max-width 72))
+    :max-width 72)
+
+  ;; Reader macros
+  ($ #'map)
+  ($ '(#'map))
+  ($ '#{#'map #'mapcat})
+  ($ '{:arglists (quote ([xform* coll])) :added "1.7"}))
 
 (deftest pprint-meta
   ;; clojure.pprint prints this incorrectly with meta

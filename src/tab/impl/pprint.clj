@@ -59,13 +59,60 @@
         (vreset! c 0)
         nil))))
 
+(def ^:private reader-macros
+  {'quote "'"
+   'clojure.core/deref "@"
+   'var "#'"
+   'clojure.core/unquote "~"})
+
 (defn ^:private print-linear
   "Given a form, print it into a string without regard to how much
   horizontal space the string takes."
-  ^String [form]
-  (with-open [writer (StringWriter.)]
-    (print-method form writer)
-    (str writer)))
+  ([form]
+   (print-linear form nil))
+  (^String [form opts]
+   (with-open [writer (StringWriter.)]
+     (print-linear writer form opts)
+     (str writer)))
+  ([^Writer writer form {:keys [level] :or {level 0}}]
+   (cond
+     (and (coll? form) (= level *print-level*))
+     (.write writer "#")
+
+     ;; Reader macros
+     (and
+       (seq? form)
+       (contains? reader-macros (first form)))
+     (do
+       (.write writer ^String (reader-macros (first form)))
+       (print-method (second form) writer))
+
+     (map-entry? form)
+     (do
+       (print-linear writer (key form) {:level (inc level)})
+       (.write writer " ")
+       (print-linear writer (val form) {:level (inc level)}))
+
+     (coll? form)
+     (do
+       (.write writer (open-delim form))
+
+       (when (seq form)
+         (loop [form form index 0]
+           (if (= index *print-length*)
+             (.write writer "...")
+             (let [f (first form)
+                   n (next form)]
+               (print-linear writer f {:level (inc level)})
+               (when-not (empty? n)
+                 (when (map-entry? f) (.write writer ","))
+                 (.write writer " ")
+                 (recur n (inc index)))))))
+
+       (.write writer (close-delim form)))
+
+     :else
+     (print-method form writer))))
 
 (defn ^:private print-mode
   "Given a java.io.Writer, a string representation of a form, and a
@@ -94,31 +141,31 @@
   "Given a CountKeepingWriter and a form, pretty-print the form into the
   writer.
 
-  Other arguments are internal.
+  Keyword args:
 
-  Internal args:
-
-    level (long)
+    :level (long)
       The current nesting level. For example, in [[:a 1]], the outer
       vector is nested at level 0, and the inner vector is nested at
       level 1.
 
-    indentation (String)
+    :indentation (String)
       The string that represents the current indentation level.
 
-    reserve-chars (long)
+    :reserve-chars (long)
       The number of characters reserved for closing delimiters of
       S-expressions above the current nesting level."
-  ([writer form]
-   (-pprint writer form 0))
-  ([writer form level]
-   (-pprint writer form level "" 0))
-  ([writer form level indentation]
-   (-pprint writer form level indentation 0))
-  ([writer form level indentation reserve-chars]
+  ([writer form
+    {:keys [level indentation reserve-chars]
+     :as opts}]
    (cond
      (and (coll? form) (meets-print-level? level))
      (write writer "#")
+
+     ;; Reader macros
+     (and
+       (seq? form)
+       (contains? reader-macros (first form)))
+     (write writer (print-linear form opts))
 
      ;; We have to special-case map entries because they normally print
      ;; like vectors (e.g. [:a 1]), but we don't want to print those
@@ -127,22 +174,22 @@
      ;; Additionally, we want to keep the key and the value on the same
      ;; line whenever we can.
      (map-entry? form)
-     (let [k (key form)]
-       (-pprint writer k (inc level) indentation reserve-chars)
+     (let [k (key form)
+           opts (update opts :level inc)]
+       (-pprint writer k opts)
 
        (let [v (val form)
-             s (print-linear v)
+             s (print-linear v opts)
              ;; If, after writing the map entry key, there's enough space
              ;; to write the val on the same line, do so. Otherwise,
              ;; write indentation followed by val on the following line.
              mode (print-mode writer s (inc reserve-chars))]
          (write-sep writer mode)
          (when (= :miser mode) (write writer indentation))
-
-         (-pprint writer v (inc level) indentation reserve-chars)))
+         (-pprint writer v opts)))
 
      (coll? form)
-     (let [s (print-linear form)
+     (let [s (print-linear form opts)
            o (open-delim form)
 
            ;; The indentation level is the indentation level of the
@@ -157,7 +204,11 @@
            ;; so.
            ;;
            ;; Otherwise, print the form in miser style.
-           mode (print-mode writer s reserve-chars)]
+           mode (print-mode writer s reserve-chars)
+
+           opts (-> opts
+                  (assoc :indentation indentation)
+                  (update :level inc))]
 
        ;; Print possible meta
        (when (and *print-meta* *print-readably*)
@@ -166,7 +217,7 @@
              (write writer "^")
              ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
              (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
-               (-pprint writer m level indentation reserve-chars))
+               (-pprint writer m opts))
              (write-sep writer mode))))
 
        ;; Print open delimiter
@@ -198,23 +249,20 @@
                      ;; This is the last child, so reserve an additional
                      ;; slot for the closing delimiter of the parent
                      ;; S-expression.
-                     (-pprint writer f
-                       (inc level)
-                       indentation
-                       (inc reserve-chars))
+                     (-pprint writer f (update opts :reserve-chars inc))
 
                      (map-entry? f)
                      (do
                        ;; Reserve a slot for the comma trailing the
                        ;; map entry.
-                       (-pprint writer f (inc level) indentation 1)
+                       (-pprint writer f (assoc opts :reserve-chars 1))
                        (write writer ",")
                        (write-sep writer mode)
                        (recur n (inc index)))
 
                      :else
                      (do
-                       (-pprint writer f (inc level) indentation)
+                       (-pprint writer f (assoc opts :reserve-chars 0))
                        (write-sep writer mode)
                        (recur n (inc index))))))))))
 
@@ -222,7 +270,7 @@
        (write writer (close-delim form)))
 
      :else
-     (write writer (print-linear form)))))
+     (write writer (print-linear form opts)))))
 
 (defn pprint
   "Pretty-print a form.
@@ -245,9 +293,12 @@
    (pprint *out* x nil))
   ([x opts]
    (pprint *out* x opts))
-  ([writer x {:keys [max-width] :or {max-width 72}}]
+  ([writer x {:keys [max-width]
+              :or {max-width 72}
+              :as opts}]
    (let [writer (count-keeping-writer writer max-width)]
-     (-pprint writer x)
+     (-pprint writer x
+       (assoc opts :level 0 :indentation "" :reserve-chars 0))
      (nl writer))))
 
 (comment

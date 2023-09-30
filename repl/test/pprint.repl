@@ -25,13 +25,6 @@
 ;; :max-width except strings? Not sure how easy it is to check whether
 ;; the thing past max-width is within a string, though.
 
-;; A hack to force clojure.pprint/pprint to print (var foo) instead of
-;; #'foo.
-(@#'clojure.pprint/use-method
- clojure.pprint/simple-dispatch
- clojure.lang.ISeq
- #'clojure.pprint/pprint-simple-list)
-
 (quick-check 1000
   (for-all [print-level gen/nat
             print-length gen/nat
@@ -43,14 +36,13 @@
 (xr/check! ::ret)
 
 ;; Prints basic maps the same way as clojure.pprint/pprint.
-;;
-;; Would be nice to include *print-level* and *print-length* in this
-;; test, but can't due to this issue:
-;;
-;; https://ask.clojure.org/index.php/13337/print-method-inconsistent-regard-clojure-pprint-print-level
 (quick-check 1000
-  (for-all [x (gen/map gen/keyword gen/int)]
-    (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x)))))
+  (for-all [print-length gen/nat
+            print-level gen/nat
+            x (gen/map gen/keyword gen/int)]
+    (binding [*print-level* print-level
+              *print-length* print-length]
+      (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
 
 (xr/check! ::ret)
 
@@ -83,13 +75,13 @@
 
 (count differences)
 
-;; There are at most 30 differences between how clojure.pprint and SUT
+;; There are at most 25 differences between how clojure.pprint and SUT
 ;; print clojure.core sources.
 ;;
 ;; Haven't gone through all of them yet, but the many of them seem to be
 ;; cases where clojure.pprint exceeds *print-right-margin* even though
 ;; it doesn't have to.
-(xr/check! (partial >= 30))
+(xr/check! (partial >= 25))
 
 ;; Benchmarks
 

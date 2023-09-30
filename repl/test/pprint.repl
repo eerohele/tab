@@ -40,6 +40,8 @@
               *print-length* print-length]
       (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
 
+(xr/check! ::ret)
+
 ;; Prints basic maps the same way as clojure.pprint/pprint.
 ;;
 ;; Would be nice to include *print-level* and *print-length* in this
@@ -49,6 +51,8 @@
 (quick-check 1000
   (for-all [x (gen/map gen/keyword gen/int)]
     (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x)))))
+
+(xr/check! ::ret)
 
 ;; A generative test that checks that pp/print and cpp/print print any
 ;; gen/any-printable-equatable the same way would be great, but

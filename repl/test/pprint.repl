@@ -67,7 +67,9 @@
         (try
           (repl/source-fn sym)
           (catch RuntimeException _))))
-    (map (fn [s] (read-string {:read-cond :preserve} s)))
+    (map (fn [s]
+           (binding [*ns* (find-ns 'clojure.core)]
+             (read-string {:read-cond :preserve} s))))
     (ns-interns 'clojure.core)))
 
 (def differences

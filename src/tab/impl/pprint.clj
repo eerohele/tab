@@ -74,7 +74,9 @@
    (with-open [writer (StringWriter.)]
      (print-linear writer form opts)
      (str writer)))
-  ([^Writer writer form {:keys [level] :or {level 0}}]
+  ([^Writer writer form
+    {:keys [level suppress-namespaces]
+     :or {level 0 suppress-namespaces #{}}}]
    (cond
      (and (coll? form) (= level *print-level*))
      (.write writer "#")
@@ -92,6 +94,12 @@
        (print-linear writer (key form) {:level (inc level)})
        (.write writer " ")
        (print-linear writer (val form) {:level (inc level)}))
+
+     (and (qualified-symbol? form) (contains? suppress-namespaces :symbol))
+     (print-method (-> form name symbol) writer)
+
+     (and (qualified-keyword? form) (contains? suppress-namespaces :keyword))
+     (print-method (-> form name keyword) writer)
 
      (coll? form)
      (do
@@ -288,7 +296,10 @@
 
     :max-width (long)
       Avoid printing anything beyond the column indicated by this
-      value."
+      value.
+
+    :suppress-namespaces
+      TODO"
   ([x]
    (pprint *out* x nil))
   ([x opts]
@@ -313,6 +324,10 @@
      :d 4
      :e {:a 1 :b 2 :c 3 :d 4 :e {:f 6 :g 7 :h 8 :i 9 :j 10}}}
     {:max-width 24})
+
+  (pprint (read-string (clojure.repl/source-fn 'for)) {:suppress-namespaces #{:symbol}})
+  (pprint ['foo/bar :bar/baz] {:suppress-namespaces #{:symbol}})
+  (pprint ['foo/bar :bar/baz] {:suppress-namespaces #{:keyword}})
 
   (require '[clojure.pprint :as cpp])
 

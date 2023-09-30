@@ -81,7 +81,12 @@
   ($ {:a 1 :b 2} :print-level 0 :print-length 0)
   ($ {:a 1 :b 2} :print-level 1 :print-length 0)
   ($ {:a 1 :b 2} :print-level 0 :print-length 1)
-  ($ {:a 1 :b 2} :print-level 1 :print-length 1))
+  ($ {:a 1 :b 2} :print-level 1 :print-length 1)
+
+  ;; Width
+  ($ {[]
+      [-1000000000000000000000000000000000000000000000000000000000000000N]}
+    :max-width 72))
 
 (deftest pprint-meta
   ;; clojure.pprint prints this incorrectly with meta

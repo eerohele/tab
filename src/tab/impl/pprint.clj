@@ -135,7 +135,7 @@
              ;; If, after writing the map entry key, there's enough space
              ;; to write the val on the same line, do so. Otherwise,
              ;; write indentation followed by val on the following line.
-             mode (print-mode writer s reserve-chars)]
+             mode (print-mode writer s (inc reserve-chars))]
          (write-sep writer mode)
          (when (= :miser mode) (write writer indentation))
 

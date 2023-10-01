@@ -89,6 +89,17 @@
 
 (xr/check! ::ret)
 
+;; *print-readably*
+(quick-check 1000
+  (for-all [x (gen/one-of [gen/string (gen/vector gen/char)])
+            print-readably gen/boolean]
+    (binding [*print-readably* print-readably]
+      (=
+        (with-out-str (pp/pprint x))
+        (with-out-str (cpp/pprint x))))))
+
+(xr/check! ::ret)
+
 (require '[clojure.repl :as repl])
 
 (def clojure-core-sources

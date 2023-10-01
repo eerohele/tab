@@ -51,6 +51,17 @@
 ;; cpp/print sometimes prints things in miser mode even when there's
 ;; enough space to use linear mode, and I don't want to have my impl do
 ;; that.
+;;
+;; With infinite max width, however, tab.impl.pprint prints everything
+;; the same way as clojure.pprint.
+(quick-check 1000
+  (for-all [x gen/any-printable-equatable]
+    (binding [cpp/*print-right-margin* ##Inf]
+      (=
+        (with-out-str (pp/pprint x {:max-width ##Inf}))
+        (with-out-str (cpp/pprint x))))))
+
+(xr/check! ::ret)
 
 (require '[clojure.repl :as repl])
 

@@ -6,7 +6,6 @@
 
 (def tab
   (tab/run
-    :pprint prn
     :print-length nil
     :print-level nil
     :browse? false

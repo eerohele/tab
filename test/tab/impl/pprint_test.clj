@@ -95,6 +95,9 @@
   ($ '(#'map))
   ($ '#{#'map #'mapcat})
   ($ '{:arglists (quote ([xform* coll])) :added "1.7"})
+  ($ '@(foo))
+  ($ ''foo)
+  ($ '~foo)
 
   ;; Namespace maps
   (binding [*print-namespace-maps* true] ($ {:a/b 1}))

@@ -94,7 +94,20 @@
   ($ #'map)
   ($ '(#'map))
   ($ '#{#'map #'mapcat})
-  ($ '{:arglists (quote ([xform* coll])) :added "1.7"}))
+  ($ '{:arglists (quote ([xform* coll])) :added "1.7"})
+
+  ;; Namespace maps
+  (binding [*print-namespace-maps* true] ($ {:a/b 1}))
+  (binding [*print-namespace-maps* true] ($ {:a/b 1 :a/c 2}))
+  (binding [*print-namespace-maps* true] ($ {:a/b 1 :c/d 2}))
+  (binding [*print-namespace-maps* true] ($ {:a/b {:a/b 1}}))
+  (binding [*print-namespace-maps* true] ($ {'a/b 1}))
+  (binding [*print-namespace-maps* true] ($ {'a/b 1 'a/c 3}))
+  (binding [*print-namespace-maps* true] ($ {'a/b 1 'c/d 2}))
+  (binding [*print-namespace-maps* true] ($ {'a/b {'a/b 1}}))
+
+  (binding [*print-namespace-maps* true] ($ #:a{:b 1 :c 2} :max-width 14))
+  (binding [*print-namespace-maps* true] ($ #{'a/b 1 'a/c 2} :max-width 14)))
 
 (deftest pprint-meta
   ;; clojure.pprint prints this incorrectly with meta

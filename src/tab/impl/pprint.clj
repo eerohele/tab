@@ -10,6 +10,29 @@
 
 (set! *warn-on-reflection* true)
 
+(defn ^:private strip-ns
+  "Given a (presumably qualified) ident, return an unqualified version
+  of the ident."
+  [x]
+  (cond
+    (keyword? x) (keyword nil (name x))
+    (symbol? x) (symbol nil (name x))))
+
+(defn ^:private extract-map-ns
+  "Given a map, iff every key in the map is a qualified ident and they
+  share a namespace, return a tuple where the first item is the
+  namespace name (a string) and the second item is a copy of the
+  original map but with unqualified idents."
+  [m]
+  (when (seq m)
+    (loop [m m ns nil nm {}]
+      (if-some [[k v] (first m)]
+        (when (qualified-ident? k)
+          (let [k-ns (namespace k)]
+            (when (or (nil? ns) (= ns k-ns))
+              (recur (rest m) k-ns (assoc nm (strip-ns k) v)))))
+        [ns nm]))))
+
 (defn ^:private open-delim
   "Return the open delimiter (a string) of coll."
   ^String [coll]
@@ -65,6 +88,23 @@
    'var "#'"
    'clojure.core/unquote "~"})
 
+(defn ^:private open-delim+form
+  "Given a coll, return a tuple where the first item is the coll's
+  opening delimiter and the second item is the coll.
+
+  If *print-namespace-maps* is true, the coll is a map, and the map is
+  amenable to the map namespace syntax, the open delimiter includes
+  the map namespace prefix and the map keys are unqualified."
+  [coll]
+  (let [[ns ns-map]
+        (when (and *print-namespace-maps* (map? coll))
+          (extract-map-ns coll))
+
+        coll (if ns ns-map coll)
+
+        o (if ns (str "#:" ns "{") (open-delim coll))]
+    [o coll]))
+
 (defn ^:private print-linear
   "Given a form, print it into a string without regard to how much
   horizontal space the string takes."
@@ -94,8 +134,8 @@
        (print-linear writer (val form) {:level (inc level)}))
 
      (coll? form)
-     (do
-       (.write writer (open-delim form))
+     (let [[^String o form] (open-delim+form form)]
+       (.write writer o)
 
        (when (seq form)
          (loop [form form index 0]
@@ -190,7 +230,11 @@
 
      (coll? form)
      (let [s (print-linear form opts)
-           o (open-delim form)
+
+           ;; If all keys in the map share a namespace and *print-
+           ;; namespace-maps* is true, print the map using map namespace
+           ;; syntax (e.g. #:a{:b 1} instead of {:a/b 1}).
+           [^String o form] (open-delim+form form)
 
            ;; The indentation level is the indentation level of the
            ;; parent S-expression plus a number of spaces equal to the

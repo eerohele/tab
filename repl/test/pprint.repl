@@ -46,6 +46,32 @@
 
 (xr/check! ::ret)
 
+(quick-check 1000
+  (for-all [print-length gen/nat
+            print-level gen/nat
+            print-namespace-maps gen/boolean
+            x (gen/map gen/keyword-ns gen/int)]
+    (binding [*print-level* print-level
+              *print-length* print-length
+              *print-namespace-maps* print-namespace-maps]
+      (= (with-out-str (pp/pprint x)) (with-out-str (cpp/pprint x))))))
+
+(xr/check! ::ret)
+
+(quick-check 75
+  (for-all [print-namespace-maps gen/boolean
+            x (gen/map (gen/one-of [gen/keyword-ns gen/symbol-ns])
+                gen/any-printable-equatable)]
+    (binding [*print-namespace-maps* print-namespace-maps]
+      (=
+        (with-out-str
+          (pp/pprint x {:max-width ##Inf}))
+        (with-out-str
+          (binding [cpp/*print-right-margin* ##Inf]
+            (cpp/pprint x)))))))
+
+(xr/check! ::ret)
+
 ;; A generative test that checks that pp/print and cpp/print print any
 ;; gen/any-printable-equatable the same way would be great, but
 ;; cpp/print sometimes prints things in miser mode even when there's

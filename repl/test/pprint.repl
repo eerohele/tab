@@ -131,6 +131,32 @@
 ;; it doesn't have to.
 (xr/check! (partial >= 25))
 
+(comment
+  ;; Spit a command to diff clojure.pprint and tab.impl.pprint output
+  (do
+    (require '[clojure.java.io :as io])
+
+    (let [tmpdir (io/file (System/getProperty "java.io.tmpdir") "tab")
+          cpp-file (io/file tmpdir "cpp.clj")
+          pp-file (io/file tmpdir "pp.clj")]
+
+      (.mkdirs tmpdir)
+
+      (when (.exists cpp-file) (.delete cpp-file))
+      (when (.exists pp-file) (.delete pp-file))
+
+      (run!
+        (fn [source]
+          (let [cpp-source (with-out-str (cpp/pprint source))
+                pp-source (with-out-str (pp/pprint source))]
+            (when (not= cpp-source pp-source)
+              (spit cpp-file cpp-source :append true)
+              (spit pp-file pp-source :append true))))
+        clojure-core-sources)
+
+      (printf "diff -u %s %s | diff-so-fancy\n" cpp-file pp-file)))
+  ,,,)
+
 ;; Benchmarks
 
 ;; Fipp

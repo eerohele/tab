@@ -9,7 +9,8 @@
                      com.microsoft.playwright/playwright {:mvn/version "1.31.0"}
                      criterium/criterium {:mvn/version "0.4.6"}
                      io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}
-                     fipp/fipp {:mvn/version "0.6.26"}}}
+                     fipp/fipp {:mvn/version "0.6.26"}
+                     com.widdindustries/time-literals {:mvn/version "0.1.10"}}}
 
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "b0ee58b"}}
           :ns-default build}}}

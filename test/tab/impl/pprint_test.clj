@@ -1,7 +1,10 @@
 (ns tab.impl.pprint-test
   (:require [clojure.pprint :as cpp]
             [clojure.test :refer [deftest is]]
+            [time-literals.read-write :as time-literals]
             [tab.impl.pprint :as sut]))
+
+(time-literals/print-time-literals-clj!)
 
 (defn pp-str
   [x]
@@ -110,7 +113,10 @@
   (binding [*print-namespace-maps* true] ($ {'a/b {'a/b 1}}))
 
   (binding [*print-namespace-maps* true] ($ #:a{:b 1 :c 2} :max-width 14))
-  (binding [*print-namespace-maps* true] ($ #{'a/b 1 'a/c 2} :max-width 14)))
+  (binding [*print-namespace-maps* true] ($ #{'a/b 1 'a/c 2} :max-width 14))
+
+  ;; Custom tagged literals
+  ($ #time/date "2023-10-02"))
 
 (deftest pprint-meta
   ;; clojure.pprint prints this incorrectly with meta

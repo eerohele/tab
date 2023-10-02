@@ -125,3 +125,9 @@
 
   (binding [*print-meta* true]
     (is (= "{:a 1}\n" (pp-str (with-meta {:a 1} {}))))))
+
+(defrecord R [x])
+
+(deftest pprint-record
+  (is (= (with-out-str (prn (->R 1)))
+        (with-out-str (sut/pprint (->R 1))))))

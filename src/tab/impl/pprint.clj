@@ -93,14 +93,16 @@
   amenable to the map namespace syntax, the open delimiter includes
   the map namespace prefix and the map keys are unqualified."
   [coll]
-  (let [[ns ns-map]
-        (when (and *print-namespace-maps* (map? coll))
-          (extract-map-ns coll))
+  (if (record? coll)
+    [(str "#" (-> coll class .getName) "{") coll]
+    (let [[ns ns-map]
+          (when (and *print-namespace-maps* (map? coll))
+            (extract-map-ns coll))
 
-        coll (if ns ns-map coll)
+          coll (if ns ns-map coll)
 
-        o (if ns (str "#:" ns "{") (open-delim coll))]
-    [o coll]))
+          o (if ns (str "#:" ns "{") (open-delim coll))]
+      [o coll])))
 
 (defn ^:private print-linear
   "Given a form, print it into a string without regard to how much

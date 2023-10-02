@@ -66,8 +66,9 @@
     not."))
 
 (defn ^:private count-keeping-writer
-  "Wrap a java.io.Writer into a CountKeepingWriter: a writer that keeps
-  count of the length of the strings written into each line."
+  "Wrap a java.io.Writer such that it becomes a CountKeepingWriter: a
+  writer that keeps count of the length of the strings written into
+  each line."
   [^Writer writer max-width]
   (let [c (volatile! 0)]
     (reify CountKeepingWriter
@@ -186,8 +187,19 @@
     (print-method this writer)))
 
 (defn ^:private print-linear
-  "Given a form, print it into a string without regard to how much
-  horizontal space the string takes."
+  "Given one arg (a form), print the form into a string using the
+  default options.
+
+  Given two args (a form and an options map), print the form into a
+  string using the given options.
+
+  Given three args (a java.io.Writer, a form, and an options map), print
+  the form into the writer using the given options.
+
+  Options:
+
+    :level (long)
+      The current nesting level."
   ([form]
    (print-linear form nil))
   (^String [form opts]
@@ -198,7 +210,7 @@
    (-print form writer opts)))
 
 (defn ^:private print-mode
-  "Given a java.io.Writer, a string representation of a form, and a
+  "Given a CountKeepingWriter, a string representation of a form, and a
   number of characters to reserve for closing delimiters, return a
   keyword indicating a printing mode (:linear or :miser)."
   [writer ^String s reserve-chars]
@@ -207,7 +219,7 @@
     :miser))
 
 (defn ^:private write-sep
-  "Given a java.io.Writer and a printing mode, print a separator (a
+  "Given a CountKeepingWriter and a printing mode, print a separator (a
   space or a newline) into the writer."
   [writer mode]
   (case mode
@@ -216,7 +228,7 @@
 
 (defprotocol ^:private PrettyPrintable
   (^:private -pprint [this writer opts]
-    "Given a CountKeepingWriter, a form, and an options map,
+    "Given a form, a CountKeepingWriter, and an options map,
     pretty-print the form into the writer.
 
     Options:

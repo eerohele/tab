@@ -117,10 +117,16 @@
    (with-open [writer (StringWriter.)]
      (print-linear writer form opts)
      (str writer)))
-  ([^Writer writer form {:keys [level] :or {level 0}}]
+  ([^Writer writer form {:keys [level] :or {level 0} :as opts}]
    (cond
      (and (default-coll? form) (= level *print-level*))
      (.write writer "#")
+
+     (instance? clojure.lang.PersistentQueue form)
+     (do
+       (.write writer "<-")
+       (print-linear writer (or (seq form) '()) opts)
+       (.write writer "-<"))
 
      ;; Reader macros
      (and

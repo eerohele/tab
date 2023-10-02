@@ -21,6 +21,15 @@
 
 (xr/check! ::ret)
 
+;; With infinite max width, prints everything the same way as prn.
+(quick-check 10000
+  (for-all [x gen/any-printable-equatable]
+    (=
+      (with-out-str (pp/pprint x {:max-width ##Inf}))
+      (with-out-str (prn x)))))
+
+(xr/check! ::ret)
+
 ;; TODO: Generative test that checks that nothing gets printed past
 ;; :max-width except strings? Not sure how easy it is to check whether
 ;; the thing past max-width is within a string, though.

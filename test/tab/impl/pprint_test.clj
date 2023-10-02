@@ -52,8 +52,11 @@
       :e {:a 1 :b 2 :c 3 :d 4 :e {:f 6 :g 7 :h 8 :i 9 :j 10}}}
     :max-width 24)
 
+  ;; Queues
   ($ (clojure.lang.PersistentQueue/EMPTY))
   ($ (conj (clojure.lang.PersistentQueue/EMPTY) 1))
+  (binding [*print-length* 1]
+    ($ (conj (clojure.lang.PersistentQueue/EMPTY) 1 2 3)))
 
   ;; Max width
   ($ {:a 1 :b 2 :c 3 :d 4} :max-width 0)

@@ -83,10 +83,7 @@
         nil))))
 
 (def ^:private reader-macros
-  {'quote "'"
-   'clojure.core/deref "@"
-   'var "#'"
-   'clojure.core/unquote "~"})
+  {`quote "'" `deref "@" `var "#'" `unquote "~"})
 
 (defn ^:private open-delim+form
   "Given a coll, return a tuple where the first item is the coll's

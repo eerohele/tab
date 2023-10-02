@@ -131,3 +131,20 @@
 (deftest pprint-record
   (is (= (with-out-str (prn (->R 1)))
         (with-out-str (sut/pprint (->R 1))))))
+
+(deftype T
+  [xs]
+  clojure.lang.Associative
+  (assoc [_ k v]
+    (T. (.assoc xs k v))))
+
+(def obj-re
+  #"#object\[tab.impl.pprint_test.T 0[xX][0-9a-fA-F]+ \"tab.impl.pprint_test.T@[0-9a-fA-F]+\"\]\n")
+
+(deftest pprint-custom-type
+  (is (re-matches obj-re (with-out-str (prn (T. {:a 1})))))
+  (is (re-matches obj-re (with-out-str (cpp/pprint (T. {:a 1})))))
+  (is (re-matches obj-re (with-out-str (sut/pprint (T. {:a 1})))))
+
+  (binding [*print-level* 0]
+    (is (re-matches obj-re (with-out-str (sut/pprint (T. {:a 1})))))))

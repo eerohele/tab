@@ -104,6 +104,10 @@
           o (if ns (str "#:" ns "{") (open-delim coll))]
       [o coll])))
 
+(defn ^:private default-coll?
+  [x]
+  (or (seq? x) (vector? x) (map? x) (set? x)))
+
 (defn ^:private print-linear
   "Given a form, print it into a string without regard to how much
   horizontal space the string takes."
@@ -115,7 +119,7 @@
      (str writer)))
   ([^Writer writer form {:keys [level] :or {level 0}}]
    (cond
-     (and (coll? form) (= level *print-level*))
+     (and (default-coll? form) (= level *print-level*))
      (.write writer "#")
 
      ;; Reader macros
@@ -132,7 +136,7 @@
        (.write writer " ")
        (print-linear writer (val form) {:level (inc level)}))
 
-     (coll? form)
+     (default-coll? form)
      (let [[^String o form] (open-delim+form form)]
        (.write writer o)
 
@@ -197,7 +201,7 @@
     {:keys [level indentation reserve-chars]
      :as opts}]
    (cond
-     (and (coll? form) (meets-print-level? level))
+     (and (default-coll? form) (meets-print-level? level))
      (write writer "#")
 
      ;; Reader macros
@@ -227,7 +231,7 @@
          (when (= :miser mode) (write writer indentation))
          (-pprint writer v opts)))
 
-     (coll? form)
+     (default-coll? form)
      (let [s (print-linear form opts)
 
            ;; If all keys in the map share a namespace and *print-

@@ -52,13 +52,13 @@
     :else ")"))
 
 (defprotocol ^:private CountKeepingWriter
-  (write [this s]
+  (^:private write [this s]
     "Write a string into the underlying java.io.Writer.")
 
-  (remaining [this]
+  (^:private remaining [this]
     "Return the number of characters available on the current line.")
 
-  (nl [this]
+  (^:private nl [this]
     "Write a newline into the underlying java.io.Writer.
 
     Resets the number of characters allotted to the current line to
@@ -110,8 +110,8 @@
   [level]
   (and (int? *print-level*) (= level *print-level*)))
 
-(defprotocol Printable
-  (-print [this writer opts]))
+(defprotocol ^:private Printable
+  (^:private -print [this writer opts]))
 
 (defn ^:private -print-coll
   [form ^Writer writer {:keys [level] :or {level 0} :as opts}]
@@ -214,8 +214,8 @@
     :miser (nl writer)
     (write writer " ")))
 
-(defprotocol PrettyPrintable
-  (-pprint [this writer opts]
+(defprotocol ^:private PrettyPrintable
+  (^:private -pprint [this writer opts]
     "Given a CountKeepingWriter, a form, and an options map,
     pretty-print the form into the writer.
 

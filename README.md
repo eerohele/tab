@@ -4,9 +4,6 @@ Tab is a little program that turns Clojure data structures into tables.
 
 <img width="1408" alt="image" src="https://user-images.githubusercontent.com/31859/215182910-f605dc32-b2f3-4bef-be13-4f0ea2331c0a.png">
 
-> **Note**
-> Tab is in **alpha**. While in alpha, breaking changes can happen.
-
 ## Rationale
 
 Tab's primary aim is to help Clojure programmers make sense of data.
@@ -99,9 +96,6 @@ Only `tab.api` and `tab.auto` are part of Tab's public API. All other namespaces
 - Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
 - Click the text that says `$N vals` in the footer to empty Tab's in-memory database (and release values for garbage collection).
 - Use the buttons in the footer to go to the next/previous value.
-
-> **Note**
-> UI controls are subject to change while Tab is in alpha.
 
 ## Examples
 

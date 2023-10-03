@@ -48,7 +48,7 @@
   (tap> "bar")
   (tap> "baz")
   (tap> (sorted-map-by > 1 "a" 2 "b" 3 "c"))
-  (tap> (sorted-set-by (fn [m1 m2] (compare (:a m1) (:a m2))) {:a 2 :b 3} {:a 1 :b 4}) 0)
+  (tap> (sorted-set-by (fn [m1 m2] (compare (:a m1) (:a m2))) {:a 2 :b 3} {:a 1 :b 4}))
   (tap> {:a 1})
   (tap> {:a 1 :b {:c 2} :d {:e 3}})
   (tap> {:a 1 3 2})

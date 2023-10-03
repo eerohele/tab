@@ -128,6 +128,6 @@ For more examples on what Tab can do, see [`repl/demo/intro.repl`](https://githu
 
 ## Acknowledgements
 
-- [My employer](https://www.solita.fi), for graciously sponsoring the development of this tool.
+- [My previous employer](https://www.solita.fi), for graciously sponsoring the development of this tool.
 - [Nikita Prokopov](https://github.com/tonsky), for the [Alabaster Color Scheme](https://github.com/tonsky/sublime-scheme-alabaster).
 - [Pedro Girardi](https://github.com/pedrorgirardi), for alpha testing and improvement ideas.

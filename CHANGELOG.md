@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## UNRELEASED
+## 2023-10-03
 
 - Sort maps and seqs of maps by key #9
 - Show expand/collapse controls when seq of maps exceeds `:print-length` #7

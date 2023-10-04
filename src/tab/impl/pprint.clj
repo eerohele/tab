@@ -55,7 +55,8 @@
 
 (defprotocol ^:private CountKeepingWriter
   (^:private write [this s]
-    "Write a string into the underlying java.io.Writer.")
+    "Write a string into the underlying java.io.Writer while keeping
+    count of the length of the strings written into the writer.")
 
   (^:private remaining [this]
     "Return the number of characters available on the current line.")
@@ -64,14 +65,20 @@
     "Write a newline into the underlying java.io.Writer.
 
     Resets the number of characters allotted to the current line to
-    zero. Writing a string with a newline via the write method does
-    not."))
+    zero.
+
+    If *flush-on-newline* is true, flushes the underlying writer."))
 
 (defn ^:private count-keeping-writer
-  "Wrap a java.io.Writer such that it becomes a CountKeepingWriter: a
-  writer that keeps count of the length of the strings written into
-  each line."
-  [^Writer writer max-width]
+  "Given a java.io.Writer and an options map, wrap the java.io.Writer
+  such that it becomes a CountKeepingWriter: a writer that keeps count
+  of the length of the strings written into each line.
+
+  Options:
+
+    :max-width (long)
+      Maximum line width."
+  [^Writer writer {:keys [max-width]}]
   (let [c (volatile! 0)]
     (reify CountKeepingWriter
       (write [_ s]
@@ -82,6 +89,7 @@
         (- max-width @c))
       (nl [_]
         (.write writer "\n")
+        (when *flush-on-newline* (.flush writer))
         (vreset! c 0)
         nil))))
 
@@ -207,7 +215,9 @@
     (print-method this writer)))
 
 (defn ^:private print-linear
-  "Given one arg (a form), print the form into a string using the
+  "Print a form in linear style (without regard to line length).
+
+  Given one arg (a form), print the form into a string using the
   default options.
 
   Given two args (a form and an options map), print the form into a
@@ -431,31 +441,38 @@
   Given one arg (an object), pretty-print the object into *out* using
   the default options.
 
-  Given two args (a object and an options map), pretty-print the object
+  Given two args (an object and an options map), pretty-print the object
   into *out* using the given options.
 
   Given three args (a java.io.Writer, a object, and an options map),
   pretty-print the object into the writer using the given options.
 
+  If *print-dup* is true, does not attempt to pretty-print; falls back
+  to default print-dup behavior instead.
+
   Options:
 
-    :max-width (long, default: 72)
+    :max-width (long or ##Inf, default: 72)
       Avoid printing anything beyond the column indicated by this
       value."
   ([x]
    (pprint *out* x nil))
   ([x opts]
    (pprint *out* x opts))
-  ([writer x {:keys [max-width]
-              :or {max-width 72}
-              :as opts}]
+  ([^Writer writer x {:keys [max-width]
+                      :or {max-width 72}
+                      :as opts}]
    (assert (or (nat-int? max-width) (= max-width ##Inf))
      ":max-width must be a natural int or ##Inf")
 
    (assert (instance? Writer writer)
      "first arg to pprint must be a java.io.Writer")
 
-   (let [writer (count-keeping-writer writer max-width)]
-     (-pprint x writer
-       (assoc opts :level 0 :indentation "" :reserve-chars 0))
-     (nl writer))))
+   (if *print-dup*
+     (do
+       (print-dup x writer)
+       (.write writer "\n"))
+     (let [writer (count-keeping-writer writer {:max-width max-width})]
+       (-pprint x writer
+         (assoc opts :level 0 :indentation "" :reserve-chars 0))
+       (nl writer)))))

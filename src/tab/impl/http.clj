@@ -7,7 +7,7 @@
   (:import (java.io BufferedOutputStream BufferedReader InputStreamReader)
            (java.net InetAddress ServerSocket SocketException)
            (java.nio.charset StandardCharsets)
-           (java.util.concurrent BlockingQueue Executors TimeUnit)
+           (java.util.concurrent BlockingQueue Executors ExecutorService TimeUnit)
            (java.util UUID)))
 
 (set! *warn-on-reflection* true)
@@ -16,6 +16,15 @@
   (address [this] "Given a HttpServer, return the address it listens on.")
   (broadcast [this event] "Send a server-sent event (SSE) to all connected clients.")
   (halt [this] "Halt a HttpServer."))
+
+(defn ^:private make-request-thread-pool
+  "Return a thread pool for handling HTTP requests."
+  []
+  (try
+    (eval '(Executors/newVirtualThreadPerTaskExecutor))
+    (catch Exception _
+      (let [thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)]
+        (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))))))
 
 (defn serve
   "Start a HTTP server.
@@ -38,8 +47,7 @@
   (let [server-id (UUID/randomUUID)
         ^ServerSocket socket (ServerSocket. port 0 (InetAddress/getLoopbackAddress))
         accept-loop-thread-pool (Executors/newSingleThreadExecutor (thread/make-factory :name-suffix :accept-loop))
-        thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)
-        request-thread-pool (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))
+        ^ExecutorService request-thread-pool (make-request-thread-pool)
         heartbeat-thread-pool (Executors/newScheduledThreadPool 1 (thread/make-factory :name-suffix :heartbeat :ex-log-level :fine))
         queue-thread-pool (Executors/newCachedThreadPool (thread/make-factory :name-suffix :queue))
 

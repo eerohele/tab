@@ -21,7 +21,7 @@
   "Return a thread pool for handling HTTP requests."
   []
   (try
-    (eval '(Executors/newVirtualThreadPerTaskExecutor))
+    (eval '(java.util.concurrent.Executors/newVirtualThreadPerTaskExecutor))
     (catch Exception _
       (let [thread-pool-size (-> (Runtime/getRuntime) .availableProcessors inc)]
         (Executors/newFixedThreadPool thread-pool-size (thread/make-factory :name-suffix :request))))))

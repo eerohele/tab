@@ -44,7 +44,7 @@
       value as collapsed.
 
       To expand a collapsed object, click on the plus sign."
-  [& {:keys [init-val add-tap? browse? pprint print-length print-level]
+  [& {:keys [init-val add-tap? browse? print-length print-level]
       :as opts
       :or {init-val '(tap> :hello-world)
            add-tap? true

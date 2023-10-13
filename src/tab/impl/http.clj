@@ -31,7 +31,7 @@
 
   Options:
 
-    :bind-address (default: loopback address)
+    :bind-address (string, default: loopback address)
       The local IP address to bind the HTTP server to.
 
     :port
@@ -48,7 +48,7 @@
          sse-heartbeat-initial-delay-secs 10
          sse-heartbeat-frequency-secs 10}}]
   (let [server-id (UUID/randomUUID)
-        ^ServerSocket socket (ServerSocket. port 0 (or bind-address (InetAddress/getLoopbackAddress)))
+        ^ServerSocket socket (ServerSocket. port 0 (or (InetAddress/getByName bind-address) (InetAddress/getLoopbackAddress)))
         accept-loop-thread-pool (Executors/newSingleThreadExecutor (thread/make-factory :name-suffix :accept-loop))
         ^ExecutorService request-thread-pool (make-request-thread-pool)
         heartbeat-thread-pool (Executors/newScheduledThreadPool 1 (thread/make-factory :name-suffix :heartbeat :ex-log-level :fine))

@@ -187,8 +187,14 @@
 
 (defn ^:private -print-map-entry
   [this writer opts]
-  (if (meets-print-level? (:level opts))
+  (cond
+    (meets-print-level? (:level opts))
     (write-into writer "#")
+
+    (zero? (:level opts))
+    (-print-coll this writer opts)
+
+    :else
     (let [opts (update opts :level inc)]
       (-print (key this) writer opts)
       (write-into writer " ")
@@ -432,22 +438,29 @@
   ;;
   ;; Additionally, we want to keep the key and the value on the same
   ;; line whenever we can.
-  (if (meets-print-level? (:level opts))
+  (cond
+    (meets-print-level? (:level opts))
     (write writer "#")
-    (let [k (key this)
-          opts (update opts :level inc)]
-      (-pprint k writer opts)
 
-      (let [v (val this)
-            s (print-linear v opts)
-            ;; If, after writing the map entry key, there's enough
-            ;; space to write the val on the same line, do so.
-            ;; Otherwise, write indentation followed by val on the
-            ;; following line.
-            mode (print-mode writer s (inc (:reserve-chars opts)))]
-        (write-sep writer mode)
-        (when (= :miser mode) (write writer (:indentation opts)))
-        (-pprint v writer opts)))))
+    (zero? (:level opts))
+    (-pprint-coll this writer opts)
+
+    :else
+    (if (meets-print-level? (:level opts))
+      (write writer "#")
+      (let [k (key this)
+            opts (update opts :level inc)]
+        (-pprint k writer opts)
+
+        (let [v (val this)
+              s (print-linear v opts)
+              ;; If, after writing the map entry key, there's enough space to
+              ;; write the val on the same line, do so. Otherwise, write
+              ;; indentation followed by val on the following line.
+              mode (print-mode writer s (inc (:reserve-chars opts)))]
+          (write-sep writer mode)
+          (when (= :miser mode) (write writer (:indentation opts)))
+          (-pprint v writer opts))))))
 
 (defn ^:private -pprint-seq
   [this writer opts]

@@ -1,7 +1,7 @@
 /* <VARIABLES> */
 
 :root {
-  --font-family-monospace: Iosevka, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+  --font-family-monospace: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', monospace;
 
   --background-color: #fff;

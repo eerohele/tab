@@ -27,7 +27,6 @@
   --color-red: #aa3731;
   --color-blue: #325cc0;
   --color-green: #448c27;
-  --color-light-green: #1dca51;
   --color-violet: #7a3e9d;
   --color-yellow: #fffabc;
 }
@@ -160,10 +159,6 @@ footer nav {
 footer a:any-link {
   color: var(--color-blue);
   transition: color 250ms ease-in-out;
-}
-
-footer a:hover {
-  color: var(--color-light-green);
 }
 
 footer .noop {
@@ -315,7 +310,7 @@ th[data-action] {
 }
 
 .value-type a:any-link:hover, tfoot a:any-link:hover {
-  color: var(--color-light-green);
+  text-decoration: underline;
 }
 
 .count {
@@ -340,7 +335,7 @@ table tfoot th {
 }
 
 table tfoot a:any-link:hover {
-  color: var(--color-light-green);
+  text-decoration: underline;
 }
 
 /* <ANNOTATE> */

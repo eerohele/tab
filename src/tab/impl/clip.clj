@@ -1,6 +1,6 @@
 (ns tab.impl.clip
   (:require [clojure.string :as string]
-            [clojure.pprint :as pprint])
+            [tab.impl.pprint :as pprint])
   (:import (java.awt Toolkit)
            (java.awt.datatransfer StringSelection)))
 
@@ -12,7 +12,7 @@
           clipboard (.getSystemClipboard toolkit)
           string (->
                    (binding [*print-length* nil *print-level* nil]
-                     (pprint/pprint form))
+                     (pprint/pprint form {:map-entry-separator ""}))
                    (with-out-str)
                    (string/trim))]
       (.setContents clipboard (StringSelection. string) nil)

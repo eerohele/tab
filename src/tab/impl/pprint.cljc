@@ -569,9 +569,6 @@
   ([writer x {:keys [max-width map-entry-separator]
               :or {max-width 72 map-entry-separator ","}
               :as opts}]
-   (assert (or (nat-int? max-width) (= max-width ##Inf))
-     ":max-width must be a natural int or ##Inf")
-
    (letfn
      [(pp [writer]
         (let [writer (count-keeping-writer writer {:max-width max-width})]
@@ -584,9 +581,6 @@
           (nl writer)))]
      #?(:clj
         (do
-          (assert (instance? java.io.Writer writer)
-            "first arg to pprint must be a java.io.Writer")
-
           (if *print-dup*
             (do
               (print-dup x writer)
@@ -597,11 +591,7 @@
 
         :cljs
         (if writer
-          (do
-            (assert (satisfies? cljs.core.IWriter writer)
-              "first arg to pprint must be a cljs.core.IWriter")
-
-            (pp writer))
+          (pp writer)
 
           ;; ClojureScript does not have *out* bound by default.
           (let [sb (goog.string.StringBuffer.)

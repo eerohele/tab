@@ -1,6 +1,5 @@
 (ns tab.impl.html
-  (:require [clojure.spec.alpha :as spec]
-            [clojure.string :as string])
+  (:require [clojure.spec.alpha :as spec])
   (:import (clojure.lang IPersistentMap)
            (java.io StringWriter Writer)))
 
@@ -11,13 +10,19 @@
 
 (defn escape
   "Given a string, return a HTML-escaped version of that string."
-  ^String [^String string]
-  (string/join
-    (map (fn [ch]
-           (if (or (#{34 38 39 60 61 62} ch) (> ch 127))
-             (format "&#%s;" ch)
-             (String. (Character/toChars ch))))
-      (some-> string .codePoints .iterator iterator-seq))))
+  ^String [^String s]
+  (let [sb (StringBuilder.)
+        len (.length s)]
+    (loop [i 0]
+      (if (< i len)
+        (let [ch (.charAt s i)
+              n (int ch)]
+          (.append sb
+            (if (or (= 34 n) (<= 38 n 39) (<= 60 n 62) (> n 127))
+              (format "&#%d;" n)
+              ch))
+          (recur (inc i)))
+        (str sb)))))
 
 (defn ^:private ->content
   [nodes]

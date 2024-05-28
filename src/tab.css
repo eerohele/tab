@@ -301,6 +301,9 @@ th[data-action] {
   text-align: center;
   vertical-align: middle;
   min-width: 15px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
 }
 
 .value-type {

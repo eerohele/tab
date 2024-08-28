@@ -29,28 +29,52 @@ const reltime = (d1, d2 = new Date()) => {
   }
 }
 
-const eventSource = new EventSource("/event-source");
-
-eventSource.onopen = (event) => {
-  console.debug(event);
-  document.querySelector(".event-source-error").classList.remove("show");
-};
-
-eventSource.addEventListener("tab", (event) => {
-  console.debug(event);
-  const json = JSON.parse(event.data);
-  document.querySelector("main").outerHTML = Base64.decode(json.html);
-
-  if (json.history) {
-    history.pushState({}, "", `/id/${event.lastEventId}`);
+class EventStream {
+  constructor() {
+    this.connected = false;
   }
 
-  document.dispatchEvent(new Event("DOMContentLoaded"));
-});
+  connect() {
+    this.eventSource = new EventSource("/event-source");
 
-eventSource.onerror = (event) => {
-  console.error(event);
-  window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
+    window.addEventListener("beforeunload", (_) => {
+      this.eventSource.close();
+    });
+
+    this.eventSource.onopen = (event) => {
+      console.debug(event);
+      document.querySelector(".event-source-error").classList.remove("show");
+    };
+
+    this.eventSource.addEventListener("tab", (event) => {
+      console.debug(event);
+      const json = JSON.parse(event.data);
+      document.querySelector("main").outerHTML = Base64.decode(json.html);
+
+      if (json.history) {
+        history.pushState({}, "", `/id/${event.lastEventId}`);
+      }
+
+      document.dispatchEvent(new Event("DOMContentLoaded"));
+    });
+
+    this.eventSource.onerror = (event) => {
+      console.error(event);
+      window.setTimeout(() => document.querySelector(".event-source-error").classList.add("show"), 3000);
+    }
+
+    this.connected = true;
+
+    return this;
+  }
+
+  disconnect() {
+    this.eventSource.close();
+    this.eventSource = null;
+    this.connected = false;
+
+    return this;
+  }
 }
 
 const getTarget = (el) => {
@@ -223,9 +247,22 @@ const relativize = (time) => {
 
 let interval;
 
+const eventSource = new EventStream().connect();
+
 const init = (el) => {
-  window.addEventListener("beforeunload", (event) => {
-    eventSource.close();
+  const pause = document.getElementById("pause");
+
+  pause.addEventListener("click", (event) => {
+    if (eventSource.connected) {
+      eventSource.disconnect();
+      event.currentTarget.classList.add("paused");
+      event.currentTarget.setAttribute("title", "Reconnect to server");
+    } else {
+      eventSource.connect();
+      event.currentTarget.classList.remove("paused");
+      event.currentTarget.setAttribute("title", "Disconnect from server");
+    }
+    event.preventDefault();
   });
 
   const time = document.querySelector("footer time");

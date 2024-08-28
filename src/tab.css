@@ -417,4 +417,16 @@ https://github.com/tonsky/sublime-scheme-alabaster
   text-decoration: underline;
 }
 
+#pause {
+  transition: 250ms filter ease-in-out;
+}
+
+.paused {
+  filter: saturate(0%);
+}
+
+.paused:hover {
+  filter: saturate(50%);
+}
+
 /* </NOTIFICATIONS> */

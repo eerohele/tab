@@ -317,6 +317,12 @@
                    :title "Go back to index"} "○")
             ($ :span {:class "noop"} "○"))
 
+          ($ :a {:href "#"
+                 :accesskey "p"
+                 :id "pause"
+                 :title "Disconnect from server"}
+            "⚡")
+
           (cond
             (= 1 offset)
             ($ :a {:data-testid "next"

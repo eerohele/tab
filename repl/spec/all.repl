@@ -842,6 +842,28 @@
 (vec (.allTextContents (.locator page "main > table > tbody > tr:nth-child(2) > td")))
 (xr/check! (partial = ["1" "2" "3"]))
 
+;; pause/resume
+
+(tab/tab> tab 1)
+(vec (.allTextContents (.locator page "main pre")))
+(xr/check! (partial = ["1"]))
+
+(.click page "#pause")
+(.waitForSelector page ".paused")
+
+;; after pause, the page does not update to show the tabbed value
+(tab/tab> tab 2)
+(vec (.allTextContents (.locator page "main pre")))
+(xr/check! (partial = ["1"]))
+
+(.click page "#pause")
+(.waitForSelector page "#pause:not(.paused)")
+
+;; after resume, the page updates to show the tabbed value
+(tab/tab> tab 2)
+(vec (.allTextContents (.locator page "main pre")))
+(xr/check! (partial = ["2"]))
+
 (comment
   ;; clipboard
 

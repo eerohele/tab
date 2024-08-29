@@ -6,6 +6,7 @@
             [tab.impl.html :refer [$] :as html]
             [tab.impl.pprint :as pp])
   (:import (clojure.lang Named IPersistentMap Seqable)
+           (java.nio.charset StandardCharsets)
            (java.time.format DateTimeFormatter)))
 
 (set! *warn-on-reflection* true)
@@ -66,6 +67,35 @@
   (-tabulate [this level]))
 
 (extend-protocol Tabulable
+  (Class/forName "[B")
+  (-tabulate [this level]
+    (let [len (alength ^bytes this)]
+      ($ :table
+        ($ :thead
+          ($ :tr
+            ($ :th {:class "value-type"
+                    :colspan (inc len)}
+              "byte array"))
+          ($ :tr
+            ($ :th {:class "sticky count"} ($ :span {:title "The total number of bytes in the byte array."} len))
+            (map (fn [i] ($ :th {:class "count violet-header"} i)) (range 8))))
+        (let [[octet & octets] (partition-all 8 this)]
+          ($ :tbody
+            ($ :tr
+              ;; TODO: *print-length*
+              ($ :th {:class "count violet-header"
+                      :rowspan (-> octets count inc)}
+                "[]")
+              (map (fn [b] ($ :td b)) octet))
+            (map (fn [octet]
+                   ($ :tr
+                     (map (fn [b] ($ :td b)) octet)))
+              octets)
+            ($ :tr
+              ($ :th {:class "violet-header"} "UTF-8")
+              ($ :td {:colspan len}
+                (-tabulate (String. ^bytes this StandardCharsets/UTF_8) level))))))))
+
   nil
   (-tabulate [_ _]
     (annotate "nil"))

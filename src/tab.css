@@ -270,7 +270,8 @@ table tbody td {
 
 /* </TABLE> */
 
-.sticky .count {
+.sticky .count,
+.violet-header {
   color: var(--color-violet);
   cursor: help;
   font-size: 80%;

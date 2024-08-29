@@ -208,14 +208,16 @@
                   ($ :tr
                     ($ :th {:colspan (-> ks count inc)}
                       (let [href (format "/toggle/%s?print-length=nil" id)]
-                        ($ :a {:data-action "toggle-length"
-                               :href href
-                               :bx-dispatch "click"
-                               :bx-request "get"
-                               :bx-uri href
-                               :bx-target "table"
-                               :bx-swap "outerHTML"}
-                          (format "⇣ %d of %d" *print-length* cnt))))))
+                        (list
+                          ($ :span "⇣ ")
+                          ($ :a {:data-action "toggle-length"
+                                 :href href
+                                 :bx-dispatch "click"
+                                 :bx-request "get"
+                                 :bx-uri href
+                                 :bx-target "table"
+                                 :bx-swap "outerHTML"}
+                            (format "%d of %d" *print-length* cnt)))))))
 
                 (and (some? *initial-print-length*) (nil? *print-length*))
                 ($ :tfoot

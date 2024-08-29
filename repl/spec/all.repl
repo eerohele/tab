@@ -864,6 +864,19 @@
 (vec (.allTextContents (.locator page "main pre")))
 (xr/check! (partial = ["2"]))
 
+;; issue #14
+#_{:clj-kondo/ignore [:redefined-var]}
+(def tab (tab/run :browse? false :print-length 2 :print-level nil))
+#_{:clj-kondo/ignore [:redefined-var]}
+(def uri (tab/address tab))
+
+(.navigate page uri)
+
+(tab/tab> tab [{:_version 1}])
+(.reload page)
+(vec (.allTextContents (.locator page "main > table > tfoot a")))
+(xr/check! empty?)
+
 (comment
   ;; clipboard
 

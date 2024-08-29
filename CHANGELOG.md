@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## UNRELEASED
+
+- Add support for pausing and resuming page updates
+
+  This is useful e.g. when you have Tab open in multiple browser windows and you only want one window to update.
+
+- Use system monospace font by default
+- Use pp to pretty-print clipboard value
+- Make seq table index column sticky
+- Only show expand/collapse controls when necessary #14
+- Minor UI improvements
+
 ## 2023-10-03
 
 - Sort maps and seqs of maps by key #9

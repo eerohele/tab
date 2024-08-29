@@ -219,7 +219,7 @@
                                  :bx-swap "outerHTML"}
                             (format "%d of %d" *print-length* cnt)))))))
 
-                (and (some? *initial-print-length*) (nil? *print-length*))
+                (and (some? *initial-print-length*) (nil? *print-length*) (> cnt *initial-print-length*))
                 ($ :tfoot
                   ($ :tr
                     ($ :th {:colspan (-> ks count inc)}

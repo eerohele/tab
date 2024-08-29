@@ -96,6 +96,7 @@ Only `tab.api` and `tab.auto` are part of Tab's public API. All other namespaces
 - Click opaque objects (`#object[...]`) to view datafied versions of them (provided that they implement `clojure.core.protocols/Datafiable`).
 - Click the text that says `$N vals` in the footer to empty Tab's in-memory database (and release values for garbage collection).
 - Use the buttons in the footer to go to the next/previous value.
+- Click the lightning icon in the footer to pause or resume page updates.
 
 ## Examples
 

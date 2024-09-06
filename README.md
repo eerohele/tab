@@ -1,5 +1,7 @@
 # Tab
 
+[![0 dependencies!](https://0dependencies.dev/0dependencies.svg)](https://0dependencies.dev)
+
 Tab is a little program that turns Clojure data structures into tables.
 
 <img width="1408" alt="image" src="https://user-images.githubusercontent.com/31859/215182910-f605dc32-b2f3-4bef-be13-4f0ea2331c0a.png">

@@ -252,6 +252,10 @@ const eventSource = new EventStream().connect();
 const init = (el) => {
   const pause = document.getElementById("pause");
 
+  if (eventSource.connected) {
+    pause.classList.remove("paused");
+  }
+
   pause.addEventListener("click", (event) => {
     if (eventSource.connected) {
       eventSource.disconnect();

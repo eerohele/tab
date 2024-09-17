@@ -322,6 +322,7 @@
           ($ :a {:href "#"
                  :accesskey "p"
                  :id "pause"
+                 :class "paused"
                  :title "Disconnect from server"}
             "⚡")
 

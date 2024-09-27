@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2024-10-27
+## 2024-09-27
 
 - Add support for pausing and resuming page updates
 

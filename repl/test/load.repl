@@ -26,9 +26,10 @@
   ,,,)
 
 (spec/def ::ok pos?)
+(spec/def ::ko zero?)
 
 (spec/def ::ret
-  (spec/and (spec/keys :req-un [::ok]) #(not (contains? % :ko))))
+  (spec/keys :req-un [::ok ::ko]))
 
 (gatling/run
   {:name "pre-tab"

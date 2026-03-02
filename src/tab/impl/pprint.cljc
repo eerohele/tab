@@ -184,6 +184,23 @@
       (write-into writer " ")
       (-print (val this) writer opts))))
 
+(defn ^:private printable-meta [form]
+  (when (and *print-meta* *print-readably*)
+    ;; prn does not print empty meta; clojure.pprint does.
+    (when-some [m (-> form meta not-empty)]
+      ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
+      (if (and (= (count m) 1) (:tag m))
+        (:tag m)
+        m))))
+
+(defn ^:private print-meta [writer form opts]
+  ;; Must print meta when linear-printing to account for cases where the form
+  ;; being printed is a coll that contains a nested IObj with meta.
+  (when-some [m (printable-meta form)]
+    (write-into writer "^")
+    (-print m writer opts)
+    (write-into writer " ")))
+
 (defn ^:private -print-map
   "Like -print, but only for maps."
   [coll writer opts]
@@ -191,6 +208,8 @@
     (write-into writer "#")
 
     (let [[^String o form] (open-delim+form coll)]
+      (print-meta writer coll opts)
+
       (write-into writer o)
 
       (when (seq form)
@@ -214,6 +233,8 @@
     (write-into writer "#")
 
     (let [[^String o form] (open-delim+form coll)]
+      (print-meta writer coll opts)
+
       (write-into writer o)
 
       (when (seq form)
@@ -312,27 +333,15 @@
        (str sb))))
 
 (defn ^:private print-linear
-  "Print a form in linear style (without regard to line length).
-
-  Given one arg (a form), print the form into a string using the
-  default options.
-
-  Given two args (a form and an options map), print the form into a
-  string using the given options.
-
-  Given three args (a java.io.Writer, a form, and an options map), print
-  the form into the writer using the given options.
+  "Given a form and an options map, print the given form in linear style
+  (without regard to line length).
 
   Options:
 
     :level (long)
       The current nesting level."
-  ([form]
-   (print-linear form nil))
-  (^String [form opts]
-   (with-str-writer (fn [writer] (print-linear writer form opts))))
-  ([writer form opts]
-   (-print form writer opts)))
+  ^String [form opts]
+  (with-str-writer (fn [writer] (-print form writer opts))))
 
 (defn ^:private print-mode
   "Given a CountKeepingWriter, a form, and an options map, return a keyword
@@ -380,16 +389,24 @@
           The number of characters reserved for closing delimiters of
           S-expressions above the current nesting level.")))
 
-(defn ^:private pprint-meta
-  [form writer opts mode]
-  (when (and *print-meta* *print-readably*)
-    (when-some [m (meta form)]
-      (when (seq m)
-        (write writer "^")
-        ;; As per https://github.com/clojure/clojure/blob/6975553804b0f8da9e196e6fb97838ea4e153564/src/clj/clojure/core_print.clj#L78-L80
-        (let [m (if (and (= (count m) 1) (:tag m)) (:tag m) m)]
-          (-pprint m writer opts))
-        (write-sep writer mode)))))
+(defn ^:private -pprint-with-meta
+  [meta form writer opts]
+  (if (meets-print-level? (:level opts))
+    (write writer "#")
+    (do
+      (write writer "^")
+      ;; Account for the meta dispatch character (^) in the indentation.
+      (let [m-mode (-pprint meta writer (update opts :indentation str " "))
+            mode (case m-mode
+                   ;; If the meta map was printed using miser mode, always use
+                   ;; miser mode for the form as well. Without this, if there's
+                   ;; room to print the entire form and the closing delimiter
+                   ;; on the last line of a multi-line meta map, pp will do so.
+                   :miser :miser
+                   (print-mode writer form (update opts :reserve-chars inc)))]
+        (write-sep writer mode)
+        (when (= :miser mode) (write writer (:indentation opts)))
+        (-pprint form writer opts)))))
 
 (defn ^:private pprint-opts
   [open-delim opts]
@@ -400,53 +417,56 @@
         indentation (str (:indentation opts) (.repeat " " (strlen open-delim)))]
     (-> opts (assoc :indentation indentation) (update :level inc))))
 
+(defn ^:private without-meta [form]
+  (with-meta form nil))
+
 (defn ^:private -pprint-coll
   "Like -pprint, but only for lists, vectors and sets."
   [this writer opts]
   (if (meets-print-level? (:level opts))
     (write writer "#")
-    (let [[^String o form] (open-delim+form this)
-          mode (print-mode writer this opts)
-          opts (pprint-opts o opts)]
+    (if-some [m (printable-meta this)]
+      (-pprint-with-meta m (without-meta this) writer opts)
+      (let [[^String o form] (open-delim+form this)
+            mode (print-mode writer this opts)
+            opts (pprint-opts o opts)]
 
-      ;; Print possible meta
-      (pprint-meta form writer opts mode)
+        ;; Print open delimiter
+        (write writer o)
 
-      ;; Print open delimiter
-      (write writer o)
+        ;; Print S-expression content
+        (if (= *print-length* 0)
+          (write writer "...")
+          (when (seq form)
+            (loop [form form index 0]
+              (if (= index *print-length*)
+                (do
+                  (when (= mode :miser) (write writer (:indentation opts)))
+                  (write writer "..."))
 
-      ;; Print S-expression content
-      (if (= *print-length* 0)
-        (write writer "...")
-        (when (seq form)
-          (loop [form form index 0]
-            (if (= index *print-length*)
-              (do
-                (when (= mode :miser) (write writer (:indentation opts)))
-                (write writer "..."))
+                (do
+                  ;; In miser mode, prepend indentation to every form
+                  ;; except the first one. We don't want to prepend
+                  ;; indentation for the first form, because it
+                  ;; immediately follows the open delimiter.
+                  (when (and (= mode :miser) (pos? index))
+                    (write writer (:indentation opts)))
 
-              (do
-                ;; In miser mode, prepend indentation to every form
-                ;; except the first one. We don't want to prepend
-                ;; indentation for the first form, because it
-                ;; immediately follows the open delimiter.
-                (when (and (= mode :miser) (pos? index))
-                  (write writer (:indentation opts)))
+                  (let [f (first form)
+                        n (next form)]
+                    (if (empty? n)
+                      ;; This is the last child, so reserve an additional
+                      ;; slot for the closing delimiter of the parent
+                      ;; S-expression.
+                      (-pprint f writer (update opts :reserve-chars inc))
+                      (do
+                        (-pprint f writer (assoc opts :reserve-chars 0))
+                        (write-sep writer mode)
+                        (recur n (inc index))))))))))
 
-                (let [f (first form)
-                      n (next form)]
-                  (if (empty? n)
-                    ;; This is the last child, so reserve an additional
-                    ;; slot for the closing delimiter of the parent
-                    ;; S-expression.
-                    (-pprint f writer (update opts :reserve-chars inc))
-                    (do
-                      (-pprint f writer (assoc opts :reserve-chars 0))
-                      (write-sep writer mode)
-                      (recur n (inc index))))))))))
-
-      ;; Print close delimiter
-      (write writer (close-delim form)))))
+        ;; Print close delimiter
+        (write writer (close-delim form))
+        mode))))
 
 (defn ^:private -pprint-map-entry
   "Pretty-print a map entry within a map."
@@ -454,53 +474,56 @@
   (if (meets-print-level? (:level opts))
     (write writer "#")
     (let [k (key this)
-          opts (update opts :level inc)]
-      (-pprint k writer opts)
-
-      (let [v (val this)
-            ;; If, after writing the map entry key, there's enough space to
-            ;; write the val on the same line, do so. Otherwise, write
-            ;; indentation followed by val on the following line.
-            mode (print-mode writer v (update opts :reserve-chars inc))]
-        (write-sep writer mode)
-        (when (= :miser mode) (write writer (:indentation opts)))
-        (-pprint v writer opts)))))
+          opts (update opts :level inc)
+          k-mode (-pprint k writer opts)
+          v (val this)
+          ;; If, after writing the map entry key, there's enough space to
+          ;; write the val on the same line, do so. Otherwise, write
+          ;; indentation followed by val on the following line.
+          mode (case k-mode
+                 :miser :miser
+                 (print-mode writer v (update opts :reserve-chars inc)))]
+      (write-sep writer mode)
+      (when (= :miser mode) (write writer (:indentation opts)))
+      (-pprint v writer opts))))
 
 (defn ^:private -pprint-map
   "Like -pprint, but only for maps."
   [this writer opts]
   (if (meets-print-level? (:level opts))
     (write writer "#")
-    (let [[^String o form] (open-delim+form this)
-          mode (print-mode writer this opts)
-          opts (pprint-opts o opts)]
-      (pprint-meta form writer opts mode)
-      (write writer o)
-      (if (= *print-length* 0)
-        (write writer "...")
-        (when (seq form)
-          (loop [form form index 0]
-            (if (= index *print-length*)
-              (do
-                (when (= mode :miser) (write writer (:indentation opts)))
-                (write writer "..."))
+    (if-some [m (printable-meta this)]
+      (-pprint-with-meta m (without-meta this) writer opts)
+      (let [[^String o form] (open-delim+form this)
+            mode (print-mode writer this opts)
+            opts (pprint-opts o opts)]
+        (write writer o)
+        (if (= *print-length* 0)
+          (write writer "...")
+          (when (seq form)
+            (loop [form form index 0]
+              (if (= index *print-length*)
+                (do
+                  (when (= mode :miser) (write writer (:indentation opts)))
+                  (write writer "..."))
 
-              (do
-                (when (and (= mode :miser) (pos? index))
-                  (write writer (:indentation opts)))
+                (do
+                  (when (and (= mode :miser) (pos? index))
+                    (write writer (:indentation opts)))
 
-                (let [f (first form)
-                      n (next form)]
-                  (if (empty? n)
-                    (-pprint-map-entry f writer (update opts :reserve-chars inc))
-                    (let [^String map-entry-separator (:map-entry-separator opts)]
-                      ;; Reserve a slot for the map entry separator.
-                      (-pprint-map-entry f writer (assoc opts :reserve-chars (strlen map-entry-separator)))
-                      (write writer map-entry-separator)
-                      (write-sep writer mode)
-                      (recur n (inc index))))))))))
+                  (let [f (first form)
+                        n (next form)]
+                    (if (empty? n)
+                      (-pprint-map-entry f writer (update opts :reserve-chars inc))
+                      (let [^String map-entry-separator (:map-entry-separator opts)]
+                        ;; Reserve a slot for the map entry separator.
+                        (-pprint-map-entry f writer (assoc opts :reserve-chars (strlen map-entry-separator)))
+                        (write writer map-entry-separator)
+                        (write-sep writer mode)
+                        (recur n (inc index))))))))))
 
-      (write writer (close-delim form)))))
+        (write writer (close-delim form))
+        mode))))
 
 (defn ^:private -pprint-seq
   [this writer opts]
